@@ -7,14 +7,14 @@ import (
 )
 
 type User struct {
-	ID primitive.ObjectID `json:"_id"`
-	Username string `json:"username"`
-	FullName string `json:"fullname"`
-	Email string `json:"email"`
-	Password string `json:"password"`
-	IsActive bool `json:"is_active"`
-	Role string `json:"role"`
-	LastLogin time.Time `json:"last_login"`
-	ProfilePicture string `json:"profile_picture"`
+	ID 				primitive.ObjectID 	`bson:"_id,omitempty"`
+	Username 		string 				`bson:"username"`
+	FullName 		string 				`bson:"fullname"`
+	Email 			string 				`bson:"email"`
+	Password 		string 				`bson:"password"`
+	IsActive 		bool 				`bson:"is_active"`
+	Role 			string 				`bson:"role"`
+	LastLogin 		time.Time 			`bson:"last_login"`
+	ProfilePicture 	string 				`bson:"profile_picture"`
 	Model
 }
