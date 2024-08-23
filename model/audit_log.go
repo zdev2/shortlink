@@ -7,11 +7,11 @@ import (
 )
 
 type AuditLog struct {
-	ID primitive.ObjectID `json:"_id"`
-	UserID primitive.ObjectID `json:"user_id"`
-	Action string `json:"action"`
-	Entity string `json:"entity"`
-	EntityID string `json:"entity_id"`
-	Timestamp time.Time `json:"timestamp"`
-	IPAddress string `json:"ip_adress"`
+	ID 			primitive.ObjectID 	`bson:"_id,omitempty"`
+	UserID 		primitive.ObjectID 	`bson:"user_id"`
+	Action 		string 				`bson:"action"`
+	Entity 		string 				`bson:"entity"`
+	EntityID 	string 				`bson:"entity_id"`
+	Timestamp	time.Time 			`bson:"timestamp"`
+	IPAddress 	string 				`bson:"ip_adress"`
 }

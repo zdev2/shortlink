@@ -2,7 +2,7 @@ package main
 
 import (
 	"shortlink/config"
-	"shortlink/routes"
+	"shortlink/internal/routes"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"

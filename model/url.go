@@ -7,14 +7,14 @@ import (
 )
 
 type Url struct {
-	ID primitive.ObjectID `json:"_id"`
-	UserID primitive.ObjectID `json:"user_id"`
-	URL string `json:"url"`
-	ShortLink string `json:"shortlink"`
-	ClickCount int `json:"click_count"`
-	LastAccessedAt time.Time `json:"last_accessed_at"`
-	ExpDate time.Time `json:"expiration_date"`
-	Status string `json:"status"`
-	Tags []string `json:"tags"`
+	ID 				primitive.ObjectID 	`bson:"_id,omitempty"`
+	UserID 			primitive.ObjectID 	`bson:"user_id"`
+	URL 			string 				`bson:"url"`
+	ShortLink 		string 				`bson:"shortlink"`
+	ClickCount 		int 				`bson:"click_count"`
+	LastAccessedAt 	time.Time 			`bson:"last_accessed_at"`
+	ExpDate 		time.Time 			`bson:"expiration_date"`
+	Status 			string 				`bson:"status"`
+	Tags 			[]string 			`bson:"tags"`
 	Model
 }
