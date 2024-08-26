@@ -10,6 +10,14 @@ func RouteSetup(app *fiber.App) {
 	})
 
 	app.Get("/user", nil)
+	app.Get("/url",nil)
+	app.Get("/id",nil)
+	app.Get("/analytics",nil)
+	app.Post("/userlogin",nil)
+	app.Post("/url",nil)
+	app.Post("/qrcode",nil)
+	app.Put("/url",nil)
+	app.Delete("/url",nil)
 }
 
 /*
