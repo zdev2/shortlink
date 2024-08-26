@@ -8,4 +8,13 @@ func RouteSetup(app *fiber.App) {
 			"message": "route test",
 		})
 	})
+
+	app.Get("/user", nil)
 }
+
+/*
+// Get: User, URL, URL/:id, Analytics
+// Post: UserLogin, URL, QRCode
+// Put: URL
+// Delete: URL
+*/
