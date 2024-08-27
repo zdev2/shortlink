@@ -1,1 +1,5 @@
 package rest
+
+func GetUser() {
+
+}
