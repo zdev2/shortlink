@@ -1,6 +1,10 @@
 package routes
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"shortlink/internal/middlewawre/rest"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 func RouteSetup(app *fiber.App) {
 	app.Get("/", func(c *fiber.Ctx) error {
@@ -9,15 +13,18 @@ func RouteSetup(app *fiber.App) {
 		})
 	})
 
-	app.Get("/user", nil)
-	app.Get("/url",nil)
-	app.Get("/id",nil)
-	app.Get("/analytics",nil)
-	app.Post("/userlogin",nil)
-	app.Post("/url",nil)
-	app.Post("/qrcode",nil)
-	app.Put("/url",nil)
-	app.Delete("/url",nil)
+	api := app.Group("/api")
+
+	api.Get("/user", nil)
+	api.Get("/url",nil)
+	api.Get("/id",nil)
+	api.Get("/analytics",nil)
+	api.Post("/userlogin",rest.LoginHandler)
+	api.Post("/usersignup",rest.SignUpHandler)
+	api.Post("/url",nil)
+	api.Post("/qrcode",nil)
+	api.Put("/url",nil)
+	api.Delete("/url",nil)
 }
 
 /*
