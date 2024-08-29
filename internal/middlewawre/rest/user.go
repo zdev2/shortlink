@@ -1,5 +1,6 @@
 package rest
 
+
 import "github.com/gofiber/fiber/v2"
 
 func LoginHandler(c *fiber.Ctx) error {
@@ -30,4 +31,3 @@ func SignUpHandler(c *fiber.Ctx) error {
 		"message": "Test2",
 		"status": "200 OK",
 	})
-}
