@@ -5,7 +5,7 @@ import (
 )
 
 type Model struct {
-	CreatedAt 	time.Time 	`bson:"created_at"` 
-	UpdateAt 	time.Time 	`bson:"updated_at"` 
-	DeletedAt 	*time.Time 	`bson:"deleted_at,omitempty"` 
+	CreatedAt 	time.Time 	`bson:"created_at" json:"createdat"` // 
+	UpdateAt 	time.Time 	`bson:"updated_at" json:"updateat"` // 
+	DeletedAt 	*time.Time 	`bson:"deleted_at,omitempty" json:"deletedat"` // 
 }
