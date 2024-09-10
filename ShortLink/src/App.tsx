@@ -3,6 +3,8 @@ import { FaArrowRight } from 'react-icons/fa';
 import Icon from './assets/Icon.svg';
 import Logo from './assets/logo.svg';
 import { useState } from 'react';
+import foto from './assets/Group 86.svg';
+import feat from './assets/feat-links 1.svg'
 
 const LandingPage = () => {
   const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false);
@@ -54,14 +56,15 @@ const LandingPage = () => {
       </section>
 
       {/* About Us Section */}
-      <section className="py-12 px-4 bg-gradient-to-r from-orange-50 via-white to-pink-50">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">About Us</h2>
-          <p className="text-lg mb-6">S.id is your solution for shortening long URLs, making them easy to share and track with just a few clicks. We prioritize simplicity, security, and reliability, helping you streamline your online interactions.</p>
+      <section className="py-12 px-8 bg-gradient-to-r from-orange-50 via-white to-pink-50 grid grid-cols-2">
+        <div className="">
+          <h2 className="font-semibold  text-6xl mb-4 text-blue-700">About Us</h2>
+          <p className="text-lg mb-6 flex justify-start">S.id is your solution for shortening long URLs, making them easy to share and track with just a few clicks. We prioritize simplicity, security, and reliability, helping you streamline your online interactions.</p>
           <button className="bg-indigo-600 text-white px-6 py-3 rounded-lg">Visit now</button>
         </div>
         <div>
           <img src={Icon} alt="" />
+
         </div>
       </section>
 
@@ -73,6 +76,10 @@ const LandingPage = () => {
             S.id is a link shortening service that makes it easy for you to turn long URLs into short, shareable links.
             Get click statistics and track your link performance with Shortly.
           </p>
+          <div className='flex justify-center align-middle'>
+            <img src={foto} alt="" className='w-3/5 absolute'/>
+            <img src={feat} alt="" className='z-10'/>
+          </div>
         </div>
 
         <div className="flex flex-col md:flex-row justify-around items-center">
