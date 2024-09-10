@@ -99,9 +99,13 @@ const LandingPage = () => {
       {/* About Us Section */}
       <section className="py-12 px-4 bg-gradient-to-r from-orange-50 via-white to-pink-50">
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">About Us</h2>
+
+          <h2 className="text-3xl font-bold mb-4 text-blue-800">About Us</h2>
           <p className="text-lg mb-6">S.id is your solution for shortening long URLs, making them easy to share and track with just a few clicks. We prioritize simplicity, security, and reliability, helping you streamline your online interactions.</p>
           <button className="bg-indigo-600 text-white px-6 py-3 rounded-lg">Visit now</button>
+        </div>
+        <div>
+          <img src={Icon} alt="" />
         </div>
       </section>
 
