@@ -130,7 +130,7 @@ const LandingPage = () => {
       <footer className="bg-indigo-600 text-white py-8">
         <div className="text-center">
           <p>Team Contribution: me, you, you, you</p>
-          <p>Created With Love ♥🔥</p>
+          <p>Created With  ♥🔥</p>
           <p>
             The link-shortening project is an internship assignment merging frontend design with backend functionality.
           </p>
