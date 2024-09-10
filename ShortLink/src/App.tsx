@@ -77,8 +77,7 @@ const LandingPage = () => {
             Get click statistics and track your link performance with Shortly.
           </p>
           <div className='flex justify-center align-middle'>
-            <img src={foto} alt="" className='w-3/5 absolute'/>
-            <img src={feat} alt="" className='z-10'/>
+
           </div>
         </div>
 
@@ -100,7 +99,7 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-indigo-600 text-white py-8">
+      <footer className="bg-indigo-600 text-white h-60 mx-14 p-5 rounded-t-full">
         <div className="text-center">
           <p>Team Contribution: me, you, you, you</p>
           <p>Created With Love ♥🔥</p>
@@ -158,5 +157,5 @@ const LandingPage = () => {
     </div>
   );
 };
-
+ 
 export default LandingPage;
