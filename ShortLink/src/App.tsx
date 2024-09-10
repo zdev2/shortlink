@@ -88,16 +88,23 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold">Fast, Easy, and Reliable</h2>
-          <p className="text-lg">
-            S.id is a link shortening service that makes it easy for you to turn long URLs into short, shareable links.
-            Get click statistics and track your link performance with Shortly.
-          </p>
-          <div className='flex justify-center align-middle'>
-            <img src={foto} alt="" className='w-3/5 absolute'/>
-            <img src={feat} alt="" className='z-10'/>
+      <section className="py-12 mt-16 px-4">
+        <div className="text-center mb-5 relative">
+          <div className='flex flex-col items-center md:flex-rol md:items-center md:justify-center'>
+            <div className="w-full md:w-1/2 mb-4 md:mb-0">
+              <h2 className="text-4xl text-indigo-500 font-bold mb-2">Fast, Easy, and Reliable</h2>
+              <p className="text-sm md:text-base">
+                S.id is a link shortening service that makes it easy for you to turn long URLs into short, shareable links.
+                Get click statistics and track your link performance with Shortly.
+              </p>
+            </div>
+
+            <div className="relative w-full md:w-1/2 flex justify-center items-center">
+              {/* Background Image (feat) */}
+              <img src={feat} alt="" className='w-3/5 absolute z-10' />
+              {/* Foreground Image (foto) */}
+              <img src={foto} alt="" className='w-4/5 relative z-0' />
+            </div>
           </div>
         </div>
 
@@ -120,10 +127,10 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-indigo-600 text-white h-60 mx-14 p-5 rounded-t-full">
+      <footer className="bg-indigo-600 text-white py-8">
         <div className="text-center">
           <p>Team Contribution: me, you, you, you</p>
-          <p>Created With  ♥🔥</p>
+          <p>Created With love ♥🔥</p>
           <p>
             The link-shortening project is an internship assignment merging frontend design with backend functionality.
           </p>
@@ -182,5 +189,5 @@ const LandingPage = () => {
     </div>
   );
 };
- 
+
 export default LandingPage;
