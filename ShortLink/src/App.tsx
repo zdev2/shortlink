@@ -120,6 +120,7 @@ const LandingPage = () => {
             <h3 className="text-xl font-bold">View Analytics</h3>
             <p className="text-lg">
               See the number of visitors to a shortened link, presented in a daily viewer graph.
+              as
             </p>
           </div>
         </div>
