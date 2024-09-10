@@ -4,7 +4,7 @@ import Icon from './assets/Icon.svg';
 import Logo from './assets/logo.svg';
 import { useState } from 'react';
 import foto from './assets/Group 86.svg';
-import feat from './assets/feat-links 1.svg'
+import feat from './assets/feat-links 1.svg';
 
 const LandingPage = () => {
   const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false);
@@ -26,9 +26,10 @@ const LandingPage = () => {
   // Fungsi untuk menangani login
   const handleLogin = () => {
     if (username === 'Admin' && password === 'admin1234') {
+      setErrorMessage(''); // Reset error message jika login berhasil
       alert('Login berhasil!'); // Ganti dengan navigasi ke halaman lain jika diperlukan
     } else {
-      alert('Username atau password salah'); // Tampilkan pesan error sebagai aler
+      setErrorMessage('Username atau password salah'); // Tampilkan pesan error di halaman login
     }
   };
 
@@ -139,14 +140,14 @@ const LandingPage = () => {
 
       {/* Komponen Popup Login */}
       {isLoginPopupVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-1/3">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 popup-background show">
+          <div className="bg-white p-8 rounded-lg shadow-lg w-1/3 popup-container show">
             <h2 className="text-2xl font-semibold mb-4">Login</h2>
             {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
             <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Username
+                  Username       
                 </label>
                 <input
                   type="text"
@@ -186,6 +187,7 @@ const LandingPage = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

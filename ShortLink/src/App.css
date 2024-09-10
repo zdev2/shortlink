@@ -3,18 +3,24 @@
 @tailwind utilities;
 
 /* Menambahkan efek scale-up */
-@keyframes modalScaleUp {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+/* Popup container */
+.popup-container {
+  opacity: 0;
+  transform: translateY(-50px); /* Mulai dengan posisi sedikit ke atas */
+  transition: opacity 0.3s ease-in, transform 0.3s ease-in;
 }
 
-/* Animasi untuk modal */
-.modal-scale {
-  animation: modalScaleUp 0.3s ease-in-out forwards;
+.popup-container.show {
+  opacity: 1;
+  transform: translateY(0); /* Kembali ke posisi awal */
+}
+
+/* Background overlay */
+.popup-background {
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+}
+
+.popup-background.show {
+  opacity: 1;
 }
