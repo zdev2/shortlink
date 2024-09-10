@@ -108,21 +108,29 @@ const LandingPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-around items-center">
+        <div className="flex flex-col md:flex-row gap-5 c justify-center items-center">
           {/* Feature 1 */}
-          <div className="text-center mb-8 md:mb-0">
+          <div className="text-center mb-8 md:mb-0 w-64 bg-white h-60 content-center  border-solid border-2 border-black">
             <h3 className="text-xl font-bold">Short Link</h3>
             <p className="text-lg">Experience ultimate convenience with our URL shortening service.</p>
           </div>
 
           {/* Feature 2 */}
-          <div className="text-center">
+          <div className="text-center mb-8 md:mb-0 w-64 bg-white h-60 content-center  border-solid border-2 border-black">
             <h3 className="text-xl font-bold">View Analytics</h3>
             <p className="text-lg">
               See the number of visitors to a shortened link, presented in a daily viewer graph.
               as
             </p>
           </div>
+        </div>
+    {/*feture 3*/}
+        <div>
+
+        </div>
+        {/*feture 4 */}
+        <div>
+
         </div>
       </section>
 
