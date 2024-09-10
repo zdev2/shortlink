@@ -71,8 +71,8 @@ const LandingPage = () => {
       <section className="p-20 bg-gradient-to-r from-orange-50 via-white to-pink-50">
         <div className='flex justify-between'>
           <div className="flex flex-col justify-center">
-            <h2 className="text-3xl font-bold mb-4">About Us</h2>
-            <p className="text-lg w-60 mb-6">
+            <h2 className="text-6xl font-bold mb-4">About <span className='text-indigo-500'>Us</span></h2>
+            <p className="text-lg w-96 mb-6 font-semibold">
               S.id is your solution for shortening long URLs, making them easy to share and track with just a few clicks.
               We prioritize simplicity, security, and reliability, helping you streamline your online interactions.
             </p>
@@ -88,16 +88,23 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold">Fast, Easy, and Reliable</h2>
-          <p className="text-lg">
-            S.id is a link shortening service that makes it easy for you to turn long URLs into short, shareable links.
-            Get click statistics and track your link performance with Shortly.
-          </p>
-          <div className='flex justify-center align-middle'>
-            <img src={foto} alt="" className='w-3/5 absolute'/>
-            <img src={feat} alt="" className='z-10'/>
+      <section className="py-12 mt-16 px-4">
+        <div className="text-center mb-5 relative">
+          <div className='flex flex-col items-center md:flex-rol md:items-center md:justify-center'>
+            <div className="w-full md:w-1/2 mb-4 md:mb-0">
+              <h2 className="text-4xl text-indigo-500 font-bold mb-2">Fast, Easy, and Reliable</h2>
+              <p className="text-sm md:text-base">
+                S.id is a link shortening service that makes it easy for you to turn long URLs into short, shareable links.
+                Get click statistics and track your link performance with Shortly.
+              </p>
+            </div>
+
+            <div className="relative w-full md:w-1/2 flex justify-center items-center">
+              {/* Background Image (feat) */}
+              <img src={feat} alt="" className='w-3/5 absolute z-10' />
+              {/* Foreground Image (foto) */}
+              <img src={foto} alt="" className='w-4/5 relative z-0' />
+            </div>
           </div>
         </div>
 
