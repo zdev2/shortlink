@@ -29,7 +29,7 @@ const LandingPage = () => {
       setErrorMessage(''); // Reset error message jika login berhasil
       alert('Login berhasil!'); // Ganti dengan navigasi ke halaman lain jika diperlukan
     } else {
-      setErrorMessage('Username atau password salah'); // Tampilkan pesan error di halaman login
+      setErrorMessage('Username atau password salah');
     }
   };
 
@@ -69,7 +69,7 @@ const LandingPage = () => {
       </section>
 
       {/* About Us Section */}
-      <section className="p-20 bg-gradient-to-r from-orange-50 via-white to-pink-50">
+      <section className="p-20 bg-gradient-to-r from-pink-100 via-white to-purple-100">
         <div className='flex justify-between'>
           <div className="flex flex-col justify-center">
             <h2 className="text-6xl font-bold mb-4">About <span className='text-indigo-500'>Us</span></h2>
@@ -101,42 +101,41 @@ const LandingPage = () => {
             </div>
 
             <div className="relative w-full md:w-1/2 flex justify-center items-center">
-              {/* Background Image (feat) */}
               <img src={feat} alt="" className='w-3/5 absolute z-10' />
-              {/* Foreground Image (foto) */}
               <img src={foto} alt="" className='w-4/5 relative z-0' />
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-5 c justify-center items-center">
-          {/* Feature 1 */}
-          <div className="text-center mb-8 md:mb-0 w-64 bg-white h-60 content-center  border-solid border-2 border-black">
-            <h3 className="text-xl font-bold">Short Link</h3>
-            <p className="text-lg">Experience ultimate convenience with our URL shortening service.</p>
-          </div>
-
-          {/* Feature 2 */}
-          <div className="text-center mb-8 md:mb-0 w-64 bg-white h-60 content-center  border-solid border-2 border-black">
-            <h3 className="text-xl font-bold">View Analytics</h3>
-            <p className="text-lg">
-              See the number of visitors to a shortened link, presented in a daily viewer graph.
-              as
-            </p>
-          </div>
-        </div>
-    {/*feture 3*/}
         <div>
+          <div className='text-center text-3xl mb-10 font-bold text-indigo-500'>
+            <h1>Feature</h1>
+          </div>
+          <div className="flex flex-col md:flex-row gap-16 c justify-center items-center">
+            {/* Feature 1 */}
+            <div className="text-center mb-8 md:mb-0 w-64 bg-white h-60 content-center rounded-xl justify-evenly flex flex-col border-solid border-2 border-black">
+              <h3 className="text-xl font-bold">Short Link</h3>
+              <p className="text-sm ml-3 text-start">Experience ultimate convenience with our URL shortening service, designed to encapsulate the essence of simplicity, speed and memorability.</p>
+            </div>
 
-        </div>
-        {/*feture 4 */}
-        <div>
-
+            {/* Feature 2 */}
+            <div className="text-center mb-8 md:mb-0 w-64 bg-white h-60 content-center rounded-xl justify-evenly flex flex-col border-solid border-2 border-black">
+              <h3 className="text-xl font-bold">View Analytics</h3>
+              <p className="text-sm ml-3 text-start">
+              feature on a link-shortening website displays the number of visitors to a shortened link, presented in a daily viewer graph.
+              </p>
+            </div>
+          </div>
+          <div className='items-center justify-center flex mt-10'>
+          <button className="bg-indigo-600 flex w-fit gap-2 items-center text-white px-6 py-3 rounded-lg" onClick={handleVisitNowClick}>
+              Visit Now <FaArrowRight />
+            </button>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-indigo-600 text-white py-8">
+      <footer className="bg-indigo-600 flex justify-center w-3/4 m-auto px-5 rounded-t-3xl text-white py-8">
         <div className="text-center">
           <p>Team Contribution: me, you, you, you</p>
           <p>Created With love ♥🔥</p>
