@@ -21,6 +21,9 @@ const LandingPage = () => {
   const closeLoginPopup = () => {
     setIsLoginPopupVisible(false);
     setErrorMessage(''); // Reset pesan error saat popup ditutup
+    setUsername('');
+    setPassword('');
+
   };
 
   // Fungsi untuk menangani login
