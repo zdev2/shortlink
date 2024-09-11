@@ -20,7 +20,6 @@ func RouteSetup(app *fiber.App) {
 	api.Get("/id",nil)
 	api.Get("/analytics",nil)
 	api.Post("/userlogin",rest.LoginHandler)
-	api.Post("/usersignup",rest.SignUpHandler)
 	api.Post("/url",nil)
 	api.Post("/qrcode",nil)
 	api.Put("/url",nil)

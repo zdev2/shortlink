@@ -15,6 +15,6 @@ type Url struct {
 	LastAccessedAt 	time.Time 			`bson:"last_accessed_at" json:"lastaccesedat"` //
 	ExpDate 		time.Time 			`bson:"expiration_date" json:"expdate"`  //
 	Status 			string 				`bson:"status" json:"status"`  //
-	Tags 			[]string 			`bson:"tags" json:"tags"` //
+	URLPassword 	string 				`bson:"url_password" json:"url_password"`  //
 	Model
 }
