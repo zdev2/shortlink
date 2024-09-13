@@ -13,8 +13,6 @@ type User struct {
 	Email 			string 				`bson:"email" json:"email"`//
 	Password 		string 				`bson:"password" json:"-"`//
 	IsActive 		bool 				`bson:"is_active" json:"is_active"`//
-	Role 			string 				`bson:"role" json:"role"`//
 	LastLogin 		time.Time 			`bson:"last_login" json:"last_login"`//
-	ProfilePicture 	string 				`bson:"profile_picture" json:"profile_picture"`//
 	Model
 }

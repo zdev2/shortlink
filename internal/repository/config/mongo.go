@@ -15,6 +15,8 @@ type MongoDB struct {
 	Client mongo.Client
 }
 
+var client *mongo.Client
+
 func OpenDB() (*mongo.Client, error){
 	// MongoDB
 	clientOptions := options.Client().ApplyURI(os.Getenv("MONGODB_URI"))
@@ -78,4 +80,8 @@ func CreateCollectionsAndIndexes(client *mongo.Client) error {
 	// Add more indexes as needed
 	log.Println("Collections and indexes created successfully!")
 	return nil
+}
+
+func GetCollection(collectionName string) *mongo.Collection {
+    return client.Database("shortlink").Collection(collectionName)
 }
