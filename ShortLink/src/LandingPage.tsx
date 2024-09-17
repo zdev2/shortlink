@@ -30,11 +30,10 @@ const LandingPage = () => {
   // Fungsi untuk menangani login
   const handleLogin = () => {
     if (username === 'Admin' && password === 'admin1234') {
-      setErrorMessage(''); // Reset error message jika login berhasil
-      alert('Login berhasil!'); // Ganti dengan navigasi ke halaman lain jika diperlukan
+      setErrorMessage('');
       navigate('/main-menu');
     } else {
-      setErrorMessage('Username atau password salah'); // Tampilkan pesan error di halaman login
+      setErrorMessage('Username atau password salah');
     }
   };
 
@@ -114,7 +113,7 @@ const LandingPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-around items-center">
+        <div className=" flex flex-col md:flex-row justify-around items-center">
           {/* Feature 1 */}
           <div className="text-center mb-8 md:mb-0">
             <h3 className="text-xl font-bold">Short Link</h3>

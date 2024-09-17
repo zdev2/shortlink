@@ -1,9 +1,9 @@
 
 
-const mainpage = () => {
+const MainPage = () => {
   return (
     <div>mainpage</div>
   )
 }
 
-export default mainpage
+export default MainPage
