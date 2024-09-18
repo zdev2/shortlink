@@ -29,7 +29,7 @@ const LandingPage = () => {
 
   // Fungsi untuk menangani login
   const handleLogin = () => {
-    if (username === 'Admin' && password === 'admin1234') {
+    if (username === 'admin' && password === 'admin1234') {
       setErrorMessage('');
       navigate('/main-menu');
     } else {
