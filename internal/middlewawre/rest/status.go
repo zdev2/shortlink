@@ -105,3 +105,53 @@ func UnprocessableEntity(c *fiber.Ctx, errLocate string) error {
 		"data":      nil,
 	})
 }
+
+func Accepted(c *fiber.Ctx, data any, errLocate string) error {
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"status":    fiber.StatusAccepted,
+		"error_location": errLocate,
+		"message":   "Accepted",
+		"timestamp": time.Now(),
+		"data":      data,
+	})
+}
+
+func TooManyRequests(c *fiber.Ctx, errLocate string) error {
+	return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
+		"status":    fiber.StatusTooManyRequests,
+		"error_location": errLocate,
+		"message":   "Too Many Requests",
+		"timestamp": time.Now(),
+		"data":      nil,
+	})
+}
+
+func NotImplemented(c *fiber.Ctx, errLocate string) error {
+	return c.Status(fiber.StatusNotImplemented).JSON(fiber.Map{
+		"status":    fiber.StatusNotImplemented,
+		"error_location": errLocate,
+		"message":   "Not Implemented",
+		"timestamp": time.Now(),
+		"data":      nil,
+	})
+}
+
+func ServiceUnavailable(c *fiber.Ctx, errLocate string) error {
+	return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{
+		"status":    fiber.StatusServiceUnavailable,
+		"error_location": errLocate,
+		"message":   "Service Unavailable",
+		"timestamp": time.Now(),
+		"data":      nil,
+	})
+}
+
+func Gone(c *fiber.Ctx, errLocate string) error {
+	return c.Status(fiber.StatusGone).JSON(fiber.Map{
+		"status":    fiber.StatusGone,
+		"error_location": errLocate,
+		"message":   "Gone",
+		"timestamp": time.Now(),
+		"data":      nil,
+	})
+}
