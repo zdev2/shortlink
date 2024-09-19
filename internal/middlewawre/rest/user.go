@@ -29,7 +29,7 @@ type registerReq struct {
 func LoginHandler(c *fiber.Ctx) error {
 	var req logReq
 	if err := c.BodyParser(req); err != nil {
-		return BadRequest(c)
+		return BadRequest(c, "LogReq")
 	}
 
 	var user model.User
@@ -38,7 +38,7 @@ func LoginHandler(c *fiber.Ctx) error {
 
 	err := userCollection.FindOne(ctx, bson.M{"username": req.Username}).Decode(&user)
 	if err != nil {
-		return BadRequest(c)
+		return BadRequest(c, "LogReq -> MongoDB")
 	}
 
 	return OK(c, nil)
