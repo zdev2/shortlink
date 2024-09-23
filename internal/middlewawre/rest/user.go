@@ -44,6 +44,24 @@ func LoginHandler(c *fiber.Ctx) error {
 	return OK(c, nil)
 }
 
+func RegisterHandler(c *fiber.Ctx) error {
+	var req registerReq
+	if err := c.BodyParser(req); err != nil {
+		return BadRequest(c, "Register	Req")
+	}
+
+	var user model.User
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err := userCollection.FindOne(ctx, bson.M{"username": req.Username}).Decode(&user)
+	if err != nil {
+		return BadRequest(c, "RegisterReq -> MongoDB")
+	}
+
+	return OK(c, nil)
+}
+
 func ChangePassword(c *fiber.Ctx) error {
 	return OK(c, nil)
 }
