@@ -4,7 +4,7 @@ import MainMenu from './MainPage';
 
 function App() {
   return (
-    <Router basename='/Dedengeming/'>
+    <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/main-menu" element={<MainMenu />} />
