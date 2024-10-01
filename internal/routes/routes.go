@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"shortlink/internal/middleware/rest"
+	"shortlink/internal/handler/rest"
 
 	"github.com/gofiber/fiber/v2"
 )
