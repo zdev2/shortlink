@@ -11,12 +11,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var client *mongo.Client // Global client variable
+var client *mongo.Client
 
-// OpenDB initializes the MongoDB client connection
 func OpenDB() error {
 	mongoURI := os.Getenv("MONGODB_URI")
 	if mongoURI == "" {
+		log.Println("MONGODB_URI environment variable is not set")
 		return errors.New("MONGODB_URI environment variable not set")
 	}
 
@@ -24,7 +24,7 @@ func OpenDB() error {
 	var err error
 	client, err = mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		return err
+		return err // Ensure this error is returned properly
 	}
 
 	// Check the connection
@@ -33,20 +33,20 @@ func OpenDB() error {
 
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		return err
+		return err // Return if there was an error during Ping
 	}
 
 	log.Println("Connected to MongoDB!")
 	return nil
 }
 
-// GetCollection returns a MongoDB collection by name
 func GetCollection(collectionName string) *mongo.Collection {
 	if client == nil {
 		log.Fatal("MongoDB client is not initialized") // This will terminate the program
 	}
 	return client.Database("shortlink").Collection(collectionName)
 }
+
 
 // GetClient returns the MongoDB client instance
 func GetClient() *mongo.Client {

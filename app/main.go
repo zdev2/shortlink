@@ -4,27 +4,29 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"shortlink/config"
 	repoconfig "shortlink/internal/repository/config"
 	"shortlink/internal/routes"
 	"syscall"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
+	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	// Initialize environment variables
-	config.InitEnv()
+	// Load the .env file
+	if err := godotenv.Load(); err != nil {
+		logrus.Fatalf("Error loading .env file")
+	}
 
 	// Open MongoDB connection
-	if err := repoconfig.OpenDB(); err != nil { // No need to capture a return value
+	if err := repoconfig.OpenDB(); err != nil {
 		logrus.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
 
 	// Create Fiber engine for templates
-	engine := html.New("./template", ".html") // Path to templates and file extension
+	engine := html.New("./template", ".html")
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
