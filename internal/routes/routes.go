@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"shortlink/internal/middlewawre/rest"
+	"shortlink/internal/handler/rest"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,8 +19,8 @@ func RouteSetup(app *fiber.App) {
 	api.Get("/url",nil)
 	api.Get("/id",nil)
 	api.Get("/analytics",nil)
-	api.Post("/userlogin",rest.LoginHandler)
-	api.Post("/url",nil)
+	// api.Post("/userlogin",rest.LoginHandler)
+	api.Post("/url",rest.GenerateURL)
 	api.Post("/qrcode",nil)
 	api.Put("/url",nil)
 	api.Delete("/url",nil)
