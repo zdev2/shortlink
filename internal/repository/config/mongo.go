@@ -2,7 +2,6 @@ package repoconfig
 
 import (
 	"context"
-	"errors"
 	"log"
 	"os"
 	"time"
@@ -11,20 +10,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var client *mongo.Client
+var client *mongo.Client // Global client
 
-func OpenDB() error {
-	mongoURI := os.Getenv("MONGODB_URI")
-	if mongoURI == "" {
-		log.Println("MONGODB_URI environment variable is not set")
-		return errors.New("MONGODB_URI environment variable not set")
-	}
-
-	clientOptions := options.Client().ApplyURI(mongoURI)
+// OpenDB initializes and sets the MongoDB client globally
+func OpenDB() (*mongo.Client, error) {
+	clientOptions := options.Client().ApplyURI(os.Getenv("MONGODB_URI"))
 	var err error
-	client, err = mongo.Connect(context.TODO(), clientOptions)
+	client, err = mongo.Connect(context.TODO(), clientOptions) // Set global client
 	if err != nil {
-		return err // Ensure this error is returned properly
+		return nil, err
 	}
 
 	// Check the connection
@@ -33,23 +27,17 @@ func OpenDB() error {
 
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		return err // Return if there was an error during Ping
+		return nil, err
 	}
 
 	log.Println("Connected to MongoDB!")
-	return nil
+	return client, nil
 }
 
+// GetCollection returns a MongoDB collection
 func GetCollection(collectionName string) *mongo.Collection {
-	if client == nil {
-		log.Fatal("MongoDB client is not initialized") // This will terminate the program
+	if client == nil { // If client is nil, fail early
+		log.Fatal("MongoDB client is not initialized")
 	}
 	return client.Database("shortlink").Collection(collectionName)
 }
-
-
-// GetClient returns the MongoDB client instance
-func GetClient() *mongo.Client {
-	return client
-}
-
