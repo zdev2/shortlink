@@ -1,9 +1,9 @@
-package config
+package repoconfig
 
 import (
 	"context"
+	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -11,33 +11,31 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MongoDB struct {
-	Client mongo.Client
-}
+var MongoClient *mongo.Client
 
-var client *mongo.Client
-
-func OpenDB() (*mongo.Client, error){
-	// MongoDB
-	clientOptions := options.Client().ApplyURI(os.Getenv("MONGODB_URI"))
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+// OpenDB initializes the MongoDB client and stores it in the global `client` variable.
+func OpenDB() (*mongo.Client, error) {
+	clientOptions := options.Client().ApplyURI("mongodb+srv://bagus:urlshortener@superskibidisigma.d27tu.mongodb.net/")
+	var err error
+	MongoClient, err = mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
 
-	// Check the connection
+	// Check the connection with a ping
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	err = client.Ping(ctx, nil)
+	err = MongoClient.Ping(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
 	}
 
 	log.Println("Connected to MongoDB!")
-	return client, nil
+	return MongoClient, nil
 }
 
+// CreateCollectionsAndIndexes creates collections and indexes in MongoDB
 func CreateCollectionsAndIndexes(client *mongo.Client) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -82,6 +80,10 @@ func CreateCollectionsAndIndexes(client *mongo.Client) error {
 	return nil
 }
 
+// GetCollection retrieves a collection from the MongoDB database.
 func GetCollection(collectionName string) *mongo.Collection {
-    return client.Database("shortlink").Collection(collectionName)
+    if MongoClient == nil {
+        log.Fatal("MongoClient is not initialized, call OpenDB() first")
+    }
+    return MongoClient.Database("shortlink").Collection(collectionName)
 }
