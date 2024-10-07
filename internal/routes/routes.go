@@ -27,8 +27,6 @@ func RouteSetup(app *fiber.App) {
 
 	api.Get("/analytics", nil)         // Fetch global analytics
 	api.Get("/analytics/:urlID", nil) // Fetch analytics for a specific URL
-
-	api.Post("/urls/:id/qrcode", nil) // Generate a QR code for a specific short URL
 }
 /*
 // Get: User, URL, URL/:id, Analytics
