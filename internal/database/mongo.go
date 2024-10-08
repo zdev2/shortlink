@@ -1,4 +1,4 @@
-package repoconfig
+package database
 
 import (
 	"context"
@@ -52,7 +52,7 @@ func CreateCollectionsAndIndexes(client *mongo.Client) error {
 
 	// Creating indexes
 	userCollection := db.Collection("user")
-	urlCollection := db.Collection("url")
+	urlCollection := db.Collection("urls")
 	// Add more as needed
 
 	// Example: Creating an index on the `username` field in the `user` collection

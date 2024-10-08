@@ -9,6 +9,8 @@ import (
 
 func RouteSetup(app *fiber.App) {
 
+	app.Get("/:shortlink", rest.RedirectURL)
+
 	api := app.Group("/api/v1")
 
 	// API endpoints (return JSON)
@@ -20,11 +22,11 @@ func RouteSetup(app *fiber.App) {
 	api.Delete("/users/:id", nil)               // Delete a user
 
 	// URL routes
-	api.Get("/urls", rest.GetURLs)              // Fetch all URLs for the logged-in user
-	api.Get("/urls/:id", rest.GetURLbyID)       // Fetch short URL by ID
-	api.Post("/urls", middleware.ValidateCookie ,rest.GenerateURL)         // Generate a new short URL
-	api.Put("/urls/:id", rest.EditURL)          // Update an existing short URL
-	api.Delete("/urls/:id", rest.DeleteURL)     // Delete a short URL
+	api.Get("/urls", middleware.ValidateCookie, rest.GetURLs)              // Fetch all URLs for the logged-in user
+	api.Get("/urls/:url_id", middleware.ValidateCookie, rest.GetURLbyID)       // Fetch short URL by ID
+	api.Post("/urls", middleware.ValidateCookie, rest.GenerateURL)         // Generate a new short URL
+	api.Put("/urls/:url_id", middleware.ValidateCookie, rest.EditShortLink)          // Update an existing short URL
+	api.Delete("/urls/:url_id", middleware.ValidateCookie, rest.DeleteURL)     // Delete a short URL
 
 	// Analytics routes
 	api.Get("/analytics", nil)                  // Fetch global analytics

@@ -2,7 +2,7 @@ package main
 
 import (
 	"shortlink/config"
-	repoconfig "shortlink/internal/repository"
+	"shortlink/internal/database"
 	"shortlink/internal/routes"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,19 +13,19 @@ func main() {
 	config.InitEnv()
 	
 	// Initialize MongoDB connection
-	client, err := repoconfig.OpenDB()
+	client, err := database.OpenDB()
 	if err != nil {
 		logrus.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
 
-	repoconfig.CreateCollectionsAndIndexes(client)
+	database.CreateCollectionsAndIndexes(client)
 
 	app := fiber.New()
 	
 	
 	// initial route
 	routes.RouteSetup(app)
-	user := repoconfig.GetCollection("user")
+	user := database.GetCollection("user")
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
