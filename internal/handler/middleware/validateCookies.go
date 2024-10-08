@@ -22,7 +22,7 @@ func ValidateCookie(c *fiber.Ctx) error {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(os.Getenv("SECRET")), nil
+		return []byte(os.Getenv("SUPERDUPERMEGABIGTOPSECRETINTHISPROJECTWHYIUSETHISNAMEFORMYCODEBRUHLOL")), nil
 	})
 
 	if err != nil {
@@ -41,7 +41,7 @@ func ValidateCookie(c *fiber.Ctx) error {
 				})
 			}
 		}
-		c.Locals("adminID", claims["sub"])
+		c.Locals("user", claims["sub"])
 	} else {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error":  "Invalid token",

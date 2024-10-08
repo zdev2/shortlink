@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"shortlink/internal/handler/middleware"
 	"shortlink/internal/handler/rest"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,7 +22,7 @@ func RouteSetup(app *fiber.App) {
 	// URL routes
 	api.Get("/urls", rest.GetURLs)              // Fetch all URLs for the logged-in user
 	api.Get("/urls/:id", rest.GetURLbyID)       // Fetch short URL by ID
-	api.Post("/urls", rest.GenerateURL)         // Generate a new short URL
+	api.Post("/urls", middleware.ValidateCookie ,rest.GenerateURL)         // Generate a new short URL
 	api.Put("/urls/:id", rest.EditURL)          // Update an existing short URL
 	api.Delete("/urls/:id", rest.DeleteURL)     // Delete a short URL
 

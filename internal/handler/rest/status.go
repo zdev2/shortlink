@@ -86,3 +86,4 @@ func ServiceUnavailable(c *fiber.Ctx, errLocate string) error {
 func Gone(c *fiber.Ctx, errLocate string) error {
 	return jsonResponse(c, fiber.StatusGone, "Gone", errLocate, nil)
 }
+//
