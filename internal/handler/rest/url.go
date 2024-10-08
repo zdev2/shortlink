@@ -27,7 +27,7 @@ func GenerateURL(c *fiber.Ctx) error {
 	url.LastAccessedAt = time.Now()
 	url.Status = "active"
 
-	collection := Mongo.Client.DB.collection("urls")
+	collection := mongo.Client.DB.collection("urls")
 	_, err := collection.InsertOne(context.Background(), url)
 	if err != nil {
 		return rest.InternalServerError(c, "Database Insert Error")
