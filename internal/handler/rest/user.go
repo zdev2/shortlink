@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	repoconfig "shortlink/internal/repository/config"
+	repoconfig "shortlink/internal/repository"
 	"shortlink/model"
 	"strings"
 	"time"

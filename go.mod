@@ -11,7 +11,6 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	go.mongodb.org/mongo-driver v1.16.1
 	golang.org/x/crypto v0.22.0
-	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
 )
 
 require (

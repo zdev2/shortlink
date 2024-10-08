@@ -2,7 +2,7 @@ package main
 
 import (
 	"shortlink/config"
-	repoconfig "shortlink/internal/repository/config"
+	repoconfig "shortlink/internal/repository"
 	"shortlink/internal/routes"
 
 	"github.com/gofiber/fiber/v2"
