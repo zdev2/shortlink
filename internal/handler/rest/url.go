@@ -212,20 +212,29 @@ func RedirectURL(c *fiber.Ctx) error {
 
 // DeleteURL handles the deletion of a short URL
 func DeleteURL(c *fiber.Ctx) error {
-	urlID := c.Params("url_id")
-	objectID, err := primitive.ObjectIDFromHex(urlID)
-	if err != nil {
-		return BadRequest(c, "Invalid URL ID format")
-	}
+    // Parse the url_id parameter as int64
+    urlID, err := strconv.ParseInt(c.Params("url_id"), 10, 64)
+    if err != nil {
+        return BadRequest(c, "Invalid URL ID format")
+    }
 
-	collection := database.MongoClient.Database("shortlink").Collection("urls")
-	_, err = collection.DeleteOne(context.TODO(), bson.M{"_id": objectID})
-	if err != nil {
-		return InternalServerError(c, "Failed to delete URL")
-	}
+    // Connect to the MongoDB collection
+    collection := database.MongoClient.Database("shortlink").Collection("urls")
 
-	return OK(c, fiber.Map{"message": "URL deleted successfully"})
+    // Attempt to delete the document with the given int64 ID
+    result, err := collection.DeleteOne(context.TODO(), bson.M{"_id": urlID})
+    if err != nil {
+        return InternalServerError(c, "Failed to delete URL")
+    }
+
+    // Check if a document was actually deleted
+    if result.DeletedCount == 0 {
+        return NotFound(c, "URL not found")
+    }
+
+    return OK(c, fiber.Map{"message": "URL deleted successfully"})
 }
+
 
 // GetUserUrlLogs retrieves logs (URLs) for the logged-in user
 func GetUserUrlLogs(c *fiber.Ctx) error {
