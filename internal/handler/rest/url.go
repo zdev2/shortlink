@@ -44,17 +44,17 @@ func GenerateURL(c *fiber.Ctx) error {
 		return BadRequest(c, "Invalid request body")
 	}
 
-	// Retrieve the user ID from the context (stored by ValidateCookie middleware)
-	userID, ok := c.Locals("user").(string)
-	if !ok || userID == "" {
-		return Unauthorized(c, "Unauthorized: Missing or invalid token")
-	}
+	// Retrieve the user from the JWT token stored in context
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	userID := claims["sub"].(string)
 
 	// Convert userID (which is a string) to MongoDB ObjectID
 	objectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return BadRequest(c, "Invalid UserID format")
 	}
+
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
 	
 	urlID, err := generator.GetNextIncrementalID(collection, "url_id")
@@ -65,10 +65,10 @@ func GenerateURL(c *fiber.Ctx) error {
 	// Generate the short link and create a new URL document
 	url := model.Url{
 		ID:             primitive.NewObjectID(),
-		URLID: urlID,
+		URLID:          urlID,
 		UserID:         objectID,
 		URL:            urlReq.URL,
-		ShortLink:      generateShortLink(6), // Assume this function generates the short link
+		ShortLink:      generateShortLink(6),
 		ClickCount:     0,
 		LastAccessedAt: time.Now(),
 		ExpDate:        time.Now().Add(30 * 24 * time.Hour), // 30-day expiration by default
@@ -90,8 +90,7 @@ func GenerateURL(c *fiber.Ctx) error {
 	})
 }
 
-
-// EditURL handles updating the URL or its details
+// EditShortLink handles updating the URL or its details
 func EditShortLink(c *fiber.Ctx) error {
 	var editReq struct {
 		ShortLink string `json:"shortlink"`
@@ -130,8 +129,6 @@ func EditShortLink(c *fiber.Ctx) error {
 	return OK(c, fiber.Map{"message": "ShortLink updated successfully"})
 }
 
-
-
 // GetURLs retrieves all URLs for the logged-in user
 func GetURLs(c *fiber.Ctx) error {
 	user := c.Locals("user").(*jwt.Token)
@@ -164,15 +161,14 @@ func GetURLs(c *fiber.Ctx) error {
 
 // GetURLbyID retrieves a specific URL by its ID
 func GetURLbyID(c *fiber.Ctx) error {
-	urlID := c.Params("url_id")
-	objectID, err := primitive.ObjectIDFromHex(urlID)
-	if err != nil {
-		return BadRequest(c, "Invalid URL ID format")
-	}
+	urlID, err := strconv.ParseInt(c.Params("url_id"), 10, 64)
+    if err != nil {
+        return BadRequest(c, "Invalid URL ID format")
+    }
 
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
 	var url model.Url
-	err = collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&url)
+	err = collection.FindOne(context.TODO(), bson.M{"url_id": urlID}).Decode(&url)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return NotFound(c, "URL not found")
@@ -221,20 +217,39 @@ func DeleteURL(c *fiber.Ctx) error {
     // Connect to the MongoDB collection
     collection := database.MongoClient.Database("shortlink").Collection("urls")
 
-    // Attempt to delete the document with the given int64 ID
-    result, err := collection.DeleteOne(context.TODO(), bson.M{"_id": urlID})
+    // Check if the URL exists and is not already deleted
+    var url model.Url
+    err = collection.FindOne(context.TODO(), bson.M{"url_id": urlID}).Decode(&url)
+    if err != nil {
+        if err == mongo.ErrNoDocuments {
+            return NotFound(c, "URL not found")
+        }
+        return InternalServerError(c, "Error fetching URL")
+    }
+
+    // If the URL is already marked as deleted, return an error
+    if url.Status == "deleted" {
+        return BadRequest(c, "URL already deleted")
+    }
+
+    // Set the current timestamp for the DeletedAt field
+    currentTime := time.Now()
+
+    // Update the status field to mark the URL as deleted and set the DeletedAt timestamp
+    update := bson.M{
+        "$set": bson.M{
+            "status":     "deleted",
+            "deleted_at": currentTime,
+        },
+    }
+
+    _, err = collection.UpdateOne(context.TODO(), bson.M{"url_id": urlID}, update)
     if err != nil {
         return InternalServerError(c, "Failed to delete URL")
     }
 
-    // Check if a document was actually deleted
-    if result.DeletedCount == 0 {
-        return NotFound(c, "URL not found")
-    }
-
     return OK(c, fiber.Map{"message": "URL deleted successfully"})
 }
-
 
 // GetUserUrlLogs retrieves logs (URLs) for the logged-in user
 func GetUserUrlLogs(c *fiber.Ctx) error {
@@ -261,10 +276,7 @@ func GetUserUrlLogs(c *fiber.Ctx) error {
 	}
 
 	return OK(c, fiber.Map{
-		"message": "URLs fetched successfully",
+		"message": "User URL logs fetched successfully",
 		"urls":    urls,
 	})
 }
-
-
-//

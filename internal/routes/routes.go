@@ -5,9 +5,15 @@ import (
 	"shortlink/internal/handler/rest"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func RouteSetup(app *fiber.App) {
+
+	app.Use(cors.New(cors.Config{
+		AllowCredentials: true, // Required to send cookies with CORS
+		AllowOrigins:     "http://127.0.0.1:3000", // Adjust to match your frontend
+	}))
 
 	app.Get("/:shortlink", rest.RedirectURL)
 
