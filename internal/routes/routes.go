@@ -20,7 +20,7 @@ func RouteSetup(app *fiber.App) {
 	api := app.Group("/api/v1")
 
 	// API endpoints (return JSON)
-	api.Get("/users", nil)                      // Fetch all users
+	api.Get("/users", rest.GetAllUsers)                      // Fetch all users
 	api.Get("/users/:id", nil)                  // Fetch a specific user by ID
 	api.Post("/users/login", rest.Login)        // Login user
 	api.Post("/users/register", rest.Register)  // Register a new user
