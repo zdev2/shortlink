@@ -20,7 +20,11 @@ func main() {
 
 	database.CreateCollectionsAndIndexes(client)
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		EnableTrustedProxyCheck: true,
+		TrustedProxies:           []string{"*"},
+	})
+	
 	
 	
 	// initial route
@@ -28,10 +32,14 @@ func main() {
 	user := database.GetCollection("user")
 
 	app.Get("/", func(c *fiber.Ctx) error {
+		forwarded := c.Get("X-Forwarded-For")
+		clientIP := c.IPs() // Will take into account X-Forwarded-For
 		return c.JSON(fiber.Map{
 			"message": "MongoDB client initialized successfully",
 			"client": client,
 			"user": user,
+			"forwarded": forwarded,
+			"client_ip": clientIP[0],
 		})
 	})
 	

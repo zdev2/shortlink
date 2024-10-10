@@ -37,6 +37,6 @@ func RouteSetup(app *fiber.App) {
 	api.Delete("/urls/:url_id", middleware.ValidateCookie, rest.DeleteURL)     // Delete a short URL
 
 	// Analytics routes
-	api.Get("/analytics", nil)                  // Fetch global analytics
+	api.Get("/analytics", middleware.ValidateCookie, rest.GetAnalytics)                  // Fetch global analytics
 	api.Get("/analytics/:urlID", nil)           // Fetch analytics for a specific URL
 }
