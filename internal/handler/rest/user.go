@@ -156,4 +156,9 @@ func GetAllUsers(c *fiber.Ctx) error {
     })
 }
 
-//
+func Logout(c *fiber.Ctx) error {
+    c.ClearCookie("Authorization")
+    return OK(c, fiber.Map{
+        "message": "Logout successful",
+    })
+}

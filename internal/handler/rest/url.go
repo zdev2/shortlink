@@ -178,11 +178,11 @@ func GetURLbyID(c *fiber.Ctx) error {
 
 	return OK(c, fiber.Map{"url": url})
 }
-
-// RedirectURL handles redirection from a short URL to the long URL
+// RedirectURL handles redirection and logs analytics
 func RedirectURL(c *fiber.Ctx) error {
 	shortLink := c.Params("shortlink")
 
+	// Fetch URL details from the "urls" collection
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
 	var url model.Url
 	err := collection.FindOne(context.TODO(), bson.M{"shortlink": shortLink}).Decode(&url)
@@ -202,9 +202,40 @@ func RedirectURL(c *fiber.Ctx) error {
 		return InternalServerError(c, "Error updating URL")
 	}
 
+	// Capture IP address and log analytics
+	ip := c.IP() // Get client IP address
+	userAgent := c.Get("User-Agent")
+	referrer := c.Get("Referer")
+	location := GetLocationFromIP(ip) // You can implement this function to get location from the IP
+
+	// Prepare analytics data
+	analytics := model.Analytics{
+		ID:         primitive.NewObjectID(),
+		UserID:     url.UserID,           // Assuming `url` has a UserID field
+		UserAgent:  userAgent,
+		Referrer:   referrer,
+		Location:   location,
+		AccessedAt: time.Now(),
+	}
+
+	// Insert analytics into a separate collection
+	analyticsCollection := database.MongoClient.Database("shortlink").Collection("analytics")
+	_, err = analyticsCollection.InsertOne(context.TODO(), analytics)
+	if err != nil {
+		return InternalServerError(c, "Error saving analytics")
+	}
+
 	// Redirect to the long URL
 	return c.Redirect(url.URL)
 }
+
+// Dummy function for getting location from IP (implement as per your needs)
+func GetLocationFromIP(ip string) string {
+	// Implement IP to location lookup, using an external service if needed
+	// You can use services like ipstack or any IP geolocation service.
+	return "Unknown Location" // Default to unknown if not implemented
+}
+
 
 // DeleteURL handles the deletion of a short URL
 func DeleteURL(c *fiber.Ctx) error {
