@@ -123,4 +123,42 @@ func Login(c *fiber.Ctx) error {
     })
 }
 
-//
+func GetAllUsers(c *fiber.Ctx) error {
+    // Define an empty slice to hold users
+    var users []model.User
+
+    // Connect to the user collection
+    collection := database.MongoClient.Database("shortlink").Collection("user")
+
+    // Query the collection for all users
+    cursor, err := collection.Find(context.TODO(), bson.M{})
+    if err != nil {
+        return InternalServerError(c, "Failed to retrieve users from the database")
+    }
+    defer cursor.Close(context.TODO())
+
+    // Iterate over the cursor to decode all users
+    for cursor.Next(context.TODO()) {
+        var user model.User
+        if err := cursor.Decode(&user); err != nil {
+            return InternalServerError(c, "Error decoding user")
+        }
+        users = append(users, user)
+    }
+
+    if err := cursor.Err(); err != nil {
+        return InternalServerError(c, "Cursor error")
+    }
+
+    // Return the list of users as JSON
+    return OK(c, fiber.Map{
+        "users": users,
+    })
+}
+
+func Logout(c *fiber.Ctx) error {
+    c.ClearCookie("Authorization")
+    return OK(c, fiber.Map{
+        "message": "Logout successful",
+    })
+}
