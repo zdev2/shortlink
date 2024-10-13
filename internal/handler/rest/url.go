@@ -204,7 +204,7 @@ func RedirectURL(c *fiber.Ctx) error {
     }
 
     // Capture IP address and log analytics
-    ip := c.IP()
+    ip, _ := GetPublicIP()
     userAgent := c.Get("User-Agent")
     referrer := c.Get("Referer")
     
@@ -215,7 +215,7 @@ func RedirectURL(c *fiber.Ctx) error {
     analytics := model.Analytics{
         ID:         primitive.NewObjectID(),
         UserID:     url.UserID,  // Assuming `url` has a UserID field
-        URLID:      url.URLID,      // Associate with URL ID
+        URLID:      url.ID,      // Associate with URL ID
         UserAgent:  userAgent,
         Referrer:   referrer,
         Location:   location,

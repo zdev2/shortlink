@@ -50,7 +50,7 @@ func GetGlobalAnalytics(c *fiber.Ctx) error {
 
 func GetAnalyticsByURL(c *fiber.Ctx) error {
 	// Get the URL ID from the request params
-	urlID := c.Params("urlID")
+	urlID := c.Params("id")
 	
 	// Convert the urlID string to ObjectID
 	objectID, err := primitive.ObjectIDFromHex(urlID)

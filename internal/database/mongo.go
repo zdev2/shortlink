@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,7 +16,7 @@ var MongoClient *mongo.Client
 
 // OpenDB initializes the MongoDB client and stores it in the global `client` variable.
 func OpenDB() (*mongo.Client, error) {
-	clientOptions := options.Client().ApplyURI("mongodb+srv://bagus:urlshortener@superskibidisigma.d27tu.mongodb.net/")
+	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO"))
 	var err error
 	MongoClient, err = mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
