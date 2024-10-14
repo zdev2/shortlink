@@ -21,8 +21,6 @@ func AuditMiddleware(action, entity string) fiber.Handler {
         if err == nil {
             // Retrieve user token from context
             userToken := c.Locals("user")
-            fmt.Printf("AuditMiddleware Token: %v\n", userToken) // Debug log to check the token
-
             if userToken == nil {
                 fmt.Println("No token found in context")
                 return err
