@@ -3,6 +3,7 @@ package main
 import (
 	"shortlink/config"
 	"shortlink/internal/database"
+	"shortlink/internal/handler/rest"
 	"shortlink/internal/routes"
 
 	"github.com/gofiber/fiber/v2"
@@ -32,14 +33,12 @@ func main() {
 	user := database.GetCollection("user")
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		forwarded := c.Get("X-Forwarded-For")
-		clientIP := c.IPs() // Will take into account X-Forwarded-For
+		clientIP, _ := rest.GetPublicIP() 
 		return c.JSON(fiber.Map{
 			"message": "MongoDB client initialized successfully",
 			"client": client,
 			"user": user,
-			"forwarded": forwarded,
-			"client_ip": clientIP[0],
+			"client_ip": clientIP,
 		})
 	})
 	
