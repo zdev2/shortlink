@@ -14,7 +14,7 @@ type Url struct {
 	ShortLink 		string 				`bson:"shortlink" json:"shortlink"` //
 	ClickCount 		int 				`bson:"click_count" json:"clickcount"` //
 	LastAccessedAt 	time.Time 			`bson:"last_accessed_at" json:"lastaccesedat"` //
-	ExpDate 		time.Time 			`bson:"expiration_date" json:"expdate"`  //
+	ExpDate 		*time.Time 			`bson:"expiration_date" json:"expdate"`  //
 	Status 			string 				`bson:"status" json:"status"`  //
 	URLPassword 	string 				`bson:"url_password" json:"url_password"`  //
 	Model
