@@ -12,10 +12,12 @@ import { useNavigate } from 'react-router-dom';
 
   const LandingPage = () => {
   const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false);
+  const [isRegisterPopupVisible, setIsRegisterPopupVisible] = useState(false);
   const [username, setUsername] = useState(''); // State untuk username
   const [password, setPassword] = useState(''); // State untuk password
   const [errorMessage, setErrorMessage] = useState(''); // State untuk pesan error
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
 
   // Fungsi untuk menampilkan popup login
   const handleVisitNowClick = () => {
@@ -28,15 +30,80 @@ import { useNavigate } from 'react-router-dom';
     setErrorMessage(''); // Reset pesan error saat popup ditutup  
     setUsername(''); // Reset username menj i kosong saat popup ditutup
     setPassword(''); // Reset password menjadi kosong saat popup ditutup
+    setEmail('');
+  };
+
+  const closeRegisterPopup = () => {
+    setIsRegisterPopupVisible(false);
+    setErrorMessage('');
+    setUsername('');
+    setPassword('');
+    setEmail('');
+  };
+
+  const openResgisterPopup = () => {
+    setIsRegisterPopupVisible(true);
+    setIsLoginPopupVisible(false);
+    setErrorMessage('');
+    setUsername('');
+    setPassword('');
+    setEmail('');
+  }
+
+  const openLoginPopup = () => {
+    setIsRegisterPopupVisible(false);
+    setIsLoginPopupVisible(true);
+    setErrorMessage('');
+    setUsername('');
+    setPassword('');
+    setEmail('');
   };
 
   // Fungsi untuk menangani login
-  const handleLogin = () => {
-    if (username === 'admin' && password === 'admin1234') {
-      setErrorMessage('');
-      navigate('/main-menu');
-    } else {
-      setErrorMessage('Username atau password salah');
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:3000/api/v1/users/login', {
+        method : 'POST',
+        headers : {
+          'Content-Type' : 'application/json',
+        },
+        body : JSON.stringify ({username, password}),
+      });
+      // const data = await response.json();
+
+      if (response.ok) {
+        setErrorMessage('');
+        navigate('/main-menu');
+      } else {
+        setErrorMessage('Username atau Password Salah');
+      }
+    }catch (error){
+      console.error('Error Fetchin API', error)
+      setErrorMessage('terjadi kesalahan')
+    }
+  }
+
+  const handleRegister = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:3000/api/v1/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, username, password }),
+      });
+
+      if (response.ok) {
+        setErrorMessage('');
+        alert ('💕💕💕Registrasi berhasil tolong login ulang💕💕💕')
+        closeRegisterPopup(); // Menutup popup setelah registrasi berhasil
+        openLoginPopup();
+      } else {
+        setErrorMessage('Registrasi gagal ');
+      }
+    } catch (error) {
+      console.error('Error Fetching API', error);
+      setErrorMessage('Terjadi kesalahan');
     }
   };
 
@@ -44,7 +111,7 @@ import { useNavigate } from 'react-router-dom';
   <div className="bg-gradient-to-r from-pink-100 via-white to-purple-100 min-h-screen text-gray-900  md:pt-5">
       {/* Header */}
 
-      <header className="md:px-[50px]">
+    <header className="md:px-[50px]">
       <section className='pt-4 md:px-10 border-none md:border-black md:rounded-xl md:border md:border-solid'>
         <div className='flex justify-between items-center px-7'>
         <div className="flex items-center">
@@ -76,29 +143,25 @@ import { useNavigate } from 'react-router-dom';
             Visit Now <FaArrowRight />
           </button>
           </div>
-   
         </div>
-
-   </section>
-      </header>
+      </section>
+    </header>
        {/* end header */}
 
-
-     
       {/* About Us Section */}
-      <section className="mt-[69px] p-6 md:px-10">
+      <section className="mt-[50px] p-6 md:px-10">
       <div className='from-pink-100 via-white to-purple-100'>
       <div className='flex justify-between bg-white rounded-xl border border-black px-[10px] py-[15px] md:border-none  md:gap-10 md:bg-gradient-to-r md:from-pink-100 md:via-white md:to-purple-100'>
       <div className="flex flex-col justify-center items-center">
             <h2 className="text-2xl font-bold mb-4 text-center md:text-4xl">About <span className='text-indigo-500'>Us</span></h2>
-            <p className="text-base  mb-6 font-semibold text-[#3F458F] text-center justify-center md:w-[25rem] md:text-lg">
+            <p className="text-base  mb-6 font-semibold text-[#3F458F] text-start justify-center md:w-[25rem] md:text-lg">
               DnD is your solution for shortening long URLs, making them easy to share and track with just a few clicks.
               We prioritize simplicity, security, and reliability, helping you streamline your online interactions.
             </p>
             <button className=" bg-indigo-600 items-center px-5 w-36 py-3 text-white gap-2 font-semibold rounded-xl hidden md:flex" onClick={handleVisitNowClick}>
-               Visit Now <FaArrowRight />
+                Visit Now <FaArrowRight />
             </button>
- 
+
           </div>
 
           <div>
@@ -116,8 +179,8 @@ import { useNavigate } from 'react-router-dom';
             <div className="w-full mb-4 md:mb-0">
               <h2 className="text-base text-indigo-500 font-bold mb-2 md:text-5xl">Fast, Easy, and Reliable</h2>
               <p className="text-sm md:text-base md:w-72 md:text-center mx-auto">
-                   DnD is a link shortening service that makes it easy for you to turn long URLs into short, shareable links.
-                   Get click statistics and track your link performance with Shortly.
+                  DnD is a link shortening service that makes it easy for you to turn long URLs into short, shareable links.
+                  Get click statistics and track your link performance with Shortly.
               </p>
         </div>
 
@@ -149,14 +212,14 @@ import { useNavigate } from 'react-router-dom';
       </section>                                                              
 
       {/* Footer */}  
-      <footer className="bg-indigo-600 text-white py-8 px-5 md:px-20">
-    <div className='mb-24 md:grid md:grid-cols-3'>
+      <footer className="bg-indigo-600 text-white pb-8 px-5 md:px-20">
+    <div className='mb-12 md:grid md:grid-cols-3'>
       <div className='flex flex-col items-center mt-11'>
         <div className='flex justify-center items-center'>
           <img src={Logo} alt="" />
-           <h2 className='text-4xl font-bold'>DnD</h2>
+            <h2 className='text-4xl font-bold'>DnD</h2>
           </div> 
-           <p className='text-base w-56 text-center mt-2'>DnD is your solution for shortening long URLs</p>
+            <p className='text-base w-56 text-center mt-2'>DnD is your solution for shortening long URLs</p>
         </div>
 
         <div className='flex flex-col items-center mt-14 text-center'>
@@ -182,7 +245,7 @@ import { useNavigate } from 'react-router-dom';
           </button>
         </div>
       </div>
-       
+      
       
           <hr/>
           <div className='flex flex-col items-center md:grid md:grid-cols-3 md:justify-items-center'>
@@ -201,10 +264,10 @@ import { useNavigate } from 'react-router-dom';
         </div>
       </footer>
 
-      {/* Komponen Popup Login */}
+      {/* Komponen Popup Login dan Popup Register*/}
       {isLoginPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 popup-background show">
-          <div className="bg-white rounded-lg p-4 shadow-lg w-[15rem] popup-container show">
+          <div className="bg-white rounded-lg p-4 shadow-lg w-[22rem] popup-container show">
             <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
             {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
             <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
@@ -233,14 +296,93 @@ import { useNavigate } from 'react-router-dom';
                 />
               </div>
               <div className="flex justify-between">
-                <button
-                  type="submit"
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold"
-                >
-                  Login
-                </button>
+                <div className='flex gap-4'>
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold"
+                  >
+                    Login
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold"
+                    onClick={openResgisterPopup}
+                  >
+                    Register
+                  </button>
+                </div>
                 <button
                   onClick={closeLoginPopup}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold"
+                >
+                  Close
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      
+      {isRegisterPopupVisible && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 popup-background show">
+          <div className="bg-white rounded-lg p-4 shadow-lg w-[22rem] popup-container show">
+            <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
+            {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
+            <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }}>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Username       
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  placeholder="Enter your username"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Email       
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Password 
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  placeholder="Enter your password"
+                />
+              </div>
+              <div className="flex justify-between">
+                <div className='flex gap-4'>
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold"
+                  >
+                    Register
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold"
+                    onClick={openLoginPopup}
+                  >
+                    Login
+                  </button>
+                </div>
+                <button
+                  onClick={closeRegisterPopup}
                   className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold"
                 >
                   Close

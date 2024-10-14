@@ -37,7 +37,7 @@ function App() {
       clicks: 0,
       password,
       status: 'active',
-      date: expiryDate || '12 Aug - 12 Sept',
+      date: expiryDate || 'Today ',
     };
     setShortlinks([newLink, ...shortlinks]);
     setShowProtectModal(false);
@@ -89,13 +89,21 @@ function App() {
 
   const handleSaveEdit = () => {
     if (editLink) {
+      // Cek apakah custom link unik
+      const isUnique = !shortlinks.some((l) => l.customLink === customLink && l.shortLink !== editLink.shortLink);
+      
+      if (!isUnique) {
+        alert('Custom link already exists. Please choose another one.');
+        return;
+      }
+  
       const updatedLinks = shortlinks.map((l) =>
         l.shortLink === editLink.shortLink
           ? {
               ...l,
               title,
               originalLink: originalUrl,
-              customLink,
+              customLink: customLink || l.customLink,
               password,
               date: expiryDate,
             }
@@ -107,6 +115,7 @@ function App() {
       resetForm();
     }
   };
+  
 
   const truncateUrl = (url: string, maxLength: number = 30) => {
     return url.length > maxLength ? url.substring(0, maxLength) + '...' : url;
@@ -121,7 +130,7 @@ function App() {
       setEnteredPassword('');
       setPasswordError('');
     } else {
-      setPasswordError('Incorrect password. Please try again.');
+      setPasswordError('Password salah tolong coba  ');
     }
   };
 
@@ -188,14 +197,14 @@ function App() {
           <div className="mb-4">
             <input
               type="password"
-              className="border p-2 w-full"
+              className="border p-2 w-full "
               placeholder="Enter password"
               value={enteredPassword}
               onChange={(e) => setEnteredPassword(e.target.value)}
             />
           </div>
           {passwordError}
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg">
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 mt-5 rounded-lg">
             Submit
           </button>
         </form>
