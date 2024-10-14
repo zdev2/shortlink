@@ -2,6 +2,7 @@ package rest
 
 import (
 	"context"
+	"net/url"
 	"shortlink/internal/database"
 	"shortlink/internal/generator"
 	"shortlink/model"
@@ -29,6 +30,11 @@ func GenerateURL(c *fiber.Ctx) error {
 		return BadRequest(c, "Invalid request body")
 	}
 
+	// Validate URL format
+	if _, err := url.ParseRequestURI(urlReq.URL); err != nil {
+		return BadRequest(c, "Invalid URL format")
+	}
+
 	// Retrieve the user from the JWT token stored in context
 	user := c.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
@@ -41,6 +47,15 @@ func GenerateURL(c *fiber.Ctx) error {
 	}
 
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
+
+	// Check if the provided short link is unique
+	if urlReq.ShortLink != "" {
+		var existingUrl model.Url
+		err := collection.FindOne(context.TODO(), bson.M{"shortlink": urlReq.ShortLink}).Decode(&existingUrl)
+		if err == nil {
+			return BadRequest(c, "Short link already exists")
+		}
+	}
 
 	// Get the next URL ID
 	urlID, err := generator.GetNextIncrementalID(collection, "url_id")
@@ -101,6 +116,7 @@ func GenerateURL(c *fiber.Ctx) error {
 		"url_details": url,
 	})
 }
+
 
 // EditShortLink handles updating the URL or its details
 func EditShortLink(c *fiber.Ctx) error {
