@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	repoconfig "shortlink/internal/repository"
+	"shortlink/internal/database"
 	"shortlink/model"
 	"strings"
 	"time"
@@ -45,7 +45,7 @@ func Register(c *fiber.Ctx) error {
 	if err != nil {
 		return BadRequest(c, "Failed to hashed password")
 	}
-    collection := repoconfig.MongoClient.Database("shortlink").Collection("user")
+    collection := database.MongoClient.Database("shortlink").Collection("user")
     var existUser model.User
     filter := bson.M{"username": registerReq.Username}
     err = collection.FindOne(context.TODO(), filter).Decode(&existUser)
@@ -84,7 +84,7 @@ func Login(c *fiber.Ctx) error {
     logReq.Username = strings.TrimSpace(logReq.Username)
     logReq.Password = strings.TrimSpace(logReq.Password)
     var userAcc model.User
-    collection := repoconfig.MongoClient.Database("shortlink").Collection("user")
+    collection := database.MongoClient.Database("shortlink").Collection("user")
     err := collection.FindOne(context.TODO(), bson.M{"username": logReq.Username}).Decode(&userAcc)
     if err != nil {
         if err == mongo.ErrNoDocuments {
@@ -123,4 +123,104 @@ func Login(c *fiber.Ctx) error {
     })
 }
 
-//
+func GetAllUsers(c *fiber.Ctx) error {
+    // Define an empty slice to hold users
+    var users []model.User
+
+    // Connect to the user collection
+    collection := database.MongoClient.Database("shortlink").Collection("user")
+
+    // Query the collection for all users
+    cursor, err := collection.Find(context.TODO(), bson.M{})
+    if err != nil {
+        return InternalServerError(c, "Failed to retrieve users from the database")
+    }
+    defer cursor.Close(context.TODO())
+
+    // Iterate over the cursor to decode all users
+    for cursor.Next(context.TODO()) {
+        var user model.User
+        if err := cursor.Decode(&user); err != nil {
+            return InternalServerError(c, "Error decoding user")
+        }
+        users = append(users, user)
+    }
+
+    if err := cursor.Err(); err != nil {
+        return InternalServerError(c, "Cursor error")
+    }
+
+    // Return the list of users as JSON
+    return OK(c, fiber.Map{
+        "users": users,
+    })
+}
+
+func Logout(c *fiber.Ctx) error {
+    c.ClearCookie("Authorization")
+    return OK(c, fiber.Map{
+        "message": "Logout successful",
+    })
+}
+
+func GetUserByID(c *fiber.Ctx) error {
+	userID := c.Params("id")
+	collection := database.MongoClient.Database("shortlink").Collection("user")
+
+	var user model.User
+	err := collection.FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return NotFound(c, "User not found")
+		}
+		return InternalServerError(c, "Error fetching user")
+	}
+
+	return OK(c, fiber.Map{
+		"user": user,
+	})
+}
+
+func UpdateUser(c *fiber.Ctx) error {
+	userID := c.Params("id")
+	var updateReq model.User // Assume model.User holds fields that can be updated
+
+	if err := c.BodyParser(&updateReq); err != nil {
+		return BadRequest(c, "Failed to read body request")
+	}
+
+	collection := database.MongoClient.Database("shortlink").Collection("user")
+	update := bson.M{
+		"$set": bson.M{
+			"fullname": updateReq.FullName,
+			"email":    updateReq.Email,
+			"username": updateReq.Username,
+			// Include more fields as necessary
+			"update_at": time.Now(),
+		},
+	}
+
+	_, err := collection.UpdateOne(context.TODO(), bson.M{"_id": userID}, update)
+	if err != nil {
+		return InternalServerError(c, "Error updating user")
+	}
+
+	return OK(c, fiber.Map{
+		"message": "User updated successfully",
+	})
+}
+
+func DeleteUser(c *fiber.Ctx) error {
+	userID := c.Params("id")
+	collection := database.MongoClient.Database("shortlink").Collection("user")
+
+	// Soft delete the user (mark as deleted)
+	_, err := collection.UpdateOne(context.TODO(), bson.M{"_id": userID}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
+	if err != nil {
+		return InternalServerError(c, "Error deleting user")
+	}
+
+	return OK(c, fiber.Map{
+		"message": "User deleted successfully",
+	})
+}
