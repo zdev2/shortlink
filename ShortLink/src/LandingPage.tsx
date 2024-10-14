@@ -3,8 +3,11 @@ import { FaArrowRight } from 'react-icons/fa';
 import Icon from './assets/Icon.svg';
 import Logo from './assets/logo.svg';
 import { useState } from 'react';
-import foto from './assets/Group 86.svg';
-import feat from './assets/feat-links 1.svg';
+// import foto from './assets/Group 86.svg';
+// import feat from './assets/feat-links 1.svg';
+// import facebook from './assets/Icon_11_.png';
+// import twiter from './assets/Twitter.png'
+// import linkedin from './assets/Linkedin.png'
 import { useNavigate } from 'react-router-dom';
 
   const LandingPage = () => {
@@ -22,46 +25,61 @@ import { useNavigate } from 'react-router-dom';
   // Fungsi untuk menutup popup login
   const closeLoginPopup = () => {
     setIsLoginPopupVisible(false);
-    setErrorMessage(''); // Reset pesan error saat popup ditutup
+    setErrorMessage(''); // Reset pesan error saat popup ditutup  
     setUsername(''); // Reset username menj i kosong saat popup ditutup
     setPassword(''); // Reset password menjadi kosong saat popup ditutup
   };
 
   // Fungsi untuk menangani login
-  const handleLogin = () => {
-    if (username === 'admin' && password === 'admin1234') {
-      setErrorMessage('');
-      navigate('/main-menu');
-    } else {
-      setErrorMessage('Username atau password salah');
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:3000/api/v1/users/login', {
+        method : 'POST',
+        headers : {
+          'Content-Type' : 'application/json',
+        },
+        body : JSON.stringify ({username, password}),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setErrorMessage('');
+        navigate('/main-menu');
+      } else {
+        setErrorMessage(data.message || 'Username atau Password Salah');
+      }
+    }catch (error){
+      console.error('Error Fetchin API', error)
+      setErrorMessage('terjadi kesalahan')
     }
-  };
+  }
 
   return (
-    <div className="bg-gradient-to-r from-pink-100 via-white to-purple-100 min-h-screen text-gray-900">
+  <div className="bg-gradient-to-r from-pink-100 via-white to-purple-100 min-h-screen text-gray-900  lg:pt-5">
       {/* Header */}
-      <header className="flex justify-between items-center px-7 pt-5">
+
+      <header className="lg:px-[50px]">
+      <section className='pt-4 lg:px-10 border-none lg:border-black lg:rounded-xl lg:border lg:border-solid'>
+        <div className='flex justify-between items-center px-7'>
         <div className="flex items-center">
           <img src={Logo} alt="Logo" className=" w-5 h-auto" />
           <div className="text-2xl font-bold text-indigo-600">DnD</div>
         </div>
-        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg" onClick={handleVisitNowClick}>
+        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg lg:w-[153px]" onClick={handleVisitNowClick}>
           Login
-        </button>
-      </header>
-      {/* end header */}
+        </button> 
+        </div>
 
-      {/* Hero Section */}
-      <section className="flex justify-between mt-[35px]">
-        <div className="flex flex-col justify-center">
-        <div>
-          <img src={Icon} alt="Icon"  className='w-80'/>
+      
+      <div className="flex mt-[35px] flex-col lg:flex-row-reverse lg:pb-6 ">
+        <div className='flex justify-center'>
+          <img src={Icon} alt="Icon"  className='w-80 lg:w-[450px]'/>
         </div>
         
-        <div className='flex flex-col items-center'>
-          <h1 className="text-4xl font-bold mb-4">Welcome to <span className="text-indigo-600">DnD</span></h1>
-          <p className="text-sm font-semibold mb-4 text-center">
-            Best and Shortest Names for<br /> 
+        <div className='flex flex-col items-center justify-center'>
+          <h1 className="text-4xl font-bold mb-4 lg:text-5xl">Welcome to <span className="text-indigo-600">DnD</span></h1>
+          <p className="text-sm font-semibold mb-4 text-center lg:text-xl">
+            Best and Shortest Names for<br />  
             <span className="text-indigo-600">Supporting your marketing tools!</span>
           </p>
           <button
@@ -72,30 +90,33 @@ import { useNavigate } from 'react-router-dom';
             Visit Now <FaArrowRight />
           </button>
           </div>
-       
+   
         </div>
 
-      </section>
-      {/* end hero section */}
+   </section>
+      </header>
+       {/* end header */}
+
 
      
       {/* About Us Section */}
-      <section className="mt-[69px] p-6">
-      <div>
-        <div className='flex justify-between bg-white rounded-xl border border-black px-[10px] py-[15px] '>
-          <div className="flex flex-col justify-center">
-            <h2 className="text-2xl font-bold mb-4 text-center">About <span className='text-indigo-500'>Us</span></h2>
-            <p className="text-base  mb-6 font-semibold text-[#3F458F] text-center">
-              S.id is your solution for shortening long URLs, making them easy to share and track with just a few clicks.
+      <section className="mt-[69px] p-6 lg:px-16">
+      <div className='from-pink-100 via-white to-purple-100'>
+      <div className='flex justify-between bg-white rounded-xl border border-black px-[10px] py-[15px] lg:border-none  lg:gap-10 lg:bg-gradient-to-r lg:from-pink-100 lg:via-white lg:to-purple-100'>
+      <div className="flex flex-col justify-center">
+            <h2 className="text-2xl font-bold mb-4 text-center lg:text-5xl">About <span className='text-indigo-500'>Us</span></h2>
+            <p className="text-base  mb-6 font-semibold text-[#3F458F] text-center justify-center lg:w-[25rem]">
+              DnD is your solution for shortening long URLs, making them easy to share and track with just a few clicks.
               We prioritize simplicity, security, and reliability, helping you streamline your online interactions.
             </p>
-            <button className="bg-indigo-600  w-fit gap-2 items-center text-white px-6 py-3 rounded-lg hidden" onClick={handleVisitNowClick}>
-              Visit Now <FaArrowRight />
+            <button className=" bg-indigo-600 items-center px-5 w-36 py-3 text-white gap-2 font-semibold rounded-xl hidden lg:flex" onClick={handleVisitNowClick}>
+               Visit Now <FaArrowRight />
             </button>
+ 
           </div>
 
           <div>
-            <img src={Icon} alt="Icon"className='hidden lg:block' />
+            <img src={Icon} alt="Icon"className='hidden lg:block lg:w-[400px]' />
           </div>
         </div>
         </div>
@@ -103,27 +124,27 @@ import { useNavigate } from 'react-router-dom';
       {/* end about section */}
 
       {/* Features Section */}
-      <section className="py-12 px-4">
+      <section className="py-12 px-4">    
         <div className="text-center mb-12 relative">
           <div className='flex flex-col items-center md:flex-rol md:items-center md:justify-center'>
-            <div className="w-full md:w-1/2 mb-4 md:mb-0">
-              <h2 className="text-base text-indigo-500 font-bold mb-2">Fast, Easy, and Reliable</h2>
-              <p className="text-sm md:text-base">
-                S.id is a link shortening service that makes it easy for you to turn long URLs into short, shareable links.
-                Get click statistics and track your link performance with Shortly.
+            <div className="w-full mb-4 md:mb-0">
+              <h2 className="text-base text-indigo-500 font-bold mb-2 md:text-5xl">Fast, Easy, and Reliable</h2>
+              <p className="text-sm md:text-base md:w-72 md:text-center mx-auto">
+                   DnD is a link shortening service that makes it easy for you to turn long URLs into short, shareable links.
+                   Get click statistics and track your link performance with Shortly.
               </p>
-            </div>
+        </div>
 
             <div className="relative w-full md:w-1/2 flex justify-center items-center">
               {/* Background Image (feat) */}
-              <img src={feat} alt="" className='w-[221px] absolute z-10' />
+              {/* <img src={feat} alt="" className='w-[221px] absolute z-10 md:w-[450px]' /> */}
               {/* Foreground Image (foto) */}
-              <img src={foto} alt="" className='w-[308px] relative z-0' />
+              {/* <img src={foto} alt="" className='w-[308px] relative z-0 md:w-[600px]' /> */}
             </div>
           </div>
         </div>
 
-        <div className=" flex flex-col md:flex-row justify-around items-center">
+        <div className=" flex flex-col md:flex-row justify-around items-center md:px-20">
           {/* Feature 1 */}
           <div className="bg-white border border-black text-center mb-8 md:mb-0 p-[10px] rounded-xl w-[247px] h-[247px]">
             <h3 className="text-2xl font-bold mt-6">Short Link</h3>
@@ -139,16 +160,57 @@ import { useNavigate } from 'react-router-dom';
             </div>
           </div>
         </div>
-      </section>
+      </section>                                                              
 
-      {/* Footer */}
-      <footer className="bg-indigo-600 text-white py-8">
-        <div className="text-center">
-          <p>Team Contribution: me, you, you, you</p>
-          <p>Created With love ♥🔥</p>
-          <p>
-            The link-shortening project is an internship assignment merging frontend design with backend functionality.
-          </p>
+      {/* Footer */}  
+      <footer className="bg-indigo-600 text-white py-8 px-5">
+      <div>
+      <div className='flex flex-col items-center mt-11'>
+        <div className='flex justify-center items-center'>
+          <img src={Logo} alt="" />
+           <h2 className='text-4xl font-bold'>DnD</h2>
+          </div> 
+           <p className='text-base w-56 text-center mt-2'>DnD is your solution for shortening long URLs</p>
+        </div>
+
+        <div className='flex flex-col items-center mt-14 text-center'>
+          <h2 className='text-xl font-bold'>Quick Links</h2>
+        <p className='text-base  mt-4'>Company</p>
+        <p className='text-base  mt-3'>Information</p>
+        <p className='text-base  mt-3'>Service</p>
+        <p className='text-base  mt-3'>Features</p>
+        </div>
+
+        <div>
+          <div>
+              <h2>Vist Now</h2>
+              <p>Get started for free.
+              Simplify the use of your links</p>            
+          </div>
+          <button
+            type="button"
+            className="flex items-center bg-indigo-600 px-5 w-fit py-3 text-white gap-2 font-semibold rounded-xl"
+            onClick={handleVisitNowClick}
+          >
+            Visit Now <FaArrowRight />
+          </button>
+        </div>
+      </div>
+       
+        <div>
+          <hr />
+          <div>
+            <p>A product of </p>
+            <img src={Logo} alt="" />
+          </div>
+          <div>
+            <p>© 2024 DnD. Copyright not protected</p>
+          </div>
+          {/* <div>
+            <a href=""><img src={facebook} alt="" /></a>
+            <a href=""><img src={twiter} alt="" /></a>
+            <a href=""><img src={linkedin} alt="" /></a>
+          </div> */}
         </div>
       </footer>
 
@@ -201,8 +263,10 @@ import { useNavigate } from 'react-router-dom';
           </div>
         </div>
       )}
-    </div>
+  </div>
   );
 };
 
 export default LandingPage;
+
+// code di atas sudah berfungsi dengan baik dan benar coba sekarang bantu aku membuat untuk bagian register dan juga di bagian popup login akan berubah input jika saat register
