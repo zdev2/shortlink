@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"shortlink/internal/database"
+	"shortlink/internal/handler/rest"
 	"shortlink/model"
 	"time"
 
@@ -20,8 +21,6 @@ func AuditMiddleware(action, entity string) fiber.Handler {
         if err == nil {
             // Retrieve user token from context
             userToken := c.Locals("user")
-            fmt.Printf("AuditMiddleware Token: %v\n", userToken) // Debug log to check the token
-
             if userToken == nil {
                 fmt.Println("No token found in context")
                 return err
@@ -44,6 +43,7 @@ func AuditMiddleware(action, entity string) fiber.Handler {
             // Retrieve user ID (subject) from claims
             userIDHex, _ := claims["sub"].(string)
             userID, _ := primitive.ObjectIDFromHex(userIDHex)
+            publicIP, _ := rest.GetPublicIP()
 
             // Log audit action
             auditLog := model.AuditLog{
@@ -53,7 +53,7 @@ func AuditMiddleware(action, entity string) fiber.Handler {
                 Entity:    entity,
                 EntityID:  c.Params("id", ""),
                 Timestamp: time.Now(),
-                IPAddress: c.IP(),
+                IPAddress: publicIP,
             }
 
             collection := database.MongoClient.Database("shortlink").Collection("audit_log")
