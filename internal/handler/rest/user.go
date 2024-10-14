@@ -162,3 +162,65 @@ func Logout(c *fiber.Ctx) error {
         "message": "Logout successful",
     })
 }
+
+func GetUserByID(c *fiber.Ctx) error {
+	userID := c.Params("id")
+	collection := database.MongoClient.Database("shortlink").Collection("user")
+
+	var user model.User
+	err := collection.FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return NotFound(c, "User not found")
+		}
+		return InternalServerError(c, "Error fetching user")
+	}
+
+	return OK(c, fiber.Map{
+		"user": user,
+	})
+}
+
+func UpdateUser(c *fiber.Ctx) error {
+	userID := c.Params("id")
+	var updateReq model.User // Assume model.User holds fields that can be updated
+
+	if err := c.BodyParser(&updateReq); err != nil {
+		return BadRequest(c, "Failed to read body request")
+	}
+
+	collection := database.MongoClient.Database("shortlink").Collection("user")
+	update := bson.M{
+		"$set": bson.M{
+			"fullname": updateReq.FullName,
+			"email":    updateReq.Email,
+			"username": updateReq.Username,
+			// Include more fields as necessary
+			"update_at": time.Now(),
+		},
+	}
+
+	_, err := collection.UpdateOne(context.TODO(), bson.M{"_id": userID}, update)
+	if err != nil {
+		return InternalServerError(c, "Error updating user")
+	}
+
+	return OK(c, fiber.Map{
+		"message": "User updated successfully",
+	})
+}
+
+func DeleteUser(c *fiber.Ctx) error {
+	userID := c.Params("id")
+	collection := database.MongoClient.Database("shortlink").Collection("user")
+
+	// Soft delete the user (mark as deleted)
+	_, err := collection.UpdateOne(context.TODO(), bson.M{"_id": userID}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
+	if err != nil {
+		return InternalServerError(c, "Error deleting user")
+	}
+
+	return OK(c, fiber.Map{
+		"message": "User deleted successfully",
+	})
+}

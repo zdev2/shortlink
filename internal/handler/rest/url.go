@@ -2,7 +2,6 @@ package rest
 
 import (
 	"context"
-	"math/rand"
 	"shortlink/internal/database"
 	"shortlink/internal/generator"
 	"shortlink/model"
@@ -15,22 +14,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-// Define the characters to use in the short link
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-// Initialize a seeded random number generator
-var seededRand *rand.Rand = rand.New(
-	rand.NewSource(time.Now().UnixNano()))
-
-// generateShortLink creates a random short link with the specified length
-func generateShortLink(length int) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
-	}
-	return string(b)
-}
 
 // GenerateURL handles the generation of a short URL
 func GenerateURL(c *fiber.Ctx) error {
@@ -68,7 +51,7 @@ func GenerateURL(c *fiber.Ctx) error {
 		URLID:          urlID,
 		UserID:         objectID,
 		URL:            urlReq.URL,
-		ShortLink:      generateShortLink(6),
+		ShortLink:      generator.GenerateShortLink(6),
 		ClickCount:     0,
 		LastAccessedAt: time.Now(),
 		ExpDate:        time.Now().Add(30 * 24 * time.Hour), // 30-day expiration by default
@@ -107,7 +90,7 @@ func EditShortLink(c *fiber.Ctx) error {
 	}
 
 	// Get the URL ID from the URL params and convert to int64
-	urlID, err := strconv.ParseInt(c.Params("url_id"), 10, 64)
+	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
 	if err != nil {
 		return BadRequest(c, "Invalid URL ID format")
 	}
@@ -141,7 +124,13 @@ func GetURLs(c *fiber.Ctx) error {
 	}
 
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
-	filter := bson.M{"user_id": objectID}
+	filter := bson.M{ 
+		"user_id": objectID,
+		"$or": []bson.M{
+			{"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
+			{"deleted_at": bson.M{"$eq": nil}},      // DeletedAt field is nil
+		},
+	}
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
 		return InternalServerError(c, "Error fetching URLs")
@@ -161,14 +150,20 @@ func GetURLs(c *fiber.Ctx) error {
 
 // GetURLbyID retrieves a specific URL by its ID
 func GetURLbyID(c *fiber.Ctx) error {
-	urlID, err := strconv.ParseInt(c.Params("url_id"), 10, 64)
+	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
     if err != nil {
         return BadRequest(c, "Invalid URL ID format")
     }
 
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
 	var url model.Url
-	err = collection.FindOne(context.TODO(), bson.M{"url_id": urlID}).Decode(&url)
+	err = collection.FindOne(context.TODO(), bson.M{
+		"url_id": urlID,
+		"$or": []bson.M{
+			{"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
+			{"deleted_at": bson.M{"$eq": nil}},      // DeletedAt field is nil
+		},
+		}).Decode(&url)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return NotFound(c, "URL not found")
@@ -178,69 +173,71 @@ func GetURLbyID(c *fiber.Ctx) error {
 
 	return OK(c, fiber.Map{"url": url})
 }
-// RedirectURL handles redirection and logs analytics
+
 func RedirectURL(c *fiber.Ctx) error {
-	shortLink := c.Params("shortlink")
+    shortLink := c.Params("shortlink")
 
-	// Fetch URL details from the "urls" collection
-	collection := database.MongoClient.Database("shortlink").Collection("urls")
-	var url model.Url
-	err := collection.FindOne(context.TODO(), bson.M{"shortlink": shortLink}).Decode(&url)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return NotFound(c, "Short URL not found")
-		}
-		return InternalServerError(c, "Error fetching URL")
-	}
+    // Fetch URL details from the "urls" collection, excluding soft-deleted ones
+    collection := database.MongoClient.Database("shortlink").Collection("urls")
+    var url model.Url
+    err := collection.FindOne(context.TODO(), bson.M{
+        "shortlink":  shortLink,
+        "$or": []bson.M{
+            {"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
+            {"deleted_at": bson.M{"$eq": nil}},      // DeletedAt field is nil
+        },
+    }).Decode(&url)
+    if err != nil {
+        if err == mongo.ErrNoDocuments {
+            return NotFound(c, "Short URL not found")
+        }
+        return InternalServerError(c, "Error fetching URL")
+    }
 
-	// Update last accessed and click count
-	_, err = collection.UpdateOne(context.TODO(), bson.M{"_id": url.ID}, bson.M{
-		"$set":  bson.M{"last_accessed_at": time.Now()},
-		"$inc":  bson.M{"click_count": 1},
-	})
-	if err != nil {
-		return InternalServerError(c, "Error updating URL")
-	}
+    // Update last accessed and click count
+    _, err = collection.UpdateOne(context.TODO(), bson.M{"_id": url.ID}, bson.M{
+        "$set": bson.M{"last_accessed_at": time.Now()},
+        "$inc": bson.M{"click_count": 1},
+    })
+    if err != nil {
+        return InternalServerError(c, "Error updating URL")
+    }
 
-	// Capture IP address and log analytics
-	ip := c.IP() // Get client IP address
-	userAgent := c.Get("User-Agent")
-	referrer := c.Get("Referer")
-	location := GetLocationFromIP(ip) // You can implement this function to get location from the IP
+    // Capture IP address and log analytics
+    ip, _ := GetPublicIP()
+    userAgent := c.Get("User-Agent")
+    referrer := c.Get("Referer")
+    
+    // Get location from IP using ipinfo or similar service
+    location := GetLocationFromIP(ip)
 
-	// Prepare analytics data
-	analytics := model.Analytics{
-		ID:         primitive.NewObjectID(),
-		UserID:     url.UserID,           // Assuming `url` has a UserID field
-		UserAgent:  userAgent,
-		Referrer:   referrer,
-		Location:   location,
-		AccessedAt: time.Now(),
-	}
+    // Prepare analytics data
+    analytics := model.Analytics{
+        ID:         primitive.NewObjectID(),
+        UserID:     url.UserID,  // Assuming `url` has a UserID field
+        URLID:      url.ID,      // Associate with URL ID
+        UserAgent:  userAgent,
+        Referrer:   referrer,
+        Location:   location,
+        AccessedAt: time.Now(),
+    }
 
-	// Insert analytics into a separate collection
-	analyticsCollection := database.MongoClient.Database("shortlink").Collection("analytics")
-	_, err = analyticsCollection.InsertOne(context.TODO(), analytics)
-	if err != nil {
-		return InternalServerError(c, "Error saving analytics")
-	}
+    // Insert analytics into a separate collection
+    analyticsCollection := database.MongoClient.Database("shortlink").Collection("analytics")
+    _, err = analyticsCollection.InsertOne(context.TODO(), analytics)
+    if err != nil {
+        return InternalServerError(c, "Error saving analytics")
+    }
 
-	// Redirect to the long URL
-	return c.Redirect(url.URL)
-}
-
-// Dummy function for getting location from IP (implement as per your needs)
-func GetLocationFromIP(ip string) string {
-	// Implement IP to location lookup, using an external service if needed
-	// You can use services like ipstack or any IP geolocation service.
-	return "Unknown Location" // Default to unknown if not implemented
+    // Redirect to the long URL
+    return c.Redirect(url.URL)
 }
 
 
 // DeleteURL handles the deletion of a short URL
 func DeleteURL(c *fiber.Ctx) error {
     // Parse the url_id parameter as int64
-    urlID, err := strconv.ParseInt(c.Params("url_id"), 10, 64)
+    urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
     if err != nil {
         return BadRequest(c, "Invalid URL ID format")
     }
