@@ -103,7 +103,7 @@ const LandingPage = () => {
         closeRegisterPopup(); // Menutup popup setelah registrasi berhasil
         openLoginPopup();
       } else {
-        setErrorMessage("Registrasi gagal ");
+        setErrorMessage("Registrasi gagal coba lagi");
       }
     } catch (error) {
       console.error("Error Fetching API", error);
