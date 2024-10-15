@@ -79,7 +79,8 @@ const LandingPage = () => {
       }
     } catch (error) {
       console.error("Error Fetching API", error);
-      setErrorMessage("terjadi kesalahan");
+      setErrorMessage("Api Gagal dimuat");
+      alert('👻👻👻👻👻')
     }
   };
 
