@@ -94,11 +94,9 @@ func GenerateURL(c *fiber.Ctx) error {
 		ExpDate:        expDate, // This can be nil
 		Status:         "active",
 		URLPassword:    urlReq.URLPassword,
-		Model: model.Model{
-			CreatedAt: currentTime,
-			UpdateAt:  currentTime,
-			DeletedAt: nil, // Not deleted initially
-		},
+		CreatedAt: currentTime,
+		UpdateAt:  currentTime,
+		DeletedAt: nil, // Not deleted initially
 	}
 
 	// Insert the new URL document into the MongoDB collection
