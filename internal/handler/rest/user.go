@@ -61,11 +61,9 @@ func Register(c *fiber.Ctx) error {
         Email: registerReq.Email,
         Password: string(hash),
         IsActive: false,
-        Model: model.Model{
-            CreatedAt: time.Now(),
-            UpdateAt: time.Now(),
-            DeletedAt: nil,
-        },
+        CreatedAt: time.Now(),
+        UpdateAt: time.Now(),
+        DeletedAt: nil,
 	}
 	_, err = collection.InsertOne(context.TODO(), user)
 	if err != nil {
