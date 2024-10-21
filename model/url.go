@@ -18,7 +18,7 @@ type Url struct {
 	Status          string             `bson:"status" json:"status"`           //
 	URLPassword     string             `bson:"url_password" json:"url_password"` //
 	QRCode          string             `bson:"qr_code" json:"qr_code"`         // Changed base64 to string
-	CreatedAt 	time.Time 	`bson:"created_at" json:"createdat"` // 
-	UpdateAt 	time.Time 	`bson:"updated_at" json:"updateat"` // 
-	DeletedAt 	*time.Time 	`bson:"deleted_at,omitempty" json:"deletedat"` // 
+	CreatedAt 		time.Time 		   `bson:"created_at" json:"createdat"` // 
+	UpdateAt 		time.Time 	       `bson:"updated_at" json:"updateat"` // 
+	DeletedAt 		*time.Time 	       `bson:"deleted_at,omitempty" json:"deletedat"` // 
 }
