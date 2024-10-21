@@ -15,6 +15,14 @@ const MainPage = () => {
   const [customSlug, setCustomSlug] = useState("");
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
 
+  const truncateUrl = (url : string, maxLength = 50) => {
+    if (url.length <= maxLength) return url;
+    const start = url.slice(0, 20); // Ambil 20 karakter awal
+    const end = url.slice(-10); // Ambil 10 karakter terakhir
+    return `${start}...${end}`; // Gabungkan dengan tanda ellipsis (...)
+  };
+  
+
   const validateUrl = (url: string) => {
     const urlPattern = new RegExp(
       "^(https?:\\/\\/)?" +
@@ -109,19 +117,29 @@ const MainPage = () => {
           <ul>
             {shortLinks.map((link, index) => (
               <li key={index}>
-                <a
-                  href={link.shortLink}
+                
+                <br />
+                <span>Original:
+                  <a
+                  href={link.originalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                >
-                  {link.shortLink}
-                </a>
-                <br />
-                <span>Original: {link.originalUrl}</span>
+                  >
+                  {truncateUrl(link.originalUrl)}
+                  </a>
+                  </span>
                 <br />
                 <span>ID: {link.id}</span>
                 <br />
-                <span>ID: {link.shortLink}</span>
+                <span>Shortlink: 
+                  <a
+                  href={link.originalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >
+                  {link.shortLink}
+                  </a>
+                </span>
                 <br />
                 <span>Click Count: {link.clicks}</span>
                 <br />
