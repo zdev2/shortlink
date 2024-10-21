@@ -13,16 +13,17 @@ interface ShortLink {
 const MainPage = () => {
   const [originalUrl, setOriginalUrl] = useState("");
   const [customSlug, setCustomSlug] = useState("");
-  const [shortLinks, setShortLinks] = useState<ShortLink[]>([]); 
+  const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
 
   const validateUrl = (url: string) => {
     const urlPattern = new RegExp(
-      "^(https?:\\/\\/)?" + 
-      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|" + 
-      "((\\d{1,3}\\.){3}\\d{1,3}))" + 
-      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + 
-      "(\\?[;&a-z\\d%_.~+=-]*)?" + 
-      "(\\#[-a-z\\d_]*)?$", "i"
+      "^(https?:\\/\\/)?" +
+        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|" +
+        "((\\d{1,3}\\.){3}\\d{1,3}))" +
+        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" +
+        "(\\?[;&a-z\\d%_.~+=-]*)?" +
+        "(\\#[-a-z\\d_]*)?$",
+      "i"
     );
     return !!urlPattern.test(url);
   };
@@ -49,7 +50,7 @@ const MainPage = () => {
       if (!response.ok) {
         const errorText = await response.json();
         console.error(`Error: ${errorText.message}`);
-        
+
         if (errorText.error_location === "Short link already exists") {
           alert("The custom slug already exists. Please choose another one.");
         } else {
@@ -62,13 +63,13 @@ const MainPage = () => {
       const data = await response.json();
 
       const newLink: ShortLink = {
-        id: data.id,  // Added ID
-        shortLink:`https://dnd.id/${data.shortlink}`, 
+        id: data.data.url_details.id, // Added ID
+        shortLink: `https://dnd.id/${data.data.shortlink}`,
         originalUrl: originalUrl,
-        clicks: data.clickcount,
-        status: data.status,
-        createdAt: data.createdat,
-        lastAccessedAt: data.lastaccesedat || null,
+        clicks: data.data.url_details.clickcount,
+        status: data.data.url_details.status,
+        createdAt: data.data.url_details.createdat,
+        lastAccessedAt: data.data.url_details.lastaccesedat || null,
       };
 
       setShortLinks([newLink, ...shortLinks]);
@@ -83,13 +84,13 @@ const MainPage = () => {
   return (
     <div>
       <h1>URL Shortener</h1>
-      
-    <div className=" flex gap-4 justify-center py-5 p">
+
+      <div className=" flex gap-4 justify-center py-5 p">
         <input
           type="text"
           value={originalUrl}
           onChange={(e) => setOriginalUrl(e.target.value)}
-          placeholder="Enter original URL"  
+          placeholder="Enter original URL"
         />
         <input
           type="text"
@@ -97,11 +98,10 @@ const MainPage = () => {
           onChange={(e) => setCustomSlug(e.target.value)}
           placeholder="Enter custom slug (optional)"
         />
-        <button 
-        onClick={handleShorten}
-        className="bg-red-100">
-          Shorten Link</button>
-    </div>
+        <button onClick={handleShorten} className="bg-red-100">
+          Shorten Link
+        </button>
+      </div>
 
       <div>
         <h2>Shortened Links</h2>
@@ -109,10 +109,14 @@ const MainPage = () => {
           <ul>
             {shortLinks.map((link, index) => (
               <li key={index}>
-                <a href={link.shortLink} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={link.shortLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {link.shortLink}
                 </a>
-                {" - "}
+                <br />
                 <span>Original: {link.originalUrl}</span>
                 <br />
                 <span>ID: {link.id}</span>
@@ -123,9 +127,16 @@ const MainPage = () => {
                 <br />
                 <span>Status: {link.status}</span>
                 <br />
-                <span>Created At: {new Date(link.createdAt).toLocaleString()}</span>
+                <span>
+                  Created At: {new Date(link.createdAt).toLocaleString()}
+                </span>
                 <br />
-                <span>Last Accessed At: {link.lastAccessedAt ? new Date(link.lastAccessedAt).toLocaleString() : "N/A"}</span>
+                <span>
+                  Last Accessed At:{" "}
+                  {link.lastAccessedAt
+                    ? new Date(link.lastAccessedAt).toLocaleString()
+                    : "N/A"}
+                </span>
               </li>
             ))}
           </ul>
