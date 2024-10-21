@@ -2,6 +2,7 @@ package rest
 
 import (
 	"context"
+	"net/url"
 	"shortlink/internal/database"
 	"shortlink/internal/generator"
 	"shortlink/model"
@@ -20,11 +21,18 @@ func GenerateURL(c *fiber.Ctx) error {
 	var urlReq struct {
 		URL         string `json:"url"`
 		URLPassword string `json:"url_password"`
+		ShortLink   string `json:"shortlink"`
+		ExpDate     string `json:"expdate"` // Use string to capture empty value
 	}
 
 	// Parse the request body
 	if err := c.BodyParser(&urlReq); err != nil {
 		return BadRequest(c, "Invalid request body")
+	}
+
+	// Validate URL format
+	if _, err := url.ParseRequestURI(urlReq.URL); err != nil {
+		return BadRequest(c, "Invalid URL format")
 	}
 
 	// Retrieve the user from the JWT token stored in context
@@ -39,11 +47,40 @@ func GenerateURL(c *fiber.Ctx) error {
 	}
 
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
-	
+
+	// Check if the provided short link is unique
+	if urlReq.ShortLink != "" {
+		var existingUrl model.Url
+		err := collection.FindOne(context.TODO(), bson.M{"shortlink": urlReq.ShortLink}).Decode(&existingUrl)
+		if err == nil {
+			return BadRequest(c, "Short link already exists")
+		}
+	}
+
+	// Get the next URL ID
 	urlID, err := generator.GetNextIncrementalID(collection, "url_id")
 	if err != nil {
 		return InternalServerError(c, "Failed to create URL ID for short URL")
 	}
+
+	// Handle short link creation
+	shortLink := urlReq.ShortLink
+	if shortLink == "" {
+		shortLink = generator.GenerateShortLink(6)
+	}
+
+	// Handle expiration date
+	var expDate *time.Time
+	if urlReq.ExpDate != "" {
+		parsedDate, err := time.Parse(time.RFC3339, urlReq.ExpDate)
+		if err != nil {
+			return BadRequest(c, "Invalid expiration date format")
+		}
+		expDate = &parsedDate
+	}
+
+	// Get the current time for timestamps
+	currentTime := time.Now()
 
 	// Generate the short link and create a new URL document
 	url := model.Url{
@@ -51,27 +88,35 @@ func GenerateURL(c *fiber.Ctx) error {
 		URLID:          urlID,
 		UserID:         objectID,
 		URL:            urlReq.URL,
-		ShortLink:      generator.GenerateShortLink(6),
+		ShortLink:      shortLink,
 		ClickCount:     0,
-		LastAccessedAt: time.Now(),
-		ExpDate:        time.Now().Add(30 * 24 * time.Hour), // 30-day expiration by default
+		LastAccessedAt: currentTime,
+		ExpDate:        expDate, // This can be nil
 		Status:         "active",
 		URLPassword:    urlReq.URLPassword,
+		Model: model.Model{
+			CreatedAt: currentTime,
+			UpdateAt:  currentTime,
+			DeletedAt: nil, // Not deleted initially
+		},
 	}
 
 	// Insert the new URL document into the MongoDB collection
-	_, err = collection.InsertOne(context.TODO(), url)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	_, err = collection.InsertOne(ctx, url)
 	if err != nil {
 		return InternalServerError(c, "Failed to create short URL")
 	}
 
 	// Return the success response
 	return OK(c, fiber.Map{
-		"message":   "Short URL created successfully",
-		"shortlink": url.ShortLink,
+		"message":    "Short URL created successfully",
+		"shortlink":  url.ShortLink,
 		"url_details": url,
 	})
 }
+
 
 // EditShortLink handles updating the URL or its details
 func EditShortLink(c *fiber.Ctx) error {

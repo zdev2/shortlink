@@ -124,7 +124,7 @@ import { useNavigate } from 'react-router-dom';
         </div>
 
       
-      <div className="flex mt-[35px] flex-col md:flex-row-reverse md:pb-10 xl:justify-between xl: ">
+      <div className="flex mt-[35px] flex-col md:flex-row-reverse md:pb-10 xl:justify-between ">
         <div className='flex justify-center'>
           <img src={Icon} alt="Icon"  className='w-80 md:w-[450px] xl:w[700px]'/>
         </div>

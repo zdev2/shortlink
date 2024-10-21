@@ -14,7 +14,9 @@ func RouteSetup(app *fiber.App) {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "http://localhost:5173", // Replace with your frontend URL
 		AllowMethods: "GET,POST,PUT,DELETE",   // Allowed HTTP methods
-		AllowHeaders: "Origin, Content-Type, Accept", // Allowed headers
+		AllowHeaders: "Origin, Content-Type, Accept, Authorization, Cookie", // Allowed headers
+		ExposeHeaders: "Cookie",
+		AllowCredentials: true,
 	}))
 
 	// Public redirect route (no authentication required)
