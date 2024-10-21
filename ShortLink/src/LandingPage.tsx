@@ -109,29 +109,29 @@ import { useNavigate } from 'react-router-dom';
 
   return (
   <div className="bg-gradient-to-r from-pink-100 via-white to-purple-100 min-h-screen text-gray-900  md:pt-5">
+     
       {/* Header */}
-
-    <header className="md:px-[50px]">
-      <section className='pt-4 md:px-10 border-none md:border-black md:rounded-xl md:border md:border-solid'>
-        <div className='flex justify-between items-center px-7'>
+    <header className="md:px-[50px] px-6">
+      <section className='pt-4 md:px-14 border-none md:border-black md:rounded-xl md:border md:border-solid xl:py-14'>
+        <div className='flex justify-between items-center'>
         <div className="flex items-center">
-          <img src={Logo} alt="Logo" className=" w-5 h-auto" />
-          <div className="text-2xl font-bold text-indigo-600">DnD</div>
+          <img src={Logo} alt="Logo" className=" w-5 h-auto md:w-11 xl:w-14" />
+          <div className="text-2xl font-bold text-indigo-600 lg:text-4xl">DnD</div>
         </div>
-        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg md:w-[153px]" onClick={handleVisitNowClick}>
+        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg md:w-[153px] xl:text-4xl xl:w-44 xl:p-3" onClick={handleVisitNowClick}>
           Login
         </button> 
         </div>
 
       
-      <div className="flex mt-[35px] flex-col md:flex-row-reverse md:pb-6 ">
+      <div className="flex mt-[35px] flex-col md:flex-row-reverse md:pb-10 xl:justify-between xl: ">
         <div className='flex justify-center'>
-          <img src={Icon} alt="Icon"  className='w-80 md:w-[450px]'/>
+          <img src={Icon} alt="Icon"  className='w-80 md:w-[450px] xl:w[700px]'/>
         </div>
         
-        <div className='flex flex-col items-center justify-center'>
-          <h1 className="text-4xl font-bold mb-4 md:text-5xl">Welcome to <span className="text-indigo-600">DnD</span></h1>
-          <p className="text-sm font-semibold mb-4 text-center md:text-xl">
+        <div className='flex flex-col items-center justify-center text-center'>
+          <h1 className="text-4xl font-bold mb-4 md:text-5xl xl:text-7xl">Welcome to <span className="text-indigo-600">DnD</span></h1>
+          <p className="text-sm font-semibold mb-4 text-center md:text-xl xl:text-2xl">
             Best and Shortest Names for<br />  
             <span className="text-indigo-600">Supporting your marketing tools!</span>
           </p>
@@ -140,7 +140,7 @@ import { useNavigate } from 'react-router-dom';
             className="flex items-center bg-indigo-600 px-5 w-fit py-3 text-white gap-2 font-semibold rounded-xl"
             onClick={handleVisitNowClick}
           >
-            Visit Now <FaArrowRight />
+            Visit Now <FaArrowRight />  
           </button>
           </div>
         </div>
@@ -153,7 +153,7 @@ import { useNavigate } from 'react-router-dom';
       <div className='from-pink-100 via-white to-purple-100'>
       <div className='flex justify-between bg-white rounded-xl border border-black px-[10px] py-[15px] md:border-none  md:gap-10 md:bg-gradient-to-r md:from-pink-100 md:via-white md:to-purple-100'>
       <div className="flex flex-col justify-center items-center">
-            <h2 className="text-2xl font-bold mb-4 text-center md:text-4xl">About <span className='text-indigo-500'>Us</span></h2>
+            <h2 className="text-2xl font-bold mb-4 text-center md:text-4xl xl:text-7xl">About <span className='text-indigo-500'>Us</span></h2>
             <p className="text-base  mb-6 font-semibold text-[#3F458F] text-start justify-center md:w-[25rem] md:text-lg">
               DnD is your solution for shortening long URLs, making them easy to share and track with just a few clicks.
               We prioritize simplicity, security, and reliability, helping you streamline your online interactions.
