@@ -11,45 +11,20 @@ import linkedin from "./assets/Linkedin.png";
 import { useNavigate } from "react-router-dom";
 
 const LandingPage = () => {
-  const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false);
-  const [isRegisterPopupVisible, setIsRegisterPopupVisible] = useState(false);
+  const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false); // State untuk popup login
+  const [isRegisterPopupVisible, setIsRegisterPopupVisible] = useState(false); // State untuk popup Register
   const [username, setUsername] = useState(""); // State untuk username
   const [password, setPassword] = useState(""); // State untuk password
   const [errorMessage, setErrorMessage] = useState(""); // State untuk pesan error
-  const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const navigate = useNavigate(); // State untuk navigate 
+  const [email, setEmail] = useState(""); // State untuk email
 
   // Fungsi untuk menampilkan popup login
   const handleVisitNowClick = () => {
     setIsLoginPopupVisible(true);
   };
 
-  // Fungsi untuk menutup popup login
-  const closeLoginPopup = () => {
-    setIsLoginPopupVisible(false);
-    setErrorMessage(""); // Reset pesan error saat popup ditutup
-    setUsername(""); // Reset username menj i kosong saat popup ditutup
-    setPassword(""); // Reset password menjadi kosong saat popup ditutup
-    setEmail("");
-  };
-
-  const closeRegisterPopup = () => {
-    setIsRegisterPopupVisible(false);
-    setErrorMessage("");
-    setUsername("");
-    setPassword("");
-    setEmail("");
-  };
-
-  const openResgisterPopup = () => {
-    setIsRegisterPopupVisible(true);
-    setIsLoginPopupVisible(false);
-    setErrorMessage("");
-    setUsername("");
-    setPassword("");
-    setEmail("");
-  };
-
+  // Fungsi untuk popup login
   const openLoginPopup = () => {
     setIsRegisterPopupVisible(false);
     setIsLoginPopupVisible(true);
@@ -58,6 +33,32 @@ const LandingPage = () => {
     setPassword("");
     setEmail("");
   };
+  // Fungsi untuk popup login
+  const closeLoginPopup = () => {
+    setIsLoginPopupVisible(false);
+    setErrorMessage(""); 
+    setUsername(""); 
+    setPassword(""); 
+    setEmail("");
+  };
+  // Fungsi untuk popup Register
+  const openResgisterPopup = () => {
+    setIsRegisterPopupVisible(true);
+    setIsLoginPopupVisible(false);
+    setErrorMessage("");
+    setUsername("");
+    setPassword("");
+    setEmail("");
+  };
+  // Fungsi untuk popup Register
+  const closeRegisterPopup = () => {
+    setIsRegisterPopupVisible(false);
+    setErrorMessage("");
+    setUsername("");
+    setPassword("");
+    setEmail("");
+  };
+
 
   // Fungsi untuk menangani login
   const handleLogin = async () => {
@@ -83,7 +84,7 @@ const LandingPage = () => {
       alert('👻👻👻👻👻')
     }
   };
-
+  // Fungsi untuk menangani register
   const handleRegister = async () => {
     try {
       const response = await fetch(
@@ -114,7 +115,6 @@ const LandingPage = () => {
   return (
     <div className="bg-gradient-to-r from-pink-100 via-white to-purple-100 min-h-screen text-gray-900  md:pt-5">
       {/* Header */}
-
       <header className="md:px-[50px]">
         <section className="pt-4 md:px-10 border-none md:border-black md:rounded-xl md:border md:border-solid">
           <div className="flex justify-between items-center px-7">
@@ -248,6 +248,7 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+      {/* end Features Section */}
 
       {/* Footer */}
       <footer className="bg-indigo-600 text-white pb-8 px-5 md:px-20">
@@ -309,6 +310,7 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+      {/* end Footer */}
 
       {/* Komponen Popup Login dan Popup Register*/}
       {isLoginPopupVisible && (
@@ -376,6 +378,7 @@ const LandingPage = () => {
         </div>
       )}
 
+      {/* Komponen Popup Login dan Popup Register*/}
       {isRegisterPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 popup-background show">
           <div className="bg-white rounded-lg p-4 shadow-lg w-[22rem] popup-container show">
