@@ -8,11 +8,14 @@ interface ShortLink {
   status: string;
   createdAt: string;
   lastAccessedAt: string | null;
+  title: string;
+  qrCodeUrl: string; // Tambahkan properti qrCodeUrl
 }
 
 const MainPage = () => {
   const [originalUrl, setOriginalUrl] = useState("");
   const [customSlug, setCustomSlug] = useState("");
+  const [customTitle, setCustomTitle] = useState("");
   const [expiredTime, setExpiredTime] = useState<number | null>(null);
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -46,8 +49,8 @@ const MainPage = () => {
   };
 
   const handlePopupSubmit = async () => {
-    if (!customSlug || !expiredTime) {
-      alert("Please complete the custom link and expiration time.");
+    if (!customSlug || !expiredTime || !customTitle) {
+      alert("Please complete all fields including custom title.");
       return;
     }
 
@@ -62,6 +65,7 @@ const MainPage = () => {
           url: originalUrl,
           shortlink: customSlug,
           expiredTime,
+          title: customTitle, // Mengirim customTitle ke backend
         }),
       });
 
@@ -78,10 +82,12 @@ const MainPage = () => {
         id: data.data.url_details.id,
         shortLink: `https://dnd.id/${data.data.shortlink}`,
         originalUrl: originalUrl,
+        title: customTitle, // Menggunakan customTitle
         clicks: data.data.url_details.clickcount,
         status: data.data.url_details.status,
         createdAt: data.data.url_details.createdat,
         lastAccessedAt: data.data.url_details.lastaccesedat || null,
+        qrCodeUrl: data.data.url_details.qr_code, // Tambahkan URL QR Code dari backend
       };
 
       setShortLinks([newLink, ...shortLinks]);
@@ -89,6 +95,7 @@ const MainPage = () => {
       setOriginalUrl("");
       setCustomSlug("");
       setExpiredTime(null);
+      setCustomTitle("");
       setIsPopupOpen(false);
     } catch (error) {
       console.error("Error fetching API:", error);
@@ -116,19 +123,24 @@ const MainPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-4xl font-bold text-center mb-8">URL Shortener</h1>
+    <div className="min-h-screen relative flex flex-col justify-center bg-gray-100 p-4 md:p-6">
+      <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8">
+        URL Shortener
+      </h1>
 
       {/* Input original link */}
-      <div className="flex justify-center gap-4 mb-6">
+      <div className="flex flex-row md:flex-row justify-center w-auto py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
           type="text"
           value={originalUrl}
           onChange={(e) => setOriginalUrl(e.target.value)}
           placeholder="Enter original URL"
-          className="p-2 border border-gray-300 rounded-lg w-1/2"
+          className="p-2 border-gray-300 text-xs bgrounded-lg w-[65%] md:w-1/2"
         />
-        <button onClick={handleShorten} className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+        <button
+          onClick={handleShorten}
+          className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
+        >
           Shorten now
         </button>
       </div>
@@ -136,13 +148,22 @@ const MainPage = () => {
       {/* Pop-up for input custom link and expiration time */}
       {isPopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">Customize your link</h2>
+          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/3">
+            <h2 className="text-xl md:text-2xl font-bold mb-4">
+              Customize your link
+            </h2>
             <input
               type="text"
               value={customSlug}
               onChange={(e) => setCustomSlug(e.target.value)}
               placeholder="Enter custom slug"
+              className="p-2 border border-gray-300 rounded-lg w-full mb-4"
+            />
+            <input
+              type="text"
+              value={customTitle}
+              onChange={(e) => setCustomTitle(e.target.value)}
+              placeholder="Enter custom title"
               className="p-2 border border-gray-300 rounded-lg w-full mb-4"
             />
             <input
@@ -152,11 +173,17 @@ const MainPage = () => {
               placeholder="Expired time in minutes"
               className="p-2 border border-gray-300 rounded-lg w-full mb-4"
             />
-            <div className="flex gap-4">
-              <button onClick={handlePopupSubmit} className="bg-blue-500 text-white px-4 py-2 rounded-lg">
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={handlePopupSubmit}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+              >
                 Submit
               </button>
-              <button onClick={() => setIsPopupOpen(false)} className="bg-red-500 text-white px-4 py-2 rounded-lg">
+              <button
+                onClick={() => setIsPopupOpen(false)}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+              >
                 Close
               </button>
             </div>
@@ -165,8 +192,7 @@ const MainPage = () => {
       )}
 
       {/* Display shortened links */}
-      <div>
-        <h2 className="text-2xl font-bold text-center mb-4">Shortened Links</h2>
+      <div className="flex justify-center">
         {shortLinks.length > 0 ? (
           <ul className="space-y-4">
             {shortLinks.map((link, index) => (
@@ -183,7 +209,7 @@ const MainPage = () => {
                   </a>
                 </p>
                 <p>
-                  <strong>ID:</strong> {link.id}
+                  <strong>Title:</strong> {link.title || "No Title Available"}
                 </p>
                 <p>
                   <strong>Shortlink:</strong>{" "}
@@ -203,33 +229,46 @@ const MainPage = () => {
                   <strong>Status:</strong> {link.status}
                 </p>
                 <p>
-                  <strong>Created At:</strong> {new Date(link.createdAt).toLocaleString()}
+                  <strong>Created At:</strong>{" "}
+                  {new Date(link.createdAt).toLocaleString()}
                 </p>
                 <p>
-                  <strong>Last Accessed At:</strong>{" "}
+                  <strong>Last Accessed:</strong>{" "}
                   {link.lastAccessedAt
                     ? new Date(link.lastAccessedAt).toLocaleString()
-                    : "N/A"}
+                    : "Not yet accessed"}
                 </p>
-                <div className="flex gap-4 mt-4">
+
+                {/* Display QR code if available */}
+                {link.qrCodeUrl && (
+                  <div className="mt-4">
+                    <strong>QR Code:</strong>
+                    <img 
+                      src={`data:image/png;base64,${link.qrCodeUrl}`} 
+                      alt="QR Code" 
+                    />
+                  </div>
+                )}
+
+                <div className="mt-4">
                   <button
                     onClick={() => handleCopy(link.shortLink)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    className="bg-green-500 text-white px-4 py-2 rounded-lg mr-4"
                   >
-                    Copy Link
+                    Copy
                   </button>
                   <button
                     onClick={() => handleShare(link.shortLink)}
-                    className="bg-green-500 text-white px-4 py-2 rounded-lg"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
                   >
-                    Share Link
+                    Share
                   </button>
                 </div>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-center text-gray-600">No shortened links yet.</p>
+          <p>No links shortened yet.</p>
         )}
       </div>
     </div>
