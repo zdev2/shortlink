@@ -14,5 +14,7 @@ type User struct {
 	Password 		string 				`bson:"password" json:"-"`//
 	IsActive 		bool 				`bson:"is_active" json:"is_active"`//
 	LastLogin 		time.Time 			`bson:"last_login" json:"last_login"`//
-	Model
+	CreatedAt 		time.Time 		    `bson:"created_at" json:"createdat"` // 
+	UpdateAt 		time.Time 			`bson:"updated_at" json:"updateat"` // 
+	DeletedAt 		*time.Time 			`bson:"deleted_at,omitempty" json:"deletedat"` // 
 }
