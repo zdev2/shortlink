@@ -1,21 +1,23 @@
 package rest
 
 import (
-	"fmt"
-	"log"
-
+	"bytes"
+	"encoding/base64"
 	"github.com/skip2/go-qrcode"
 )
 
-func GenerateQRCode() {
-	//data yang akan diubah menjadi qrcode
-	text := "https://example.com"
+func GenerateQRCode(url string) (string, error) {
+//buffer to hold the QR code image
+	var pngBuffer bytes.Buffer
 
-	//buat QR code dengan level koreksi kesalahan standar dan ukuran 256x256 pixel
-	err := qrcode.WriteFile(text, qrcode.Medium, 256, "qrcode.png")
+	//generate the qr code with medium error correction and 256x256 size
+    png, err := qrcode.Encode(url, qrcode.Medium, 256, &pngBuffer)
 	if err != nil {
-		log.Fatal(err)
-
+		return "", err
 	}
-	fmt.Println("QR code berhasil dibuat dan disimpan sebagai qrcode.png")
+
+	// Encode the QR code image to base64
+	qrCodeBase64 := base64.StdEncoding.EncodeToString(pngBuffer.Bytes())
+
+	return qrCodeBase64, nil
 }

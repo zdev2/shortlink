@@ -79,6 +79,7 @@ func GenerateURL(c *fiber.Ctx) error {
 		ExpDate:        expDate, // This can be nil
 		Status:         "active",
 		URLPassword:    urlReq.URLPassword,
+		QrCode:         GenerateQRCode(),
 		Model: model.Model{
 			CreatedAt: currentTime,
 			UpdateAt:  currentTime,
@@ -96,8 +97,8 @@ func GenerateURL(c *fiber.Ctx) error {
 
 	// Return the success response
 	return OK(c, fiber.Map{
-		"message":    "Short URL created successfully",
-		"shortlink":  url.ShortLink,
+		"message":     "Short URL created successfully",
+		"shortlink":   url.ShortLink,
 		"url_details": url,
 	})
 }
@@ -153,11 +154,11 @@ func GetURLs(c *fiber.Ctx) error {
 	}
 
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
-	filter := bson.M{ 
+	filter := bson.M{
 		"user_id": objectID,
 		"$or": []bson.M{
 			{"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
-			{"deleted_at": bson.M{"$eq": nil}},      // DeletedAt field is nil
+			{"deleted_at": bson.M{"$eq": nil}},       // DeletedAt field is nil
 		},
 	}
 	cursor, err := collection.Find(context.TODO(), filter)
@@ -180,9 +181,9 @@ func GetURLs(c *fiber.Ctx) error {
 // GetURLbyID retrieves a specific URL by its ID
 func GetURLbyID(c *fiber.Ctx) error {
 	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
-    if err != nil {
-        return BadRequest(c, "Invalid URL ID format")
-    }
+	if err != nil {
+		return BadRequest(c, "Invalid URL ID format")
+	}
 
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
 	var url model.Url
@@ -190,9 +191,9 @@ func GetURLbyID(c *fiber.Ctx) error {
 		"url_id": urlID,
 		"$or": []bson.M{
 			{"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
-			{"deleted_at": bson.M{"$eq": nil}},      // DeletedAt field is nil
+			{"deleted_at": bson.M{"$eq": nil}},       // DeletedAt field is nil
 		},
-		}).Decode(&url)
+	}).Decode(&url)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return NotFound(c, "URL not found")
@@ -204,108 +205,107 @@ func GetURLbyID(c *fiber.Ctx) error {
 }
 
 func RedirectURL(c *fiber.Ctx) error {
-    shortLink := c.Params("shortlink")
+	shortLink := c.Params("shortlink")
 
-    // Fetch URL details from the "urls" collection, excluding soft-deleted ones
-    collection := database.MongoClient.Database("shortlink").Collection("urls")
-    var url model.Url
-    err := collection.FindOne(context.TODO(), bson.M{
-        "shortlink":  shortLink,
-        "$or": []bson.M{
-            {"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
-            {"deleted_at": bson.M{"$eq": nil}},      // DeletedAt field is nil
-        },
-    }).Decode(&url)
-    if err != nil {
-        if err == mongo.ErrNoDocuments {
-            return NotFound(c, "Short URL not found")
-        }
-        return InternalServerError(c, "Error fetching URL")
-    }
+	// Fetch URL details from the "urls" collection, excluding soft-deleted ones
+	collection := database.MongoClient.Database("shortlink").Collection("urls")
+	var url model.Url
+	err := collection.FindOne(context.TODO(), bson.M{
+		"shortlink": shortLink,
+		"$or": []bson.M{
+			{"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
+			{"deleted_at": bson.M{"$eq": nil}},       // DeletedAt field is nil
+		},
+	}).Decode(&url)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return NotFound(c, "Short URL not found")
+		}
+		return InternalServerError(c, "Error fetching URL")
+	}
 
-    // Update last accessed and click count
-    _, err = collection.UpdateOne(context.TODO(), bson.M{"_id": url.ID}, bson.M{
-        "$set": bson.M{"last_accessed_at": time.Now()},
-        "$inc": bson.M{"click_count": 1},
-    })
-    if err != nil {
-        return InternalServerError(c, "Error updating URL")
-    }
+	// Update last accessed and click count
+	_, err = collection.UpdateOne(context.TODO(), bson.M{"_id": url.ID}, bson.M{
+		"$set": bson.M{"last_accessed_at": time.Now()},
+		"$inc": bson.M{"click_count": 1},
+	})
+	if err != nil {
+		return InternalServerError(c, "Error updating URL")
+	}
 
-    // Capture IP address and log analytics
-    ip, _ := GetPublicIP()
-    userAgent := c.Get("User-Agent")
-    referrer := c.Get("Referer")
-    
-    // Get location from IP using ipinfo or similar service
-    location := GetLocationFromIP(ip)
+	// Capture IP address and log analytics
+	ip, _ := GetPublicIP()
+	userAgent := c.Get("User-Agent")
+	referrer := c.Get("Referer")
 
-    // Prepare analytics data
-    analytics := model.Analytics{
-        ID:         primitive.NewObjectID(),
-        UserID:     url.UserID,  // Assuming `url` has a UserID field
-        URLID:      url.ID,      // Associate with URL ID
-        UserAgent:  userAgent,
-        Referrer:   referrer,
-        Location:   location,
-        AccessedAt: time.Now(),
-    }
+	// Get location from IP using ipinfo or similar service
+	location := GetLocationFromIP(ip)
 
-    // Insert analytics into a separate collection
-    analyticsCollection := database.MongoClient.Database("shortlink").Collection("analytics")
-    _, err = analyticsCollection.InsertOne(context.TODO(), analytics)
-    if err != nil {
-        return InternalServerError(c, "Error saving analytics")
-    }
+	// Prepare analytics data
+	analytics := model.Analytics{
+		ID:         primitive.NewObjectID(),
+		UserID:     url.UserID, // Assuming `url` has a UserID field
+		URLID:      url.ID,     // Associate with URL ID
+		UserAgent:  userAgent,
+		Referrer:   referrer,
+		Location:   location,
+		AccessedAt: time.Now(),
+	}
 
-    // Redirect to the long URL
-    return c.Redirect(url.URL)
+	// Insert analytics into a separate collection
+	analyticsCollection := database.MongoClient.Database("shortlink").Collection("analytics")
+	_, err = analyticsCollection.InsertOne(context.TODO(), analytics)
+	if err != nil {
+		return InternalServerError(c, "Error saving analytics")
+	}
+
+	// Redirect to the long URL
+	return c.Redirect(url.URL)
 }
-
 
 // DeleteURL handles the deletion of a short URL
 func DeleteURL(c *fiber.Ctx) error {
-    // Parse the url_id parameter as int64
-    urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
-    if err != nil {
-        return BadRequest(c, "Invalid URL ID format")
-    }
+	// Parse the url_id parameter as int64
+	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	if err != nil {
+		return BadRequest(c, "Invalid URL ID format")
+	}
 
-    // Connect to the MongoDB collection
-    collection := database.MongoClient.Database("shortlink").Collection("urls")
+	// Connect to the MongoDB collection
+	collection := database.MongoClient.Database("shortlink").Collection("urls")
 
-    // Check if the URL exists and is not already deleted
-    var url model.Url
-    err = collection.FindOne(context.TODO(), bson.M{"url_id": urlID}).Decode(&url)
-    if err != nil {
-        if err == mongo.ErrNoDocuments {
-            return NotFound(c, "URL not found")
-        }
-        return InternalServerError(c, "Error fetching URL")
-    }
+	// Check if the URL exists and is not already deleted
+	var url model.Url
+	err = collection.FindOne(context.TODO(), bson.M{"url_id": urlID}).Decode(&url)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return NotFound(c, "URL not found")
+		}
+		return InternalServerError(c, "Error fetching URL")
+	}
 
-    // If the URL is already marked as deleted, return an error
-    if url.Status == "deleted" {
-        return BadRequest(c, "URL already deleted")
-    }
+	// If the URL is already marked as deleted, return an error
+	if url.Status == "deleted" {
+		return BadRequest(c, "URL already deleted")
+	}
 
-    // Set the current timestamp for the DeletedAt field
-    currentTime := time.Now()
+	// Set the current timestamp for the DeletedAt field
+	currentTime := time.Now()
 
-    // Update the status field to mark the URL as deleted and set the DeletedAt timestamp
-    update := bson.M{
-        "$set": bson.M{
-            "status":     "deleted",
-            "deleted_at": currentTime,
-        },
-    }
+	// Update the status field to mark the URL as deleted and set the DeletedAt timestamp
+	update := bson.M{
+		"$set": bson.M{
+			"status":     "deleted",
+			"deleted_at": currentTime,
+		},
+	}
 
-    _, err = collection.UpdateOne(context.TODO(), bson.M{"url_id": urlID}, update)
-    if err != nil {
-        return InternalServerError(c, "Failed to delete URL")
-    }
+	_, err = collection.UpdateOne(context.TODO(), bson.M{"url_id": urlID}, update)
+	if err != nil {
+		return InternalServerError(c, "Failed to delete URL")
+	}
 
-    return OK(c, fiber.Map{"message": "URL deleted successfully"})
+	return OK(c, fiber.Map{"message": "URL deleted successfully"})
 }
 
 // GetUserUrlLogs retrieves logs (URLs) for the logged-in user
