@@ -11,6 +11,7 @@ type Url struct {
 	UserID          primitive.ObjectID `bson:"user_id" json:"userid"`          //
 	URLID           int64              `bson:"url_id" json:"url_id"`
 	URL             string             `bson:"url" json:"url"`                 //
+	Title			string 			   `bson:"url_title" json:"url_title"`
 	ShortLink       string             `bson:"shortlink" json:"shortlink"`     //
 	ClickCount      int                `bson:"click_count" json:"clickcount"`  //
 	LastAccessedAt  time.Time          `bson:"last_accessed_at" json:"lastaccesedat"` //

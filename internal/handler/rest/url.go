@@ -3,11 +3,14 @@ package rest
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
+	"os"
 	"shortlink/internal/database"
 	"shortlink/internal/generator"
 	"shortlink/model"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/net/html"
 )
 
 // GenerateURL handles the generation of a short URL
@@ -22,6 +26,7 @@ func GenerateURL(c *fiber.Ctx) error {
 	var urlReq struct {
 		URL         string `json:"url"`
 		URLPassword string `json:"url_password"`
+		Title 		string `json:"url_title"`
 		ShortLink   string `json:"shortlink"`
 		ExpDate     string `json:"expdate"` // Use string to capture empty value
 	}
@@ -70,6 +75,11 @@ func GenerateURL(c *fiber.Ctx) error {
 		shortLink = generator.GenerateShortLink(6)
 	}
 
+	urlTitle := urlReq.Title
+	if urlTitle == "" {
+		urlTitle, _ = getUrlTitle(urlReq.URL)
+	}
+
 	// Handle expiration date
 	var expDate *time.Time
 	if urlReq.ExpDate != "" {
@@ -80,9 +90,11 @@ func GenerateURL(c *fiber.Ctx) error {
 		expDate = &parsedDate
 	}
 
+	link := os.Getenv("BASEURL")
+
 	// Get the current time for timestamps
 	currentTime := time.Now()
-	qrcode, _ := GenerateQRCode(fmt.Sprintf("https://8qmgb2wt-3000.asse.devtunnels.ms/%s",shortLink))
+	qrcode, _ := GenerateQRCode(fmt.Sprintf("%s/%s", link, shortLink))
 
 	// Generate the short link and create a new URL document
 	url := model.Url{
@@ -90,16 +102,17 @@ func GenerateURL(c *fiber.Ctx) error {
 		URLID:          urlID,
 		UserID:         objectID,
 		URL:            urlReq.URL,
+		Title: 			urlTitle,	
 		ShortLink:      shortLink,
 		ClickCount:     0,
 		LastAccessedAt: currentTime,
 		ExpDate:        expDate, // This can be nil
 		Status:         "active",
 		URLPassword:    urlReq.URLPassword,
-		CreatedAt: currentTime,
-		UpdateAt:  currentTime,
-		DeletedAt: nil, // Not deleted initially
-		QRCode:   qrcode,
+		CreatedAt: 		currentTime,
+		UpdateAt:  		currentTime,
+		DeletedAt: 		nil, // Not deleted initially
+		QRCode:   		qrcode,
 	}
 
 	// Insert the new URL document into the MongoDB collection
@@ -352,4 +365,35 @@ func GetUserUrlLogs(c *fiber.Ctx) error {
 		"message": "User URL logs fetched successfully",
 		"urls":    urls,
 	})
+}
+
+func getUrlTitle(url string)(string, error){
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		url = "http://" + url
+	}
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	z := html.NewTokenizer(resp.Body)
+
+	for {
+		tt := z.Next()
+		switch tt {
+		case html.ErrorToken:
+			return "", fmt.Errorf("title not found")
+		case html.StartTagToken:
+			t := z.Token()
+
+			// Check if the token is a <title> tag
+			if t.Data == "title" {
+				z.Next() // Move to the text inside the <title> tag
+				title := z.Token().Data
+				return strings.TrimSpace(title), nil
+			}
+		}
+	}
 }
