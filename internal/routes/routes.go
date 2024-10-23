@@ -44,8 +44,5 @@ func RouteSetup(app *fiber.App) {
 	// Analytics routes
 	api.Get("/analytics", middleware.ValidateCookie, middleware.AuditMiddleware("GET", "analytics"), rest.GetGlobalAnalytics) // Fetch global analytics
 	api.Get("/analytics/:id", middleware.ValidateCookie, middleware.AuditMiddleware("GET", "analytics"), rest.GetAnalyticsByURL) // Fetch analytics for a specific URL
-
-	//api post
-	api.Post("/qrs", middleware.ValidateCookie, middleware.AuditMiddleware("POST", "qrs"), rest.GenerateQRCode) // Fetch generate code analitycs
 	
 }

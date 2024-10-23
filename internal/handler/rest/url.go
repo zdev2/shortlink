@@ -2,6 +2,7 @@ package rest
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"shortlink/internal/database"
 	"shortlink/internal/generator"
@@ -81,6 +82,7 @@ func GenerateURL(c *fiber.Ctx) error {
 
 	// Get the current time for timestamps
 	currentTime := time.Now()
+	qrcode, _ := GenerateQRCode(fmt.Sprintf("https://8qmgb2wt-3000.asse.devtunnels.ms/%s",shortLink))
 
 	// Generate the short link and create a new URL document
 	url := model.Url{
@@ -97,12 +99,7 @@ func GenerateURL(c *fiber.Ctx) error {
 		CreatedAt: currentTime,
 		UpdateAt:  currentTime,
 		DeletedAt: nil, // Not deleted initially
-		QrCode:         GenerateQRCode(),
-		Model: model.Model{
-			CreatedAt: currentTime,
-			UpdateAt:  currentTime,
-			DeletedAt: nil, // Not deleted initially
-		},
+		QRCode:   qrcode,
 	}
 
 	// Insert the new URL document into the MongoDB collection
