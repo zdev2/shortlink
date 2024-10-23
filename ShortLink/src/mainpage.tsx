@@ -17,14 +17,12 @@ const MainPage = () => {
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
-  // Fungsi untuk memendekan tampila original Link
   const truncateUrl = (url: string, maxLength = 50) => {
     if (url.length <= maxLength) return url;
     const start = url.slice(0, 20);
     return `${start}...`;
   };
 
-  // Validasi original Url saat input 
   const validateUrl = (url: string) => {
     const urlPattern = new RegExp(
       "^(https?:\\/\\/)?" +
@@ -168,6 +166,7 @@ const MainPage = () => {
 
       {/* Display shortened links */}
       <div>
+        <h2 className="text-2xl font-bold text-center mb-4">Shortened Links</h2>
         {shortLinks.length > 0 ? (
           <ul className="space-y-4">
             {shortLinks.map((link, index) => (
