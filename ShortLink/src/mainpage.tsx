@@ -48,36 +48,49 @@ const MainPage = () => {
     setIsPopupOpen(true);
   };
 
+  interface BodyData {
+    url: string;
+    shortlink: string;
+    title: string;
+    expiredTime?: number; // expiredTime bersifat opsional
+  }
+
   const handlePopupSubmit = async () => {
-    if (!customSlug || !expiredTime || !customTitle) {
-      alert("Please complete all fields including custom title.");
+    if (!customSlug || !customTitle) {
+      alert("Please complete all fields including custom slug and custom title.");
       return;
     }
-
+  
     try {
+      const bodyData: BodyData = {
+        url: originalUrl,
+        shortlink: customSlug,
+        title: customTitle, // Mengirim customTitle ke backend
+      };
+  
+      // Hanya tambahkan expiredTime jika diisi
+      if (expiredTime !== null) {
+        bodyData.expiredTime = expiredTime;
+      }
+  
       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({
-          url: originalUrl,
-          shortlink: customSlug,
-          expiredTime,
-          title: customTitle, // Mengirim customTitle ke backend
-        }),
+        body: JSON.stringify(bodyData),
       });
-
+  
       if (!response.ok) {
         const errorText = await response.json();
         console.error(`Error: ${errorText.message}`);
         alert("Failed to shorten the link. Please try again.");
         return;
       }
-
+  
       const data = await response.json();
-
+  
       const newLink: ShortLink = {
         id: data.data.url_details.id,
         shortLink: `https://dnd.id/${data.data.shortlink}`,
@@ -89,12 +102,12 @@ const MainPage = () => {
         lastAccessedAt: data.data.url_details.lastaccesedat || null,
         qrCodeUrl: data.data.url_details.qr_code, // Tambahkan URL QR Code dari backend
       };
-
+  
       setShortLinks([newLink, ...shortLinks]);
-
+  
       setOriginalUrl("");
       setCustomSlug("");
-      setExpiredTime(null);
+      setExpiredTime(null); // Reset expired time
       setCustomTitle("");
       setIsPopupOpen(false);
     } catch (error) {
@@ -169,8 +182,8 @@ const MainPage = () => {
             <input
               type="number"
               value={expiredTime || ""}
-              onChange={(e) => setExpiredTime(parseInt(e.target.value))}
-              placeholder="Expired time in minutes"
+              onChange={(e) => setExpiredTime(e.target.value ? parseInt(e.target.value) : null)}
+              placeholder="Expired time in minutes (optional)"
               className="p-2 border border-gray-300 rounded-lg w-full mb-4"
             />
             <div className="flex justify-end gap-4">
@@ -246,20 +259,21 @@ const MainPage = () => {
                     <img 
                       src={`data:image/png;base64,${link.qrCodeUrl}`} 
                       alt="QR Code" 
+                      className="w-24 h-24" 
                     />
                   </div>
                 )}
 
-                <div className="mt-4">
+                <div className="flex justify-end gap-2 mt-4">
                   <button
                     onClick={() => handleCopy(link.shortLink)}
-                    className="bg-green-500 text-white px-4 py-2 rounded-lg mr-4"
+                    className="bg-green-500 text-white px-2 py-1 rounded-lg"
                   >
-                    Copy
+                    Copy Link
                   </button>
                   <button
                     onClick={() => handleShare(link.shortLink)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    className="bg-blue-500 text-white px-2 py-1 rounded-lg"
                   >
                     Share
                   </button>
@@ -268,7 +282,7 @@ const MainPage = () => {
             ))}
           </ul>
         ) : (
-          <p>No links shortened yet.</p>
+          <p className="text-center mt-4">No links available.</p>
         )}
       </div>
     </div>
