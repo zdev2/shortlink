@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Tambahkan ini
 
 interface ShortLink {
   id: string;
@@ -13,6 +14,7 @@ interface ShortLink {
 }
 
 const MainPage = () => {
+  const navigate = useNavigate(); // Inisialisasi navigate
   const [originalUrl, setOriginalUrl] = useState("");
   const [customSlug, setCustomSlug] = useState("");
   const [customTitle, setCustomTitle] = useState("");
@@ -60,19 +62,19 @@ const MainPage = () => {
       alert("Please complete all fields including custom slug and custom title.");
       return;
     }
-  
+
     try {
       const bodyData: BodyData = {
         url: originalUrl,
         shortlink: customSlug,
         title: customTitle, // Mengirim customTitle ke backend
       };
-  
+
       // Hanya tambahkan expiredTime jika diisi
       if (expiredTime !== null) {
         bodyData.expiredTime = expiredTime;
       }
-  
+
       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
         method: "POST",
         headers: {
@@ -81,16 +83,16 @@ const MainPage = () => {
         credentials: "include",
         body: JSON.stringify(bodyData),
       });
-  
+
       if (!response.ok) {
         const errorText = await response.json();
         console.error(`Error: ${errorText.message}`);
         alert("Failed to shorten the link. Please try again.");
         return;
       }
-  
+
       const data = await response.json();
-  
+
       const newLink: ShortLink = {
         id: data.data.url_details.id,
         shortLink: `https://dnd.id/${data.data.shortlink}`,
@@ -102,9 +104,9 @@ const MainPage = () => {
         lastAccessedAt: data.data.url_details.lastaccesedat || null,
         qrCodeUrl: data.data.url_details.qr_code, // Tambahkan URL QR Code dari backend
       };
-  
+
       setShortLinks([newLink, ...shortLinks]);
-  
+
       setOriginalUrl("");
       setCustomSlug("");
       setExpiredTime(null); // Reset expired time
@@ -140,6 +142,16 @@ const MainPage = () => {
       <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8">
         URL Shortener
       </h1>
+
+      {/* Tombol navigasi ke halaman Analisi */}
+      <div className="flex justify-center mb-4">
+        <button
+          onClick={() => navigate("/analisi")} // Mengarahkan ke halaman Analisi
+          className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
+        >
+          Go to Analisi
+        </button>
+      </div>
 
       {/* Input original link */}
       <div className="flex flex-row md:flex-row justify-center w-auto py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
@@ -236,44 +248,35 @@ const MainPage = () => {
                   </a>
                 </p>
                 <p>
-                  <strong>Click Count:</strong> {link.clicks}
+                  <strong>Clicks:</strong> {link.clicks}
                 </p>
                 <p>
                   <strong>Status:</strong> {link.status}
                 </p>
                 <p>
-                  <strong>Created At:</strong>{" "}
-                  {new Date(link.createdAt).toLocaleString()}
+                  <strong>Created At:</strong> {link.createdAt}
                 </p>
                 <p>
-                  <strong>Last Accessed:</strong>{" "}
-                  {link.lastAccessedAt
-                    ? new Date(link.lastAccessedAt).toLocaleString()
-                    : "Not yet accessed"}
+                  <strong>Last Accessed:</strong> {link.lastAccessedAt || "Never"}
                 </p>
-
-                {/* Display QR code if available */}
+                {/* Tampilkan QR Code jika ada */}
                 {link.qrCodeUrl && (
-                  <div className="mt-4">
-                    <strong>QR Code:</strong>
-                    <img 
-                      src={`data:image/png;base64,${link.qrCodeUrl}`} 
-                      alt="QR Code" 
-                      className="w-24 h-24" 
-                    />
-                  </div>
+                  <img
+                    src={`data:image/png;base64,${link.qrCodeUrl}`}
+                    alt="QR Code"
+                    className="w-24 h-24 my-2"
+                  />
                 )}
-
-                <div className="flex justify-end gap-2 mt-4">
+                <div className="flex space-x-2">
                   <button
                     onClick={() => handleCopy(link.shortLink)}
-                    className="bg-green-500 text-white px-2 py-1 rounded-lg"
+                    className="bg-green-500 text-white px-4 py-2 rounded-lg"
                   >
-                    Copy Link
+                    Copy
                   </button>
                   <button
                     onClick={() => handleShare(link.shortLink)}
-                    className="bg-blue-500 text-white px-2 py-1 rounded-lg"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
                   >
                     Share
                   </button>
@@ -282,7 +285,7 @@ const MainPage = () => {
             ))}
           </ul>
         ) : (
-          <p className="text-center mt-4">No links available.</p>
+          <p>No shortened links available.</p>
         )}
       </div>
     </div>
