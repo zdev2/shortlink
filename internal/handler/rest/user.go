@@ -61,11 +61,9 @@ func Register(c *fiber.Ctx) error {
         Email: registerReq.Email,
         Password: string(hash),
         IsActive: false,
-        Model: model.Model{
-            CreatedAt: time.Now(),
-            UpdateAt: time.Now(),
-            DeletedAt: nil,
-        },
+        CreatedAt: time.Now(),
+        UpdateAt: time.Now(),
+        DeletedAt: nil,
 	}
 	_, err = collection.InsertOne(context.TODO(), user)
 	if err != nil {
@@ -85,7 +83,15 @@ func Login(c *fiber.Ctx) error {
     logReq.Password = strings.TrimSpace(logReq.Password)
     var userAcc model.User
     collection := database.MongoClient.Database("shortlink").Collection("user")
-    err := collection.FindOne(context.TODO(), bson.M{"username": logReq.Username}).Decode(&userAcc)
+    var query bson.M
+    if strings.Contains(logReq.Username, "@") {
+        // Login by email
+        query = bson.M{"email": logReq.Username}
+    } else {
+        // Login by username
+        query = bson.M{"username": logReq.Username}
+    }
+    err := collection.FindOne(context.TODO(), query).Decode(&userAcc)
     if err != nil {
         if err == mongo.ErrNoDocuments {
             return Unauthorized(c, "Invalid username")
