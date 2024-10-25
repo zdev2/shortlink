@@ -12,13 +12,13 @@ import close from './assets/close.svg'
 import { useNavigate } from 'react-router-dom';
 
   const LandingPage = () => {
-  const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false);
-  const [isRegisterPopupVisible, setIsRegisterPopupVisible] = useState(false);
+  const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false); // State untuk popup Login
+  const [isRegisterPopupVisible, setIsRegisterPopupVisible] = useState(false); // State untuk popup Register
+  const [email, setEmail] = useState(''); // State untuk email 
   const [username, setUsername] = useState(''); // State untuk username
   const [password, setPassword] = useState(''); // State untuk password
   const [errorMessage, setErrorMessage] = useState(''); // State untuk pesan error
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const navigate = useNavigate(); // State untuk navigate
 
   // Fungsi untuk menampilkan popup login
   const handleVisitNowClick = () => {
@@ -34,6 +34,7 @@ import { useNavigate } from 'react-router-dom';
     setEmail('');
   };
 
+  // Fungsi untuk menutup popup Register
   const closeRegisterPopup = () => {
     setIsRegisterPopupVisible(false);
     setErrorMessage('');
@@ -42,6 +43,7 @@ import { useNavigate } from 'react-router-dom';
     setEmail('');
   };
 
+  // Fungsi untuk membuka popup  Register
   const openResgisterPopup = () => {
     setIsRegisterPopupVisible(true);
     setIsLoginPopupVisible(false);
@@ -51,6 +53,7 @@ import { useNavigate } from 'react-router-dom';
     setEmail('');
   }
 
+  // Fungsi untuk membuka popup  Login
   const openLoginPopup = () => {
     setIsRegisterPopupVisible(false);
     setIsLoginPopupVisible(true);
@@ -83,7 +86,7 @@ import { useNavigate } from 'react-router-dom';
       setErrorMessage('terjadi kesalahan')
     }
   }
-
+  // Fungsi untuk menangani Register
   const handleRegister = async () => {
     try {
       const response = await fetch('http://127.0.0.1:3000/api/v1/users/register', {
@@ -110,7 +113,7 @@ import { useNavigate } from 'react-router-dom';
 
   return (
   <div className="bg-gradient-to-r from-pink-100 via-white to-purple-100 min-h-screen text-gray-900  md:pt-5">
-     
+    
       {/* Header */}
     <header className="md:px-[50px] px-6">
       <section className='pt-4 md:px-14 border-none md:border-black md:rounded-xl md:border md:border-solid xl:py-14'>
@@ -209,46 +212,44 @@ import { useNavigate } from 'react-router-dom';
             </div>
           </div>
         </div>
-      </section>                                                              
+      </section>
+      {/* End Features Section */}
 
       {/* Footer */}  
       <footer className="bg-indigo-600 text-white pb-8 px-5 md:px-20">
-    <div className='mb-12 md:grid md:grid-cols-3'>
-      <div className='flex flex-col items-center mt-11'>
-        <div className='flex justify-center items-center'>
-          <img src={Logo} alt="" />
-            <h2 className='text-4xl font-bold'>DnD</h2>
-          </div> 
-            <p className='text-base w-56 text-center mt-2'>DnD is your solution for shortening long URLs</p>
-        </div>
-
-        <div className='flex flex-col items-center mt-14 text-center'>
-          <h2 className='text-xl font-bold'>Quick Links</h2>
-        <p className='text-base  mt-4'>Company</p>
-        <p className='text-base  mt-3'>Information</p>
-        <p className='text-base  mt-3'>Service</p>
-        <p className='text-base  mt-3'>Features</p>
-        </div>
-
-        <div className='mt-14 flex flex-col items-center'>
-          <div className='flex flex-col text-center items-center'>
-              <h2 className='text-xl font-bold'>Vist Now</h2>
-              <p className='text-base w-44 mt-6'>Get started for free.
-              Simplify the use of your links</p>            
+        <div className='mb-12 md:grid md:grid-cols-3'>
+          <div className='flex flex-col items-center mt-11'>
+            <div className='flex justify-center items-center'>
+              <img src={Logo} alt="" />
+                <h2 className='text-4xl font-bold'>DnD</h2>
+            </div> 
+              <p className='text-base w-56 text-center mt-2'>DnD is your solution for shortening long URLs</p>
           </div>
-          <button
-            type="button"
-            className="flex items-center bg-sky-500 px-5 w-fit py-3 text-white gap-2 font-semibold rounded-xl mt-4"
-            onClick={handleVisitNowClick}
-          >
-            Visit Now <FaArrowRight/>
-          </button>
+
+          <div className='flex flex-col items-center mt-14 text-center'>
+            <h2 className='text-xl font-bold'>Quick Links</h2>
+              <p className='text-base  mt-4'>Company</p>
+              <p className='text-base  mt-3'>Information</p>
+              <p className='text-base  mt-3'>Service</p>
+              <p className='text-base  mt-3'>Features</p>
+          </div>
+
+          <div className='mt-14 flex flex-col items-center'>
+            <div className='flex flex-col text-center items-center'>
+                <h2 className='text-xl font-bold'>Vist Now</h2>
+                <p className='text-base w-44 mt-6'>Get started for free.Simplify the use of your links</p>            
+            </div>
+            <button
+              type="button"
+              className="flex items-center bg-sky-500 px-5 w-fit py-3 text-white gap-2 font-semibold rounded-xl mt-4"
+              onClick={handleVisitNowClick}
+            >
+              Visit Now <FaArrowRight/>
+            </button>
+          </div>
         </div>
-      </div>
-      
-      
-          <hr/>
-          <div className='flex flex-col items-center md:grid md:grid-cols-3 md:justify-items-center'>
+        <hr/>
+        <div className='flex flex-col items-center md:grid md:grid-cols-3 md:justify-items-center'>
           <div className='flex mt-6'>
             <p className='text-xl'>A product of </p>
             <img src={Logo} alt="" className='w-5'/>
@@ -265,8 +266,6 @@ import { useNavigate } from 'react-router-dom';
       </footer>
 
       {/* Komponen Popup Login dan Popup Register*/}
-
-      {/* login */}
       {isLoginPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 popup-background show">
           <div className="bg-white rounded-lg p-4 shadow-lg w-[250px] popup-container show md:w-[400px] md:px-14 lg:py-11 lg:w-[500px]">
@@ -326,9 +325,7 @@ import { useNavigate } from 'react-router-dom';
           </div>
         </div>
       )}
-      {/* login end */}
-
-      {/* register */}
+      
       {isRegisterPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 popup-background show">
           <div className="bg-white rounded-lg p-4 shadow-lg w-[250px] popup-container show  md:w-[400px] md:px-14 lg:py-11 lg:w-[500px]">
