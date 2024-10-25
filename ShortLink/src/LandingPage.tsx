@@ -8,6 +8,7 @@ import feat from './assets/feat-links 1.svg';
 import facebook from './assets/Icon_11_.png';
 import twiter from './assets/Twitter.png'
 import linkedin from './assets/Linkedin.png'
+import close from './assets/close.svg'
 import { useNavigate } from 'react-router-dom';
 
   const LandingPage = () => {
@@ -118,12 +119,11 @@ import { useNavigate } from 'react-router-dom';
           <img src={Logo} alt="Logo" className=" w-5 h-auto md:w-11 xl:w-14" />
           <div className="text-2xl font-bold text-indigo-600 lg:text-4xl">DnD</div>
         </div>
-        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg md:w-[153px] xl:text-4xl xl:w-44 xl:p-3" onClick={handleVisitNowClick}>
+        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg md:w-[153px] xl:text-3xl xl:w-44 xl:p-3" onClick={handleVisitNowClick}>
           Login
         </button> 
         </div>
 
-      
       <div className="flex mt-[35px] flex-col md:flex-row-reverse md:pb-10 justify-between ">
         <div className='flex justify-center'>
           <img src={Icon} alt="Icon"  className='w-80 md:w-[450px] xl:w[700px]'/>
@@ -265,132 +265,135 @@ import { useNavigate } from 'react-router-dom';
       </footer>
 
       {/* Komponen Popup Login dan Popup Register*/}
+
+      {/* login */}
       {isLoginPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 popup-background show">
-          <div className="bg-white rounded-lg p-4 shadow-lg w-[22rem] popup-container show">
-            <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+          <div className="bg-white rounded-lg p-4 shadow-lg w-[250px] popup-container show md:w-[400px] md:px-14 lg:py-11 lg:w-[500px]">
+          <button
+                  onClick={closeLoginPopup}
+                  className="font-bold text-2xl"
+                >
+                  <img src={close} alt="" className='w-5' />
+                </button>
+            <h2 className="text-2xl font-bold mb-4 text-center lg:text-4xl">Welcome Back</h2>
+           
             {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
             <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Username       
-                </label>
+               
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-2xl"
                   placeholder="Enter your username"
                 />
               </div>
+              
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Password 
-                </label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-2xl"
                   placeholder="Enter your password"
                 />
               </div>
-              <div className="flex justify-between">
-                <div className='flex gap-4'>
-                  <button
+
+              <div className='flex gap-1'>
+                <p className='text-sm cursor-default lg:text-lg'>Didn't have account?</p>
+                  <a
                     type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold"
-                  >
-                    Login
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold"
+                    className="text-sm cursor-pointer lg:text-xl"
                     onClick={openResgisterPopup}
                   >
                     Register
+                  </a>
+                  </div>
+              <div className="f">
+                <div className='flex gap-4'>
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold w-full lg:text-2xl"
+                  >
+                    Login
                   </button>
                 </div>
-                <button
-                  onClick={closeLoginPopup}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold"
-                >
-                  Close
-                </button>
+
               </div>
             </form>
           </div>
         </div>
       )}
-      
+      {/* login end */}
+
+      {/* register */}
       {isRegisterPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 popup-background show">
-          <div className="bg-white rounded-lg p-4 shadow-lg w-[22rem] popup-container show">
-            <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
+          <div className="bg-white rounded-lg p-4 shadow-lg w-[250px] popup-container show  md:w-[400px] md:px-14 lg:py-11 lg:w-[500px]">
+          <button
+                  onClick={closeRegisterPopup}
+                  className=""
+                >
+                  <img src={close} alt="" className='w-5'/>
+                </button>
+            <h2 className="text-2xl font-bold mb-4 text-center lg:text-4xl">Get's Started</h2>
             {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
             <form onSubmit={(e) => { e.preventDefault(); handleRegister(); }}>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Username       
-                </label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-2xl"
                   placeholder="Enter your username"
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Email       
-                </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-2xl"
                   placeholder="Enter your email"
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Password 
-                </label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-2xl"
                   placeholder="Enter your password"
                 />
               </div>
-              <div className="flex justify-between">
-                <div className='flex gap-4'>
-                  <button
+            <div className='flex gap-1'>
+              <p className='text-sm cursor-default lg:text-lg'>Already have account?</p>
+              <a
                     type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold"
-                  >
-                    Register
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold"
+                    className="font-semibold cursor-pointer text-sm lg:text-lg"
                     onClick={openLoginPopup}
                   >
                     Login
+                  </a>
+              </div>
+
+                <div className='flex gap-4'>
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold w-full lg:text-2xl"
+                  >
+                    Register
                   </button>
                 </div>
-                <button
-                  onClick={closeRegisterPopup}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold"
-                >
-                  Close
-                </button>
-              </div>
+  
             </form>
           </div>
         </div>
+        // register end
+       
+        // login and register popup end
       )}
   </div>
   );
