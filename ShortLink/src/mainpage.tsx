@@ -146,7 +146,7 @@ const MainPage = () => {
       {/* Tombol navigasi ke halaman Analisi */}
       <div className="flex justify-center mb-4">
         <button
-          onClick={() => navigate("/analisi")} // Mengarahkan ke halaman Analisi
+          onClick={() => navigate("/analisis")} // Mengarahkan ke halaman Analisi
           className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
         >
           Go to Analisi
@@ -253,19 +253,21 @@ const MainPage = () => {
                 <p>
                   <strong>Status:</strong> {link.status}
                 </p>
-                <p>
+                {/* <p>
                   <strong>Created At:</strong> {link.createdAt}
                 </p>
                 <p>
                   <strong>Last Accessed:</strong> {link.lastAccessedAt || "Never"}
-                </p>
+                </p> */}
                 {/* Tampilkan QR Code jika ada */}
                 {link.qrCodeUrl && (
-                  <img
+                  <p className="font-bold">QR Code : 
+                    <img
                     src={`data:image/png;base64,${link.qrCodeUrl}`}
                     alt="QR Code"
                     className="w-24 h-24 my-2"
                   />
+                  </p>
                 )}
                 <div className="flex space-x-2">
                   <button
