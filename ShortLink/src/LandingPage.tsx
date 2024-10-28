@@ -133,9 +133,9 @@ import { useNavigate } from 'react-router-dom';
           <img src={Icon} alt="Icon"  className='w-80 md:w-[450px] xl:w[700px]'/>
         </div>
         
-        <div className='flex flex-col items-center justify-center text-center'>
+        <div className='flex flex-col items-center justify-center text-center md:items-start md:text-left'>
           <h1 className="text-4xl font-bold mb-4 md:text-5xl xl:text-7xl">Welcome to <span className="text-indigo-600">DnD</span></h1>
-          <p className="text-sm font-semibold mb-4 text-center md:text-xl xl:text-2xl">
+          <p className="text-sm font-semibold mb-4 text-center md:text-left md:text-xl xl:text-2xl">
             Best and Shortest Names for<br />  
             <span className="text-indigo-600">Supporting your marketing tools!</span>
           </p>
@@ -155,10 +155,12 @@ import { useNavigate } from 'react-router-dom';
       {/* About Us Section */}
       <section className="mt-[50px] p-6 md:px-10 xl:px-40">
       <div className='from-pink-100 via-white to-purple-100'>
-      <div className='flex justify-between bg-white rounded-xl border border-black px-[10px] py-[15px] md:border-none  md:gap-10 md:bg-gradient-to-r md:from-pink-100 md:via-white md:to-purple-100'>
-      <div className="flex flex-col justify-center items-center">
-            <h2 className="text-2xl font-bold mb-4 text-center md:text-4xl xl:text-7xl">About <span className='text-indigo-500'>Us</span></h2>
-            <p className="text-base  mb-6 font-semibold text-[#3F458F] text-start justify-center md:w-[25rem] md:text-lg xl:text-center">
+     
+      <div className='flex justify-between bg-white rounded-xl border border-black px-[10px] py-[15px] md:items-start md:border-none  md:gap-10 md:bg-gradient-to-r md:from-pink-100 md:via-white md:to-purple-100'>
+      
+      <div className="flex flex-col justify-center">
+            <h2 className="text-2xl font-bold mb-4 text-center md:text-left md:text-4xl xl:text-7xl">About <span className='text-indigo-500'>Us</span></h2>
+            <p className="text-base  mb-6 font-semibold text-[#3F458F] text-start justify-center md:w-[25rem] md:text-lg">
               DnD is your solution for shortening long URLs, making them easy to share and track with just a few clicks.
               We prioritize simplicity, security, and reliability, helping you streamline your online interactions.
             </p>
@@ -260,7 +262,7 @@ import { useNavigate } from 'react-router-dom';
           </div>
           <div className='flex items-center mt-6'>
             <a href=""><img src={facebook} alt="" /></a>
-            <a href=""><img src={twiter} alt="" /></a>
+            <a href="" className='mx-4'><img src={twiter} alt="" /></a>
             <a href=""><img src={linkedin} alt="" /></a>
           </div>
         </div>
