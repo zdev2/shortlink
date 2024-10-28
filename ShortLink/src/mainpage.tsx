@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Tambahkan ini
+import { useNavigate } from "react-router-dom";
+
+// Define the interface for the body data sent to the API
+interface BodyData {
+  url: string;
+  shortlink: string;
+  title: string;
+  expiredTime?: number; // Optional property
+}
 
 interface ShortLink {
   id: string;
@@ -10,17 +18,33 @@ interface ShortLink {
   createdAt: string;
   lastAccessedAt: string | null;
   title: string;
-  qrCodeUrl: string; // Tambahkan properti qrCodeUrl
+  qrCodeUrl: string;
 }
 
 const MainPage = () => {
-  const navigate = useNavigate(); // Inisialisasi navigate
+  const navigate = useNavigate();
   const [originalUrl, setOriginalUrl] = useState("");
   const [customSlug, setCustomSlug] = useState("");
   const [customTitle, setCustomTitle] = useState("");
   const [expiredTime, setExpiredTime] = useState<number | null>(null);
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const generateRandomSlug = (length: number = 6): string => {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let slug = "";
+    for (let i = 0; i < length; i++) {
+      slug += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return slug;
+  };
+
+  const resetInputs = () => {
+    setOriginalUrl("");
+    setCustomSlug("");
+    setCustomTitle("");
+    setExpiredTime(null);
+  };
 
   const truncateUrl = (url: string, maxLength = 50) => {
     if (url.length <= maxLength) return url;
@@ -46,16 +70,11 @@ const MainPage = () => {
       alert("Please enter a valid URL.");
       return;
     }
-
+    // Generate a random slug and set it as customSlug
+    const randomSlug = generateRandomSlug();
+    setCustomSlug(randomSlug);
     setIsPopupOpen(true);
   };
-
-  interface BodyData {
-    url: string;
-    shortlink: string;
-    title: string;
-    expiredTime?: number; // expiredTime bersifat opsional
-  }
 
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
@@ -67,16 +86,16 @@ const MainPage = () => {
       const bodyData: BodyData = {
         url: originalUrl,
         shortlink: customSlug,
-        title: customTitle, // Mengirim customTitle ke backend
+        title: customTitle,
       };
 
-      // Hanya tambahkan expiredTime jika diisi
       if (expiredTime !== null) {
         bodyData.expiredTime = expiredTime;
       }
 
       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
         },
@@ -92,24 +111,22 @@ const MainPage = () => {
       }
 
       const data = await response.json();
-
       const newLink: ShortLink = {
         id: data.data.url_details.id,
         shortLink: `https://dnd.id/${data.data.shortlink}`,
         originalUrl: originalUrl,
-        title: customTitle, // Menggunakan customTitle
+        title: customTitle,
         clicks: data.data.url_details.clickcount,
         status: data.data.url_details.status,
         createdAt: data.data.url_details.createdat,
         lastAccessedAt: data.data.url_details.lastaccesedat || null,
-        qrCodeUrl: data.data.url_details.qr_code, // Tambahkan URL QR Code dari backend
+        qrCodeUrl: data.data.url_details.qr_code,
       };
 
       setShortLinks([newLink, ...shortLinks]);
-
       setOriginalUrl("");
       setCustomSlug("");
-      setExpiredTime(null); // Reset expired time
+      setExpiredTime(null);
       setCustomTitle("");
       setIsPopupOpen(false);
     } catch (error) {
@@ -143,24 +160,22 @@ const MainPage = () => {
         URL Shortener
       </h1>
 
-      {/* Tombol navigasi ke halaman Analisi */}
       <div className="flex justify-center mb-4">
         <button
-          onClick={() => navigate("/analisis")} // Mengarahkan ke halaman Analisi
+          onClick={() => navigate("/analisis")}
           className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
         >
           Go to Analisi
         </button>
       </div>
 
-      {/* Input original link */}
       <div className="flex flex-row md:flex-row justify-center w-auto py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
           type="text"
           value={originalUrl}
           onChange={(e) => setOriginalUrl(e.target.value)}
           placeholder="Enter original URL"
-          className="p-2 border-gray-300 text-xs bgrounded-lg w-[65%] md:w-1/2"
+          className="p-2 border-gray-300 text-xs rounded-lg w-[65%] md:w-1/2"
         />
         <button
           onClick={handleShorten}
@@ -170,13 +185,18 @@ const MainPage = () => {
         </button>
       </div>
 
-      {/* Pop-up for input custom link and expiration time */}
       {isPopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/3">
             <h2 className="text-xl md:text-2xl font-bold mb-4">
-              Customize your link
+              Customize Your Link
             </h2>
+            <div className="p-2 mb-2 bg-gray-200 rounded-lg w-fit ">
+              <p>
+                <strong>Shortlink:</strong>{" "}
+                {customSlug ? `https://dnd.id/${customSlug}` : "https://dnd.id/"}
+              </p>
+            </div>
             <input
               type="text"
               value={customSlug}
@@ -206,7 +226,10 @@ const MainPage = () => {
                 Submit
               </button>
               <button
-                onClick={() => setIsPopupOpen(false)}
+                onClick={() => {
+                  resetInputs(); // Reset inputs saat popup ditutup
+                  setIsPopupOpen(false);
+                }}
                 className="bg-red-500 text-white px-4 py-2 rounded-lg"
               >
                 Close
@@ -216,7 +239,6 @@ const MainPage = () => {
         </div>
       )}
 
-      {/* Display shortened links */}
       <div className="flex justify-center">
         {shortLinks.length > 0 ? (
           <ul className="space-y-4">
@@ -234,51 +256,38 @@ const MainPage = () => {
                   </a>
                 </p>
                 <p>
-                  <strong>Title:</strong> {link.title || "No Title Available"}
+                  <strong>Shortened:</strong>{" "}
+                  <span className="text-blue-600">
+                    {link.shortLink}
+                  </span>
                 </p>
                 <p>
-                  <strong>Shortlink:</strong>{" "}
-                  <a
-                    href={link.originalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline"
-                  >
-                    {link.shortLink}
-                  </a>
+                  <strong>Title:</strong> {link.title}
+                </p>
+                <p>
+                  <strong>Status:</strong> {link.status}
                 </p>
                 <p>
                   <strong>Clicks:</strong> {link.clicks}
                 </p>
                 <p>
-                  <strong>Status:</strong> {link.status}
-                </p>
-                {/* <p>
-                  <strong>Created At:</strong> {link.createdAt}
-                </p>
-                <p>
-                  <strong>Last Accessed:</strong> {link.lastAccessedAt || "Never"}
-                </p> */}
-                {/* Tampilkan QR Code jika ada */}
-                {link.qrCodeUrl && (
-                  <p className="font-bold">QR Code : 
-                    <img
+                <strong>QR Code:</strong>
+                <img
                     src={`data:image/png;base64,${link.qrCodeUrl}`}
                     alt="QR Code"
                     className="w-24 h-24 my-2"
-                  />
-                  </p>
-                )}
-                <div className="flex space-x-2">
+                />
+                </p>
+                <div className="flex gap-2">
                   <button
                     onClick={() => handleCopy(link.shortLink)}
-                    className="bg-green-500 text-white px-4 py-2 rounded-lg"
+                    className="bg-green-500 text-white px-2 py-1 rounded-md"
                   >
                     Copy
                   </button>
                   <button
                     onClick={() => handleShare(link.shortLink)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    className="bg-blue-500 text-white px-2 py-1 rounded-md"
                   >
                     Share
                   </button>
@@ -287,7 +296,7 @@ const MainPage = () => {
             ))}
           </ul>
         ) : (
-          <p>No shortened links available.</p>
+          <p>No shortened links yet.</p>
         )}
       </div>
     </div>
