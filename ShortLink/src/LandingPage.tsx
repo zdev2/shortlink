@@ -22,7 +22,8 @@ import { useNavigate } from 'react-router-dom';
 
   // Fungsi untuk menampilkan popup login
   const handleVisitNowClick = () => {
-    setIsLoginPopupVisible(true);
+    setIsLoginPopupVisible(false);
+    setIsRegisterPopupVisible(true);
   };
 
   // Fungsi untuk menutup popup login
@@ -122,7 +123,7 @@ import { useNavigate } from 'react-router-dom';
           <img src={Logo} alt="Logo" className=" w-5 h-auto md:w-11 xl:w-14" />
           <div className="text-2xl font-bold text-indigo-600 lg:text-4xl">DnD</div>
         </div>
-        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg md:w-[153px] xl:text-3xl xl:w-44 xl:p-3" onClick={handleVisitNowClick}>
+        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg md:w-[100px] xl:text-3xl xl:w-44 xl:p-3" onClick={handleVisitNowClick}>
           Login
         </button> 
         </div>
@@ -268,7 +269,7 @@ import { useNavigate } from 'react-router-dom';
       {/* Komponen Popup Login dan Popup Register*/}
       {isLoginPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 popup-background show">
-          <div className="bg-white rounded-lg p-4 shadow-lg w-[250px] popup-container show md:w-[400px] md:px-14 lg:py-11 lg:w-[500px]">
+          <div className="bg-white rounded-lg p-4 shadow-lg w-[250px] popup-container show md:w-[350px] md:px-10 lg:py-10 ">
           <button
                   onClick={closeLoginPopup}
                   className="font-bold text-2xl"
@@ -276,11 +277,11 @@ import { useNavigate } from 'react-router-dom';
                   <img src={close} alt="" className='w-5' />
                 </button>
             <h2 className="text-2xl font-bold mb-4 text-center lg:text-4xl">Welcome Back</h2>
-           
+          
             {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
             <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
               <div className="mb-4">
-               
+              
                 <input
                   type="text"
                   value={username}
@@ -304,7 +305,7 @@ import { useNavigate } from 'react-router-dom';
                 <p className='text-sm cursor-default lg:text-lg'>Didn't have account?</p>
                   <a
                     type="submit"
-                    className="text-sm cursor-pointer lg:text-xl"
+                    className="text-sm cursor-pointer text-blue-600 mb-3 font-bold lg:text-xl"
                     onClick={openResgisterPopup}
                   >
                     Register
@@ -314,7 +315,7 @@ import { useNavigate } from 'react-router-dom';
                 <div className='flex gap-4'>
                   <button
                     type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold w-full lg:text-2xl"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold w-full lg:text-2xl"
                   >
                     Login
                   </button>
@@ -328,7 +329,7 @@ import { useNavigate } from 'react-router-dom';
       
       {isRegisterPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 popup-background show">
-          <div className="bg-white rounded-lg p-4 shadow-lg w-[250px] popup-container show  md:w-[400px] md:px-14 lg:py-11 lg:w-[500px]">
+          <div className="bg-white rounded-lg p-4 shadow-lg w-[250px] popup-container show  md:w-[350px] md:px-10 lg:py-10 ">
           <button
                   onClick={closeRegisterPopup}
                   className=""
@@ -369,7 +370,7 @@ import { useNavigate } from 'react-router-dom';
               <p className='text-sm cursor-default lg:text-lg'>Already have account?</p>
               <a
                     type="submit"
-                    className="font-semibold cursor-pointer text-sm lg:text-lg"
+                    className="font-bold cursor-pointer text-blue-600 mb-3 text-sm lg:text-lg"
                     onClick={openLoginPopup}
                   >
                     Login
