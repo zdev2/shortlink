@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Define the interface for the body data sent to the API
@@ -31,7 +31,8 @@ const MainPage = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const generateRandomSlug = (length: number = 6): string => {
-    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const chars =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let slug = "";
     for (let i = 0; i < length; i++) {
       slug += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -75,10 +76,44 @@ const MainPage = () => {
     setCustomSlug(randomSlug);
     setIsPopupOpen(true);
   };
+  useEffect(() => {
+    const showAllURLs = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
+          method: "GET",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch URLs");
+        const data = await response.json();
+        const links = data.data.urls.map((item: any) => ({
+          id: item.id,
+          shortLink: `https://dnd.id/${item.shortlink}`,
+          originalUrl: item.url,
+          title: item.url_title, // `url_title` is used directly from the JSON
+          clicks: item.clickcount, // `clickcount` directly from `item`
+          status: item.status,
+          createdAt: item.createdat,
+          lastAccessedAt: item.lastaccesedat || null,
+          qrCodeUrl: item.qr_code, // `qr_code` as in the JSON
+        }));
+        setShortLinks(links);
+      } catch (error) {
+        console.error("Error fetching URLs:", error);
+      }
+    };
+    showAllURLs(); // Call fetch function on mount
+  }, []);
 
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
-      alert("Please complete all fields including custom slug and custom title.");
+      alert(
+        "Please complete all fields including custom slug and custom title."
+      );
       return;
     }
 
@@ -181,8 +216,8 @@ const MainPage = () => {
           onClick={handleShorten}
           className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
         >
-          Shorten now
-``        </button>
+          Shorten now ``{" "}
+        </button>
       </div>
 
       {isPopupOpen && (
@@ -194,7 +229,9 @@ const MainPage = () => {
             <div className="p-2 mb-2 bg-gray-200 rounded-lg w-fit ">
               <p>
                 <strong>Shortlink:</strong>{" "}
-                {customSlug ? `https://dnd.id/${customSlug}` : "https://dnd.id/"}
+                {customSlug
+                  ? `https://dnd.id/${customSlug}`
+                  : "https://dnd.id/"}
               </p>
             </div>
             <input
@@ -214,7 +251,9 @@ const MainPage = () => {
             <input
               type="number"
               value={expiredTime || ""}
-              onChange={(e) => setExpiredTime(e.target.value ? parseInt(e.target.value) : null)}
+              onChange={(e) =>
+                setExpiredTime(e.target.value ? parseInt(e.target.value) : null)
+              }
               placeholder="Expired time in minutes (optional)"
               className="p-2 border border-gray-300 rounded-lg w-full mb-4"
             />
@@ -257,9 +296,7 @@ const MainPage = () => {
                 </p>
                 <p>
                   <strong>Shortened:</strong>{" "}
-                  <span className="text-blue-600">
-                    {link.shortLink}
-                  </span>
+                  <span className="text-blue-600">{link.shortLink}</span>
                 </p>
                 <p>
                   <strong>Title:</strong> {link.title}
@@ -271,12 +308,12 @@ const MainPage = () => {
                   <strong>Clicks:</strong> {link.clicks}
                 </p>
                 <p>
-                <strong>QR Code:</strong>
-                <img
+                  <strong>QR Code:</strong>
+                  <img
                     src={`data:image/png;base64,${link.qrCodeUrl}`}
                     alt="QR Code"
                     className="w-24 h-24 my-2"
-                />
+                  />
                 </p>
                 <div className="flex gap-2">
                   <button
