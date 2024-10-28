@@ -227,7 +227,7 @@ import { useNavigate } from 'react-router-dom';
               <p className='text-base w-56 text-center mt-2'>DnD is your solution for shortening long URLs</p>
           </div>
 
-          <div className='flex flex-col items-center mt-14 text-center'>
+          <div className='flex flex-col items-center mt-14 `text-center'>
             <h2 className='text-xl font-bold'>Quick Links</h2>
               <p className='text-base  mt-4'>Company</p>
               <p className='text-base  mt-3'>Information</p>
