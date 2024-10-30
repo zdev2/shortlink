@@ -56,7 +56,7 @@ const MainPage = () => {
     setExpiredTime(null);
   };
 
-  const truncateUrl = (url: string, maxLength = 50) => {
+  const truncateUrl = (url: string, maxLength = 20) => {
     if (url.length <= maxLength) return url;
     const start = url.slice(0, 20);
     return `${start}...`;
@@ -102,7 +102,7 @@ const MainPage = () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const links = data.data.urls.map((item: any) => ({
           id: item.id,
-          shortLink: `dnd.id/${item.shortlink}`,
+          shortLink: `https://dnd.id/${item.shortlink}`,
           originalUrl: item.url,
           title: item.url_title, // `url_title` is used directly from the JSON
           clicks: item.clickcount, // `clickcount` directly from `item`
@@ -158,7 +158,7 @@ const MainPage = () => {
       const data = await response.json();
       const newLink: ShortLink = {
         id: data.data.url_details.id,
-        shortLink: `dnd.id/${data.data.shortlink}`,
+        shortLink: `https://dnd.id/${data.data.shortlink}`,
         originalUrl: originalUrl,
         title: customTitle,
         clicks: data.data.url_details.clickcount,
@@ -244,15 +244,6 @@ const MainPage = () => {
       <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8">
         URL Shortener
       </h1>
-
-      <div className="flex justify-center mb-4">
-        <button
-          onClick={() => navigate("/analisis")}
-          className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
-        >
-          Go to Analisi
-        </button>
-      </div>
       {/* Input Original Link */}
       <div className="flex flex-row md:flex-row justify-center w-auto py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
@@ -269,6 +260,15 @@ const MainPage = () => {
           Shorten now
         </button>
       </div>
+      {/* Navigasi */}
+      <div className="flex justify-center mt-4">
+        <button
+          onClick={() => navigate("/analisis")}
+          className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
+        >
+          Go to Analisi
+        </button>
+      </div>
       {/* Customize Your Link */}
       {isPopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -280,8 +280,8 @@ const MainPage = () => {
               <p>
                 <strong>Shortlink:</strong>{" "}
                 {customSlug
-                  ? `dnd.id/${customSlug}`
-                  : "dnd.id/"}
+                  ? `https://dnd.id/${customSlug}`
+                  : "https://dnd.id/"}
               </p>
             </div>
             <input
@@ -335,30 +335,39 @@ const MainPage = () => {
         />
       )}
       {/* Output Semua Link */}
-      <div className="flex mt-5 justify-center">
-        <div className="w-fit max-h-[450px] flex flex-col justify-center scrollbar-hide overflow-y-auto bg-white shadow-md rounded-lg pt-4"> 
-          <div className="listsorlink bg-white max-h-[450px] shadow-md w-fit  grid grid-cols-8 place-content-center text-center items-center rounded-lg"  > </div>
+      <div className="flex mt-5 flex-wrap justify-center">
+          <div className="barki bg-white max-h-[450px] shadow-md w-fit  grid grid-cols-8 place-content-center text-center items-center rounded-b-none rounded-lg"  > 
+            <strong>Original Link</strong>{" "}
+            <strong>Shortlink</strong>{" "}
+            <strong>Title</strong>{" "}
+            <strong>Date</strong>{" "}
+            <strong>Status</strong>{" "}
+            <strong>Click</strong>{" "}
+            <strong>QR Code</strong>{" "}
+            <strong>Action</strong>{" "}
+          </div>
+        <div className="w-fit max-h-[450px] flex flex-col justify-start scrollbar-hide overflow-y-auto rounded-t-none bg-white shadow-md rounded-lg"> 
         {shortLinks.length > 0 ? (
           <ul className="space-y-4">
             {shortLinks.map((link, index) => (
-              <li key={index} className="listsorlink bg-white shadow-md w-fit  grid grid-cols-8 place-content-center text-center items-center rounded-lg">
+              <li key={index} className="listsorlink bg-white shadow-md w-fit border grid grid-cols-8 place-content-center text-center items-center rounded-3xl">
                 <p>
                   <a
                     href={link.originalUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-500 underline"
+                    className="shor text-black"
                   >
                     {truncateUrl(link.originalUrl)}
                   </a>
                 </p>
                 <p>
-                  {/* <strong>Shortlink:</strong>{" "} */}
+                  
                   <a
                     href={link.originalUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-500 underline"
+                    className="shor text-blue-600 font-semibold"
                   >
                     {link.shortLink}
                   </a>
