@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCopy, faShare } from '@fortawesome/free-solid-svg-icons';
+import './App.css'
 
 // Define the interface for the body data sent to the API
 interface BodyData {
@@ -7,6 +10,11 @@ interface BodyData {
   shortlink: string;
   title: string;
   expiredTime?: number; // Optional property
+}
+
+interface QrCodePopupProps {
+  qrCodeUrl: string; // Tipe untuk URL QR code
+  onClose: () => void; // Tipe untuk fungsi onClose
 }
 
 interface ShortLink {
@@ -29,6 +37,7 @@ const MainPage = () => {
   const [expiredTime, setExpiredTime] = useState<number | null>(null);
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedQrCode, setSelectedQrCode] = useState<ShortLink | null>(null);
 
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
@@ -90,9 +99,10 @@ const MainPage = () => {
 
         if (!response.ok) throw new Error("Failed to fetch URLs");
         const data = await response.json();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const links = data.data.urls.map((item: any) => ({
           id: item.id,
-          shortLink: `https://dnd.id/${item.shortlink}`,
+          shortLink: `dnd.id/${item.shortlink}`,
           originalUrl: item.url,
           title: item.url_title, // `url_title` is used directly from the JSON
           clicks: item.clickcount, // `clickcount` directly from `item`
@@ -148,7 +158,7 @@ const MainPage = () => {
       const data = await response.json();
       const newLink: ShortLink = {
         id: data.data.url_details.id,
-        shortLink: `https://dnd.id/${data.data.shortlink}`,
+        shortLink: `dnd.id/${data.data.shortlink}`,
         originalUrl: originalUrl,
         title: customTitle,
         clicks: data.data.url_details.clickcount,
@@ -189,6 +199,46 @@ const MainPage = () => {
     }
   };
 
+  const QrCodePopup: React.FC<QrCodePopupProps> = ({ qrCodeUrl, onClose }) => {
+    const handleDownload = () => {
+      const link = document.createElement('a');
+      link.href = `data:image/png;base64,${qrCodeUrl}`;
+      link.download = 'qrcode.png';
+      link.click();
+    };
+  
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/3">
+          <h2 className="text-xl md:text-2xl font-bold mb-4">QR Code</h2>
+          <img
+            src={`data:image/png;base64,${qrCodeUrl}`}
+            alt="QR Code"
+            className="w-full h-auto mb-4"
+          />
+          <div className="flex justify-between">
+            <button
+              onClick={handleDownload}
+              className="bg-green-500 text-white px-4 py-2 rounded-lg"
+            >
+              Download QR Code
+            </button>
+            <button
+              onClick={onClose}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const handleQrCodeClick = (link: ShortLink) => {
+    setSelectedQrCode(link);
+  };
+
   return (
     <div className="min-h-screen relative flex flex-col justify-center bg-gray-100 p-4 md:p-6">
       <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8">
@@ -203,7 +253,7 @@ const MainPage = () => {
           Go to Analisi
         </button>
       </div>
-
+      {/* Input Original Link */}
       <div className="flex flex-row md:flex-row justify-center w-auto py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
           type="text"
@@ -216,10 +266,10 @@ const MainPage = () => {
           onClick={handleShorten}
           className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
         >
-          Shorten now ``{" "}
+          Shorten now
         </button>
       </div>
-
+      {/* Customize Your Link */}
       {isPopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/3">
@@ -230,8 +280,8 @@ const MainPage = () => {
               <p>
                 <strong>Shortlink:</strong>{" "}
                 {customSlug
-                  ? `https://dnd.id/${customSlug}`
-                  : "https://dnd.id/"}
+                  ? `dnd.id/${customSlug}`
+                  : "dnd.id/"}
               </p>
             </div>
             <input
@@ -277,14 +327,22 @@ const MainPage = () => {
           </div>
         </div>
       )}
-
-      <div className="flex justify-center">
+      {/* QR Code Popup */}
+      {selectedQrCode && (
+        <QrCodePopup
+          qrCodeUrl={selectedQrCode.qrCodeUrl}
+          onClose={() => setSelectedQrCode(null)}
+        />
+      )}
+      {/* Output Semua Link */}
+      <div className="flex mt-5 justify-center">
+        <div className="w-fit max-h-[450px] flex flex-col justify-center scrollbar-hide overflow-y-auto bg-white shadow-md rounded-lg pt-4"> 
+          <div className="listsorlink bg-white max-h-[450px] shadow-md w-fit  grid grid-cols-8 place-content-center text-center items-center rounded-lg"  > </div>
         {shortLinks.length > 0 ? (
           <ul className="space-y-4">
             {shortLinks.map((link, index) => (
-              <li key={index} className="p-4 bg-white shadow-md rounded-lg">
+              <li key={index} className="listsorlink bg-white shadow-md w-fit  grid grid-cols-8 place-content-center text-center items-center rounded-lg">
                 <p>
-                  <strong>Original:</strong>{" "}
                   <a
                     href={link.originalUrl}
                     target="_blank"
@@ -295,46 +353,73 @@ const MainPage = () => {
                   </a>
                 </p>
                 <p>
-                  <strong>Shortened:</strong>{" "}
-                  <span className="text-blue-600">{link.shortLink}</span>
+                  {/* <strong>Shortlink:</strong>{" "} */}
+                  <a
+                    href={link.originalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline"
+                  >
+                    {link.shortLink}
+                  </a>
                 </p>
                 <p>
-                  <strong>Title:</strong> {link.title}
+                  {/* <strong>Title:</strong>  */}
+                  {link.title}
                 </p>
                 <p>
-                  <strong>Status:</strong> {link.status}
+                  {/* <strong>Created At:</strong>  */}
+                  {link.createdAt}
                 </p>
                 <p>
-                  <strong>Clicks:</strong> {link.clicks}
+                  {/* <strong>Status:</strong>  */}
+                  {link.status}
                 </p>
                 <p>
-                  <strong>QR Code:</strong>
+                  {/* <strong>Clicks:</strong>  */}
+                  {link.clicks}
+                </p>
+                <div className="flex items-center justify-center">
                   <img
                     src={`data:image/png;base64,${link.qrCodeUrl}`}
                     alt="QR Code"
-                    className="w-24 h-24 my-2"
+                    className="qr-code w-16 h-16 my-1"
+                    onClick={() => handleQrCodeClick(link)}
                   />
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleCopy(link.shortLink)}
-                    className="bg-green-500 text-white px-2 py-1 rounded-md"
-                  >
-                    Copy
-                  </button>
-                  <button
-                    onClick={() => handleShare(link.shortLink)}
-                    className="bg-blue-500 text-white px-2 py-1 rounded-md"
-                  >
-                    Share
-                  </button>
+                </div>
+                <div className="grid grid-cols-2">
+                  <div className="flex justify-center">
+                    <FontAwesomeIcon
+                        onClick={() => handleShare(link.shortLink)}
+                        className="px-4 py-2"
+                        icon={faShare} />
+                  </div>
+                  <div className="flex justify-center">
+                    <FontAwesomeIcon
+                        onClick={() => handleCopy(link.shortLink)}
+                        className="px-4 py-2"
+                        icon={faCopy} />
+                  </div>
+                  <div className="flex justify-center">
+                    <FontAwesomeIcon
+                        onClick={() => handleShare(link.shortLink)}
+                        className="px-4 py-2"
+                        icon={faShare} />
+                  </div>
+                  <div className="flex justify-center">
+                    <FontAwesomeIcon
+                        onClick={() => handleCopy(link.shortLink)}
+                        className="px-4 py-2"
+                        icon={faCopy} />
+                  </div>
                 </div>
               </li>
             ))}
           </ul>
         ) : (
-          <p>No shortened links yet.</p>
+          <p></p>
         )}
+        </div>
       </div>
     </div>
   );

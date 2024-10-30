@@ -10,4 +10,8 @@ export default {
         'sm-custom': '425px', // Custom breakpoint untuk 425px
       },
     },
-  },}
+  },
+  plugins: [
+    require('tailwind-scrollbar-hide')
+  ]
+}
