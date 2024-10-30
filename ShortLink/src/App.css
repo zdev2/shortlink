@@ -24,3 +24,35 @@
 .popup-background.show {
   opacity: 1;
 }
+
+/* styles.css */
+.listsorlink {
+  display: grid;
+  grid-template-columns: 200px 240px 150px 150px 75px 60px 100px 100px ; /* Kolom tanpa nama */
+                      /*  Original|Shortlink|Title|Date|Status|Click|Qr|Action  */
+  grid-template-rows: auto;
+}
+.barki {
+  display: grid;
+  grid-template-columns: 200px 240px 150px 150px 75px 60px 100px 100px ; /* Kolom tanpa nama */
+                      /*  Original|Shortlink|Title|Date|Status|Click|Qr|Action  */
+  grid-template-rows: 70px;
+}
+
+.qr-code {
+  width: 4rem; /* Default size */
+  height: 4rem; /* Default size */
+  transition: transform 0.2s ease-in; /* Smooth transition */
+}
+
+.qr-code:hover, .qr-code:focus {
+  transform: scale(1.2); /* Enlarge on hover */
+}
+
+.shor:hover{
+  text-decoration: underline;
+}
+
+strong {
+  color: rgb(0, 0, 0);
+}
