@@ -115,17 +115,11 @@ func Login(c *fiber.Ctx) error {
     if err != nil {
         return BadRequest(c, "Failed to create token")
     }
-    cookie := fiber.Cookie{
-        Name:     "Authorization",
-        Value:    tokenString,
-        Expires:  time.Now().Add(24 * time.Hour * 30),
-        HTTPOnly: true,
-        SameSite: fiber.CookieSameSiteNoneMode,
-    }
 
-    c.Cookie(&cookie)
+    // Return token in the JSON response
     return OK(c, fiber.Map{
         "message": "Login successful",
+        "token":   tokenString,
         "user":    userAcc,
     })
 }
