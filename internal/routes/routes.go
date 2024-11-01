@@ -15,7 +15,7 @@ func RouteSetup(app *fiber.App) {
 		AllowOrigins: "http://localhost:5173", // Replace with your frontend URL
 		AllowMethods: "GET,POST,PUT,DELETE",   // Allowed HTTP methods
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization, Cookie", // Allowed headers
-		ExposeHeaders: "Cookie",
+		ExposeHeaders: "Authorization, Cookie",
 		AllowCredentials: true,
 	}))
 

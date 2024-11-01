@@ -173,39 +173,46 @@ func EditShortLink(c *fiber.Ctx) error {
 
 // GetURLs retrieves all URLs for the logged-in user
 func GetURLs(c *fiber.Ctx) error {
-	user := c.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	userID := claims["sub"].(string)
+    // Retrieve claims from context, asserting as jwt.MapClaims
+    claims := c.Locals("user").(jwt.MapClaims)
+    userID := claims["sub"].(string) // Get the user ID from claims
 
-	objectID, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return BadRequest(c, "Invalid UserID format")
-	}
+    // Convert the userID to ObjectID
+    objectID, err := primitive.ObjectIDFromHex(userID)
+    if err != nil {
+        return BadRequest(c, "Invalid UserID format")
+    }
 
-	collection := database.MongoClient.Database("shortlink").Collection("urls")
-	filter := bson.M{
-		"user_id": objectID,
-		"$or": []bson.M{
-			{"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
-			{"deleted_at": bson.M{"$eq": nil}},       // DeletedAt field is nil
-		},
-	}
-	cursor, err := collection.Find(context.TODO(), filter)
-	if err != nil {
-		return InternalServerError(c, "Error fetching URLs")
-	}
-	defer cursor.Close(context.TODO())
+    // Define the filter for the MongoDB query
+    collection := database.MongoClient.Database("shortlink").Collection("urls")
+    filter := bson.M{
+        "user_id": objectID,
+        "$or": []bson.M{
+            {"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
+            {"deleted_at": bson.M{"$eq": nil}},       // DeletedAt field is nil
+        },
+    }
 
-	var urls []model.Url
-	if err = cursor.All(context.TODO(), &urls); err != nil {
-		return InternalServerError(c, "Error decoding URLs")
-	}
+    // Execute the MongoDB query
+    cursor, err := collection.Find(context.TODO(), filter)
+    if err != nil {
+        return InternalServerError(c, "Error fetching URLs")
+    }
+    defer cursor.Close(context.TODO())
 
-	return OK(c, fiber.Map{
-		"message": "URLs fetched successfully",
-		"urls":    urls,
-	})
+    // Decode the results into a slice of Url models
+    var urls []model.Url
+    if err = cursor.All(context.TODO(), &urls); err != nil {
+        return InternalServerError(c, "Error decoding URLs")
+    }
+
+    // Return the URLs in the response
+    return OK(c, fiber.Map{
+        "message": "URLs fetched successfully",
+        "urls":    urls,
+    })
 }
+
 
 // GetURLbyID retrieves a specific URL by its ID
 func GetURLbyID(c *fiber.Ctx) error {

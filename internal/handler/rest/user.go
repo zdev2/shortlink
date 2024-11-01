@@ -74,21 +74,26 @@ func Register(c *fiber.Ctx) error {
 }
 
 func Login(c *fiber.Ctx) error {
+    // Parse the request body
     if err := c.BodyParser(&logReq); err != nil {
         return BadRequest(c, "Failed to read body request")
     }
     logReq.Username = strings.TrimSpace(logReq.Username)
     logReq.Password = strings.TrimSpace(logReq.Password)
+
+    // Initialize user account struct
     var userAcc model.User
     collection := database.MongoClient.Database("shortlink").Collection("user")
     var query bson.M
+
+    // Determine if login is by email or username
     if strings.Contains(logReq.Username, "@") {
-        // Login by email
         query = bson.M{"email": logReq.Username}
     } else {
-        // Login by username
         query = bson.M{"username": logReq.Username}
     }
+
+    // Find the user account
     err := collection.FindOne(context.TODO(), query).Decode(&userAcc)
     if err != nil {
         if err == mongo.ErrNoDocuments {
@@ -96,33 +101,53 @@ func Login(c *fiber.Ctx) error {
         }
         return InternalServerError(c, "Database error")
     }
+
+    // Check if the account is deleted
     if userAcc.DeletedAt != nil && !userAcc.DeletedAt.IsZero() {
         return Gone(c, fmt.Sprintf("This account has already been deleted, %s", userAcc.DeletedAt))
     }
+
+    // Verify the password
     err = bcrypt.CompareHashAndPassword([]byte(userAcc.Password), []byte(logReq.Password))
     if err != nil {
         return Unauthorized(c, "Invalid password")
     }
+
+    // Create JWT token
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
         "sub": userAcc.ID.Hex(),
         "exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
     })
+
+    // Get the secret key from environment variable
     secret := os.Getenv("SUPERDUPERMEGABIGTOPSECRETINTHISPROJECTWHYIUSETHISNAMEFORMYCODEBRUHLOL")
     if secret == "" {
         return InternalServerError(c, "Secret key not set")
     }
+
+    // Sign the token
     tokenString, err := token.SignedString([]byte(secret))
     if err != nil {
         return BadRequest(c, "Failed to create token")
     }
 
-    // Return token in the JSON response
+    // Set the token as an HttpOnly cookie
+    c.Cookie(&fiber.Cookie{
+        Name:     "Authorization",
+        Value:    tokenString,
+        Expires:  time.Now().Add(24 * time.Hour), // Set expiry as needed
+        HTTPOnly: true,
+        Secure:   false, // Set to true if using HTTPS in production
+        Path:     "/",
+    })
+
+    // Return success response without the token
     return OK(c, fiber.Map{
         "message": "Login successful",
-        "token":   tokenString,
         "user":    userAcc,
     })
 }
+
 
 func GetAllUsers(c *fiber.Ctx) error {
     // Define an empty slice to hold users

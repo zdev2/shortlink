@@ -10,10 +10,14 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-// ValidateToken checks the Authorization header, validates the JWT, and passes claims to the context
+// ValidateToken checks the Authorization cookie, validates the JWT, and passes claims to the context
 func ValidateToken(c *fiber.Ctx) error {
     // Retrieve token from cookies
     tokenString := c.Cookies("Authorization")
+    
+    // Log the retrieved token for debugging purposes
+    fmt.Println("Retrieved token from cookie:", tokenString)
+    
     if tokenString == "" {
         fmt.Println("Token cookie is missing")
         return rest.Unauthorized(c, "Unauthorized, please login")
@@ -43,7 +47,8 @@ func ValidateToken(c *fiber.Ctx) error {
         } else {
             fmt.Println("Expiration (exp) claim is missing")
         }
-        c.Locals("user", token)
+        fmt.Println("Token claims:", claims) // Log the claims for debugging
+        c.Locals("user", claims) // Store claims instead of token if needed
     } else {
         fmt.Println("Invalid token claims or token is not valid")
         return rest.Unauthorized(c, "Invalid Token")
