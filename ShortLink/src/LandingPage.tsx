@@ -10,8 +10,9 @@ import twiter from './assets/Twitter.png'
 import linkedin from './assets/Linkedin.png'
 import close from './assets/close.svg'
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
-  const LandingPage = () => {
+const LandingPage = () => {
   const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false); // State untuk popup Login
   const [isRegisterPopupVisible, setIsRegisterPopupVisible] = useState(false); // State untuk popup Register
   const [email, setEmail] = useState(''); // State untuk email 
@@ -73,10 +74,16 @@ import { useNavigate } from 'react-router-dom';
           'Content-Type' : 'application/json',
         },
         body : JSON.stringify ({username, password}),
-      });
-      // const data = await response.json();
+      }); 
+      const data = await response.json();
+      console.log(data)
+
+      const token = data.token; // pastikan sesuai dengan respons server
+      localStorage.setItem('authToken', token);
 
       if (response.ok) {
+        const token = data.token; // Make sure this matches the server's response
+        Cookies.set('authToken', token, { expires: 7 }); // Save token as a cookie, expires in 7 days
         setErrorMessage('');
         navigate('/main-menu');
       } else {
