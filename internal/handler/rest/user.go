@@ -24,7 +24,6 @@ var logReq struct {
 
 var registerReq struct {
     Username string `json:"username" bson:"username"`
-    FullName string `json:"fullname" bson:"fullname"`
     Email    string `json:"email" bson:"email"`
     Password string `json:"password" bson:"password"`
 }
@@ -57,7 +56,6 @@ func Register(c *fiber.Ctx) error {
 	user := model.User{
 		ID:            primitive.NewObjectID(),
 		Username: registerReq.Username,
-        FullName: registerReq.FullName,
         Email: registerReq.Email,
         Password: string(hash),
         IsActive: false,
@@ -201,7 +199,6 @@ func UpdateUser(c *fiber.Ctx) error {
 	collection := database.MongoClient.Database("shortlink").Collection("user")
 	update := bson.M{
 		"$set": bson.M{
-			"fullname": updateReq.FullName,
 			"email":    updateReq.Email,
 			"username": updateReq.Username,
 			// Include more fields as necessary
