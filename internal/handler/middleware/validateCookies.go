@@ -4,29 +4,20 @@ import (
 	"fmt"
 	"os"
 	"shortlink/internal/handler/rest"
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 )
 
+// ValidateToken checks the Authorization header, validates the JWT, and passes claims to the context
 func ValidateToken(c *fiber.Ctx) error {
-    // Retrieve token from Authorization header
-    authHeader := c.Get("Authorization")
-    if authHeader == "" {
-        fmt.Println("Authorization header is missing")
+    // Retrieve token from cookies
+    tokenString := c.Cookies("Authorization")
+    if tokenString == "" {
+        fmt.Println("Token cookie is missing")
         return rest.Unauthorized(c, "Unauthorized, please login")
     }
-
-    // Check if the token has "Bearer " prefix
-    if !strings.HasPrefix(authHeader, "Bearer ") {
-        fmt.Println("Bearer token prefix missing")
-        return rest.Unauthorized(c, "Invalid Token")
-    }
-
-    // Extract the token string after "Bearer "
-    tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
     // Parse the JWT token
     token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
