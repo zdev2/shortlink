@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy, faShare } from '@fortawesome/free-solid-svg-icons';
-import './App.css'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCopy, faShare } from "@fortawesome/free-solid-svg-icons";
+import "./App.css";
 
 // Define the interface for the body data sent to the API
 interface BodyData {
@@ -54,6 +54,35 @@ const MainPage = () => {
     setCustomSlug("");
     setCustomTitle("");
     setExpiredTime(null);
+  };
+
+  const authToken = localStorage.getItem('Authorization'); // Replace 'authToken' with your actual key
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/v1/users/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+    
+      if (response.status === 401) {
+        // Handle unauthorized response (e.g., redirect to login or clear session)
+        console.log("Session expired, redirecting to login...");
+        navigate("/")
+        // Clear any session data or redirect the user
+      } else if (!response.ok) {
+        throw new Error(`Logout failed: ${response.statusText}`);
+      }
+    
+      console.log("Logout successful");
+    
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+    
   };
 
   const truncateUrl = (url: string, maxLength = 20) => {
@@ -134,7 +163,7 @@ const MainPage = () => {
         title: customTitle,
       };
 
-      if (expiredTime !== null) { 
+      if (expiredTime !== null) {
         bodyData.expiredTime = expiredTime;
       }
 
@@ -201,12 +230,12 @@ const MainPage = () => {
 
   const QrCodePopup: React.FC<QrCodePopupProps> = ({ qrCodeUrl, onClose }) => {
     const handleDownload = () => {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = `data:image/png;base64,${qrCodeUrl}`;
-      link.download = 'qrcode.png';
+      link.download = "qrcode.png";
       link.click();
     };
-  
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
         <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/3">
@@ -241,9 +270,19 @@ const MainPage = () => {
 
   return (
     <div className="min-h-screen relative flex flex-col justify-center bg-gray-100 p-4 md:p-6">
-      <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8">
-        URL Shortener
-      </h1>
+      
+      {/* Logout Button */}
+      <div className="flex justify-center mt-4">
+        <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8">
+          URL Shortener
+        </h1>
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
+        >
+          Logout
+        </button>
+      </div>
       {/* Input Original Link */}
       <div className="flex flex-row md:flex-row justify-center w-auto py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
@@ -336,98 +375,100 @@ const MainPage = () => {
       )}
       {/* Output Semua Link */}
       <div className="flex mt-5 flex-wrap justify-center">
-          <div className="barki bg-white max-h-[450px] shadow-md w-fit  grid grid-cols-8 place-content-center text-center items-center rounded-b-none rounded-lg"  > 
-            <strong>Original Link</strong>{" "}
-            <strong>Shortlink</strong>{" "}
-            <strong>Title</strong>{" "}
-            <strong>Date</strong>{" "}
-            <strong>Status</strong>{" "}
-            <strong>Click</strong>{" "}
-            <strong>QR Code</strong>{" "}
-            <strong>Action</strong>{" "}
-          </div>
-        <div className="w-fit max-h-[450px] flex flex-col justify-start scrollbar-hide overflow-y-auto rounded-t-none bg-white shadow-md rounded-lg"> 
-        {shortLinks.length > 0 ? (
-          <ul className="space-y-4">
-            {shortLinks.map((link, index) => (
-              <li key={index} className="listsorlink bg-white shadow-md w-fit border grid grid-cols-8 place-content-center text-center items-center rounded-3xl">
-                <p>
-                  <a
-                    href={link.originalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shor text-black"
-                  >
-                    {truncateUrl(link.originalUrl)}
-                  </a>
-                </p>
-                <p>
-                  
-                  <a
-                    href={link.originalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shor text-blue-600 font-semibold"
-                  >
-                    {link.shortLink}
-                  </a>
-                </p>
-                <p>
-                  {/* <strong>Title:</strong>  */}
-                  {link.title}
-                </p>
-                <p>
-                  {/* <strong>Created At:</strong>  */}
-                  {link.createdAt}
-                </p>
-                <p>
-                  {/* <strong>Status:</strong>  */}
-                  {link.status}
-                </p>
-                <p>
-                  {/* <strong>Clicks:</strong>  */}
-                  {link.clicks}
-                </p>
-                <div className="flex items-center justify-center">
-                  <img
-                    src={`data:image/png;base64,${link.qrCodeUrl}`}
-                    alt="QR Code"
-                    className="qr-code w-16 h-16 my-1"
-                    onClick={() => handleQrCodeClick(link)}
-                  />
-                </div>
-                <div className="grid grid-cols-2">
-                  <div className="flex justify-center">
-                    <FontAwesomeIcon
+        <div className="barki bg-white max-h-[450px] shadow-md w-fit  grid grid-cols-8 place-content-center text-center items-center rounded-b-none rounded-lg">
+          <strong>Original Link</strong> <strong>Shortlink</strong>{" "}
+          <strong>Title</strong> <strong>Date</strong> <strong>Status</strong>{" "}
+          <strong>Click</strong> <strong>QR Code</strong>{" "}
+          <strong>Action</strong>{" "}
+        </div>
+        <div className="w-fit max-h-[450px] flex flex-col justify-start scrollbar-hide overflow-y-auto rounded-t-none bg-white shadow-md rounded-lg">
+          {shortLinks.length > 0 ? (
+            <ul className="space-y-4">
+              {shortLinks.map((link, index) => (
+                <li
+                  key={index}
+                  className="listsorlink bg-white shadow-md w-fit border grid grid-cols-8 place-content-center text-center items-center rounded-3xl"
+                >
+                  <p>
+                    <a
+                      href={link.originalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shor text-black"
+                    >
+                      {truncateUrl(link.originalUrl)}
+                    </a>
+                  </p>
+                  <p>
+                    <a
+                      href={link.originalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shor text-blue-600 font-semibold"
+                    >
+                      {link.shortLink}
+                    </a>
+                  </p>
+                  <p>
+                    {/* <strong>Title:</strong>  */}
+                    {link.title}
+                  </p>
+                  <p>
+                    {/* <strong>Created At:</strong>  */}
+                    {link.createdAt}
+                  </p>
+                  <p>
+                    {/* <strong>Status:</strong>  */}
+                    {link.status}
+                  </p>
+                  <p>
+                    {/* <strong>Clicks:</strong>  */}
+                    {link.clicks}
+                  </p>
+                  <div className="flex items-center justify-center">
+                    <img
+                      src={`data:image/png;base64,${link.qrCodeUrl}`}
+                      alt="QR Code"
+                      className="qr-code w-16 h-16 my-1"
+                      onClick={() => handleQrCodeClick(link)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <div className="flex justify-center">
+                      <FontAwesomeIcon
                         onClick={() => handleShare(link.shortLink)}
                         className="px-4 py-2"
-                        icon={faShare} />
-                  </div>
-                  <div className="flex justify-center">
-                    <FontAwesomeIcon
+                        icon={faShare}
+                      />
+                    </div>
+                    <div className="flex justify-center">
+                      <FontAwesomeIcon
                         onClick={() => handleCopy(link.shortLink)}
                         className="px-4 py-2"
-                        icon={faCopy} />
-                  </div>
-                  <div className="flex justify-center">
-                    <FontAwesomeIcon
+                        icon={faCopy}
+                      />
+                    </div>
+                    <div className="flex justify-center">
+                      <FontAwesomeIcon
                         onClick={() => handleShare(link.shortLink)}
                         className="px-4 py-2"
-                        icon={faShare} />
-                  </div>
-                  <div className="flex justify-center">
-                    <FontAwesomeIcon
+                        icon={faShare}
+                      />
+                    </div>
+                    <div className="flex justify-center">
+                      <FontAwesomeIcon
                         onClick={() => handleCopy(link.shortLink)}
                         className="px-4 py-2"
-                        icon={faCopy} />
+                        icon={faCopy}
+                      />
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p></p>
-        )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p></p>
+          )}
         </div>
       </div>
     </div>
