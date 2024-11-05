@@ -137,7 +137,7 @@ const LandingPage = () => {
 
       <div className="flex mt-[35px] flex-col md:flex-row-reverse md:pb-10 justify-between ">
         <div className='flex justify-center'>
-          <img src={Icon} alt="Icon"  className='w-80 md:w-[450px] xl:w[700px]'/>
+          <img src={Icon} alt="Icon"  className='w-80 md:w-[450px] xl:w-[700px]'/>
         </div>
         
         <div className='flex flex-col items-center justify-center text-center md:items-start md:text-left'>
@@ -178,7 +178,7 @@ const LandingPage = () => {
           </div>
 
           <div>
-            <img src={Icon} alt="Icon"className='hidden md:block md:w-[400px]' />
+            <img src={Icon} alt="Icon"className='hidden md:block md:w-[450px] xl:w-[700px]' />
           </div>
         </div>
         </div>
@@ -226,7 +226,7 @@ const LandingPage = () => {
       {/* End Features Section */}
 
       {/* Footer */}  
-      <footer className="bg-indigo-600 text-white pb-8 px-5 md:px-20">
+      <footer className="bg-indigo-600 text-white py-8 px-5 md:px-20">
         <div className='mb-12 md:grid md:grid-cols-3'>
           <div className='flex flex-col items-center mt-11'>
             <div className='flex justify-center items-center'>
@@ -295,7 +295,7 @@ const LandingPage = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-2xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
                   placeholder="Enter your username"
                 />
               </div>
@@ -305,7 +305,7 @@ const LandingPage = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-2xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl "
                   placeholder="Enter your password"
                 />
               </div>
@@ -353,7 +353,7 @@ const LandingPage = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-2xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
                   placeholder="Enter your username"
                 />
               </div>
@@ -362,7 +362,7 @@ const LandingPage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-2xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
                   placeholder="Enter your email"
                 />
               </div>
@@ -371,7 +371,7 @@ const LandingPage = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-2xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
                   placeholder="Enter your password"
                 />
               </div>
