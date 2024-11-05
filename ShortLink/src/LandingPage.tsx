@@ -307,7 +307,7 @@ import { useNavigate } from 'react-router-dom';
                 <p className='text-sm cursor-default lg:text-lg'>Didn't have account?</p>
                   <a
                     type="submit"
-                    className="text-sm cursor-pointer text-blue-600 mb-3 font-bold lg:text-xl"
+                    className="text-sm cursor-pointer text-blue-600 mb-3 font-bold lg:text-base"
                     onClick={openResgisterPopup}
                   >
                     Register
@@ -317,7 +317,7 @@ import { useNavigate } from 'react-router-dom';
                 <div className='flex gap-4'>
                   <button
                     type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold w-full lg:text-2xl"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold w-full lg:text-base"
                   >
                     Login
                   </button>
@@ -346,7 +346,7 @@ import { useNavigate } from 'react-router-dom';
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your username"
                 />
               </div>
@@ -355,7 +355,7 @@ import { useNavigate } from 'react-router-dom';
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your email"
                 />
               </div>
@@ -364,7 +364,7 @@ import { useNavigate } from 'react-router-dom';
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your password"
                 />
               </div>
