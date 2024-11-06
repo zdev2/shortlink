@@ -11,6 +11,10 @@ import linkedin from './assets/Linkedin.png'
 import close from './assets/close.svg'
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import { notification } from 'antd';
+import type { NotificationArgsProps } from 'antd';
+
+type NotificationPlacement = NotificationArgsProps['placement'];
 
 const LandingPage = () => {
   const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false); // State untuk popup Login
@@ -20,6 +24,16 @@ const LandingPage = () => {
   const [password, setPassword] = useState(""); // State untuk password
   const [errorMessage, setErrorMessage] = useState(""); // State untuk pesan error
   const navigate = useNavigate(); // State untuk navigate
+  // const [api] = notification.useNotification();
+
+  const openNotification = (placement: NotificationPlacement) => {
+    notification.info({
+      message: `Notification ${placement}`,
+      description:
+        'Registrasi Berhasil silahkan kembali Login',
+      placement,
+    });
+  };
 
   // Fungsi untuk menampilkan popup login
   const handleVisitNowClick = () => {
@@ -98,28 +112,32 @@ const LandingPage = () => {
   // Fungsi untuk menangani Register
   const handleRegister = async () => {
     try {
-      const response = await fetch(
-        "http://127.0.0.1:3000/api/v1/users/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, username, password }),
-        }
-      );
-
+      const response = await fetch("http://127.0.0.1:3000/api/v1/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, username, password }),
+      });
+  
       if (response.ok) {
-        setErrorMessage("");
-        alert("💕💕💕Registrasi berhasil tolong login ulang💕💕💕");
-        closeRegisterPopup(); // Menutup popup setelah registrasi berhasil
-        openLoginPopup();
+        openNotification("top"); // Notifikasi sukses
+        closeRegisterPopup();     // Menutup popup registrasi
+        openLoginPopup();         // Membuka popup login
       } else {
-        setErrorMessage("Registrasi gagal ");
+        notification.error({
+          message: 'Registration Failed',
+          description: 'Registrasi gagal. Silakan coba lagi.',
+          placement: 'top',
+        });
       }
     } catch (error) {
       console.error("Error Fetching API", error);
-      setErrorMessage("Terjadi kesalahan");
+      notification.error({
+        message: 'Error',
+        description: 'Terjadi kesalahan saat menghubungi server. Silakan coba lagi nanti.',
+        placement: 'top',
+      });
     }
   };
 
@@ -474,5 +492,4 @@ const LandingPage = () => {
     </div>
   );
 };
-
 export default LandingPage;

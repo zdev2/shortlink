@@ -278,7 +278,7 @@ const MainPage = () => {
         </h1>
         <button
           onClick={handleLogout}
-          className="bg-red-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
+          className="bg-red-600 text-white text-xs font-semibold"
         >
           Logout
         </button>
@@ -299,6 +299,7 @@ const MainPage = () => {
           Shorten now
         </button>
       </div>
+
       {/* Navigasi */}
       <div className="flex justify-center mt-4">
         <button
@@ -308,6 +309,7 @@ const MainPage = () => {
           Go to Analisi
         </button>
       </div>
+
       {/* Customize Your Link */}
       {isPopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -366,6 +368,7 @@ const MainPage = () => {
           </div>
         </div>
       )}
+      
       {/* QR Code Popup */}
       {selectedQrCode && (
         <QrCodePopup
@@ -375,19 +378,23 @@ const MainPage = () => {
       )}
       {/* Output Semua Link */}
       <div className="flex mt-5 flex-wrap justify-center">
-        <div className="barki bg-white max-h-[450px] shadow-md w-fit  grid grid-cols-8 place-content-center text-center items-center rounded-b-none rounded-lg">
-          <strong>Original Link</strong> <strong>Shortlink</strong>{" "}
-          <strong>Title</strong> <strong>Date</strong> <strong>Status</strong>{" "}
-          <strong>Click</strong> <strong>QR Code</strong>{" "}
-          <strong>Action</strong>{" "}
+        <div className="barki bg-[#4250CC]/50 max-h-[450px] shadow-md w-fit grid grid-cols-8 place-content-center text-center items-center rounded-b-none rounded-lg">
+          <strong className="text-white">Original Link</strong> 
+          <strong className="text-white">Shortlink</strong>
+          <strong className="text-white">Title</strong> 
+          <strong className="text-white">Date</strong> 
+          <strong className="text-white">Status</strong>
+          <strong className="text-white">Click</strong> 
+          <strong className="text-white">QR Code</strong>
+          <strong className="text-white">Action</strong>
         </div>
-        <div className="w-fit max-h-[450px] flex flex-col justify-start scrollbar-hide overflow-y-auto rounded-t-none bg-white shadow-md rounded-lg">
+        <div className="w-fit max-h-[450px] flex  flex-col justify-start scrollbar-hide overflow-y-auto rounded-t-none bg-[#4250CC]/50 shadow-md rounded-lg">
           {shortLinks.length > 0 ? (
             <ul className="space-y-4">
               {shortLinks.map((link, index) => (
                 <li
                   key={index}
-                  className="listsorlink bg-white shadow-md w-fit border grid grid-cols-8 place-content-center text-center items-center rounded-3xl"
+                  className="listsorlink bg-white/50 shadow-md w-fit border font-semibold grid grid-cols-8 place-content-center text-center items-center "
                 >
                   <p>
                     <a
