@@ -388,9 +388,8 @@ const LandingPage = () => {
                   placeholder="Enter your password"
                 />
               </div>
-
               <div className="flex gap-1">
-                <p className="text-sm cursor-default lg:text-lg">
+                 <p className="text-sm cursor-default lg:text-lg">
                   Didn't have account?
                 </p>
                 <a
@@ -405,7 +404,7 @@ const LandingPage = () => {
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold w-full lg:text-2xl"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold w-full lg:text-base"
                   >
                     Login
                   </button>
@@ -439,7 +438,7 @@ const LandingPage = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your username"
                 />
               </div>
@@ -448,7 +447,7 @@ const LandingPage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your email"
                 />
               </div>
@@ -457,7 +456,7 @@ const LandingPage = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your password"
                 />
               </div>
