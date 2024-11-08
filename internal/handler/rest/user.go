@@ -143,6 +143,7 @@ func Login(c *fiber.Ctx) error {
 
     // Return success response without the token
     return OK(c, fiber.Map{
+        "token": tokenString,
         "message": "Login successful",
         "user":    userAcc,
     })
