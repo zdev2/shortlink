@@ -56,6 +56,35 @@ const MainPage = () => {
     setExpiredTime(null);
   };
 
+  const authToken = localStorage.getItem('Authorization'); // Replace 'authToken' with your actual key
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/v1/users/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+    
+      if (response.status === 401) {
+        // Handle unauthorized response (e.g., redirect to login or clear session)
+        console.log("Session expired, redirecting to login...");
+        navigate("/")
+        // Clear any session data or redirect the user
+      } else if (!response.ok) {
+        throw new Error(`Logout failed: ${response.statusText}`);
+      }
+    
+      console.log("Logout successful");
+    
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+    
+  };
+
   const truncateUrl = (url: string, maxLength = 20) => {
     if (url.length <= maxLength) return url;
     const start = url.slice(0, 20);
@@ -118,30 +147,6 @@ const MainPage = () => {
     };
     showAllURLs(); // Call fetch function on mount
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      const response = await fetch(
-        "http://127.0.0.1:3000/api/v1/users/logout",
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
-
-      if (response.ok) {
-        localStorage.removeItem("auth_token");
-        sessionStorage.removeItem("auth_token");
-        alert("Logout successful!");
-        navigate("/"); // Redirect to login page or any other page
-      } else {
-        alert("Failed to log out.");
-      }
-    } catch (error) {
-      console.error("Error logging out:", error);
-      alert("An error occurred during logout.");
-    }
-  };
 
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
@@ -265,13 +270,15 @@ const MainPage = () => {
 
   return (
     <div className="min-h-screen relative flex flex-col justify-center bg-gray-100 p-4 md:p-6">
-      <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8">
-        URL Shortener
-      </h1>
-      <div className="flex justify-end mb-4">
+      
+      {/* Logout Button */}
+      <div className="flex justify-center mt-4">
+        <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8">
+          URL Shortener
+        </h1>
         <button
           onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-2 rounded-full flex items-center"
+          className="bg-red-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
         >
           Logout
         </button>

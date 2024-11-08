@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import "./App.css";
 import { FaArrowRight } from "react-icons/fa";
 import Icon from "./assets/Icon.svg";
@@ -10,6 +11,21 @@ import twiter from "./assets/Twitter.png";
 import linkedin from "./assets/Linkedin.png";
 import close from "./assets/close.svg";
 import { useNavigate } from "react-router-dom";
+=======
+import './App.css';
+import { FaArrowRight } from 'react-icons/fa';
+import Icon from './assets/Icon.svg';
+import Logo from './assets/logo.svg';
+import { useState } from 'react';
+import foto from './assets/Group 86.svg';
+import feat from './assets/feat-links 1.svg';
+import facebook from './assets/Icon_11_.png';
+import twiter from './assets/Twitter.png'
+import linkedin from './assets/Linkedin.png'
+import close from './assets/close.svg'
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+>>>>>>> af7515e41751ead0092d19734c9ac4e15287f3c8
 
 const LandingPage = () => {
   const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false); // State untuk popup Login
@@ -72,6 +88,7 @@ const LandingPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
+<<<<<<< HEAD
         body: JSON.stringify({ username, password }),
         credentials: "include",
       });
@@ -80,6 +97,21 @@ const LandingPage = () => {
       if (response.ok) {
         setErrorMessage("");
         navigate("/main-menu");
+=======
+        body : JSON.stringify ({username, password}),
+      }); 
+      const data = await response.json();
+      console.log(data)
+
+      const token = data.token; // pastikan sesuai dengan respons server
+      localStorage.setItem('authToken', token);
+
+      if (response.ok) {
+        const token = data.token; // Make sure this matches the server's response
+        Cookies.set('authToken', token, { expires: 7 }); // Save token as a cookie, expires in 7 days
+        setErrorMessage('');
+        navigate('/main-menu');
+>>>>>>> af7515e41751ead0092d19734c9ac4e15287f3c8
       } else {
         setErrorMessage("Username atau Password Salah");
       }
@@ -364,6 +396,7 @@ const LandingPage = () => {
                 />
               </div>
 
+<<<<<<< HEAD
               <div className="flex gap-1">
                 <p className="text-sm cursor-default lg:text-lg">
                   Didn't have account?
@@ -376,11 +409,23 @@ const LandingPage = () => {
                   Register
                 </a>
               </div>
+=======
+              <div className='flex gap-1'>
+                <p className='text-sm cursor-default lg:text-lg'>Didn't have account?</p>
+                  <a
+                    type="submit"
+                    className="text-sm cursor-pointer text-blue-600 mb-3 font-bold lg:text-base"
+                    onClick={openResgisterPopup}
+                  >
+                    Register
+                  </a>
+                  </div>
+>>>>>>> af7515e41751ead0092d19734c9ac4e15287f3c8
               <div className="f">
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold w-full lg:text-2xl"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold w-full lg:text-base"
                   >
                     Login
                   </button>
@@ -414,7 +459,7 @@ const LandingPage = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your username"
                 />
               </div>
@@ -423,7 +468,7 @@ const LandingPage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your email"
                 />
               </div>
@@ -432,7 +477,7 @@ const LandingPage = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your password"
                 />
               </div>
