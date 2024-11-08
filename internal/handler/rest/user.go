@@ -133,7 +133,7 @@ func Login(c *fiber.Ctx) error {
 
     // Set the token as an HttpOnly cookie
     c.Cookie(&fiber.Cookie{
-        Name:     "Authorization",
+        Name:     "authToken",
         Value:    tokenString,
         Expires:  time.Now().Add(24 * time.Hour), // Set expiry as needed
         HTTPOnly: true,
