@@ -11,6 +11,10 @@ import linkedin from './assets/Linkedin.png'
 import close from './assets/close.svg'
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import { notification } from 'antd';
+import type { NotificationArgsProps } from 'antd';
+
+type NotificationPlacement = NotificationArgsProps['placement'];
 
 const LandingPage = () => {
   const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false); // State untuk popup Login
@@ -20,6 +24,16 @@ const LandingPage = () => {
   const [password, setPassword] = useState(""); // State untuk password
   const [errorMessage, setErrorMessage] = useState(""); // State untuk pesan error
   const navigate = useNavigate(); // State untuk navigate
+  // const [api] = notification.useNotification();
+
+  const openNotification = (placement: NotificationPlacement) => {
+    notification.success({
+      message: 'Succes Registrase',
+      description:
+        'Registrasi Berhasil silahkan kembali Login',
+      placement,
+    });
+  };
 
   // Fungsi untuk menampilkan popup login
   const handleVisitNowClick = () => {
@@ -83,6 +97,12 @@ const LandingPage = () => {
       localStorage.setItem('authToken', token);
 
       if (response.ok) {
+        notification.success({
+          message: 'Login Berhasil',
+          description:
+            'Login Berhasil Selamat Datang di DnD Shortlink',
+          placement: 'top',
+        });
         const token = data.token; // Make sure this matches the server's response
         Cookies.set('authToken', token, { expires: 7 }); // Save token as a cookie, expires in 7 days
         setErrorMessage('');
@@ -98,28 +118,32 @@ const LandingPage = () => {
   // Fungsi untuk menangani Register
   const handleRegister = async () => {
     try {
-      const response = await fetch(
-        "http://127.0.0.1:3000/api/v1/users/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, username, password }),
-        }
-      );
-
+      const response = await fetch("http://127.0.0.1:3000/api/v1/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, username, password }),
+      });
+  
       if (response.ok) {
-        setErrorMessage("");
-        alert("💕💕💕Registrasi berhasil tolong login ulang💕💕💕");
-        closeRegisterPopup(); // Menutup popup setelah registrasi berhasil
-        openLoginPopup();
+        openNotification("top"); // Notifikasi sukses
+        closeRegisterPopup();     // Menutup popup registrasi
+        openLoginPopup();         // Membuka popup login
       } else {
-        setErrorMessage("Registrasi gagal ");
+        notification.error({
+          message: 'Registration Failed',
+          description: 'Registrasi gagal. Silakan coba lagi.',
+          placement: 'top',
+        });
       }
     } catch (error) {
       console.error("Error Fetching API", error);
-      setErrorMessage("Terjadi kesalahan");
+      notification.error({
+        message: 'Error',
+        description: 'Terjadi kesalahan saat menghubungi server. Silakan coba lagi nanti.',
+        placement: 'top',
+      });
     }
   };
 
@@ -311,11 +335,11 @@ const LandingPage = () => {
         <hr />
         <div className="flex flex-col items-center md:grid md:grid-cols-3 md:justify-items-center">
           <div className="flex mt-6">
-            <p className="text-xl md:text-base lg:text-lg">A product of </p>
+            <p className="text-xl">A product of </p>
             <img src={Logo} alt="" className="w-5" />
           </div>
           <div className="mt-6">
-            <p className="text-base md:text-xs lg:text-lg">© 2024 DnD. Copyright not protected</p>
+            <p className="text-base">© 2024 DnD. Copyright not protected</p>
           </div>
           <div className="flex items-center mt-6">
             <a href="">
@@ -356,7 +380,7 @@ const LandingPage = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-sm"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
                   placeholder="Enter your username"
                 />
               </div>
@@ -366,11 +390,10 @@ const LandingPage = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-sm "
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl "
                   placeholder="Enter your password"
                 />
               </div>
-
               <div className="flex gap-1">
                 <p className="text-sm cursor-default lg:text-lg">
                   Didn't have account?
@@ -387,7 +410,7 @@ const LandingPage = () => {
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold w-full lg:text-2xl"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold w-full lg:text-base"
                   >
                     Login
                   </button>
@@ -421,7 +444,7 @@ const LandingPage = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-sm"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your username"
                 />
               </div>
@@ -430,7 +453,7 @@ const LandingPage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-sm"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your email"
                 />
               </div>
@@ -439,7 +462,7 @@ const LandingPage = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-sm"
+                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-base"
                   placeholder="Enter your password"
                 />
               </div>
@@ -474,5 +497,4 @@ const LandingPage = () => {
     </div>
   );
 };
-
-export default LandingPage;
+export default LandingPage;
