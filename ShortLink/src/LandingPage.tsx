@@ -311,11 +311,11 @@ const LandingPage = () => {
         <hr />
         <div className="flex flex-col items-center md:grid md:grid-cols-3 md:justify-items-center">
           <div className="flex mt-6">
-            <p className="text-xl">A product of </p>
+            <p className="text-xl md:text-base lg:text-lg">A product of </p>
             <img src={Logo} alt="" className="w-5" />
           </div>
           <div className="mt-6">
-            <p className="text-base">© 2024 DnD. Copyright not protected</p>
+            <p className="text-base md:text-xs lg:text-lg">© 2024 DnD. Copyright not protected</p>
           </div>
           <div className="flex items-center mt-6">
             <a href="">
@@ -356,7 +356,7 @@ const LandingPage = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-sm"
                   placeholder="Enter your username"
                 />
               </div>
@@ -366,7 +366,7 @@ const LandingPage = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl "
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-sm "
                   placeholder="Enter your password"
                 />
               </div>
@@ -421,7 +421,7 @@ const LandingPage = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-sm"
                   placeholder="Enter your username"
                 />
               </div>
@@ -430,7 +430,7 @@ const LandingPage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-sm"
                   placeholder="Enter your email"
                 />
               </div>
@@ -439,7 +439,7 @@ const LandingPage = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-xl"
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 lg:text-sm"
                   placeholder="Enter your password"
                 />
               </div>
