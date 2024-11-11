@@ -4,10 +4,16 @@ import "./App.css";
 import { notification } from 'antd';
 import type { NotificationArgsProps, MenuProps } from 'antd';
 import { CopyOutlined, ShareAltOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Space, Menu }  from 'antd';
-import axios from 'axios';
+import { Dropdown, Space, Menu }  from 'antd';
+import {jwtDecode} from "jwt-decode";
 
 type NotificationPlacement = NotificationArgsProps['placement'];
+
+interface DecodedToken {
+  exp: number;
+  iat: number;
+  // Add other properties of the decoded token as needed
+}
 
 // Define the interface for the body data sent to the API
 interface BodyData {
@@ -43,56 +49,36 @@ const MainPage = () => {
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedQrCode, setSelectedQrCode] = useState<ShortLink | null>(null);
-  const [link, setLink] = useState<ShortLink | null>(null);
+  const [selectedLink, setSelectedLink] = useState<ShortLink | null>(null);
 
-  useEffect(() => {
-    const fetchShortLink = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:3000/api/v1/urls'); // Ganti URL ini dengan API Anda
-        const data: ShortLink = response.data;
-        setLink(data);
-      } catch (error) {
-        console.error("Error fetching short link:", error);
-        notification.error({
-          message: 'Failed to load link',
-          description: 'There was an error loading the link. Please try again later.',
-          placement: 'top',
-        });
-      }
-    };
-
-    fetchShortLink();
-  }, []);
-
-  // Function to handle "Copy" action
   const handleCopy = () => {
-    navigator.clipboard.writeText('')
-      .then(() => {
-        notification.success({
-          message: 'Link copied to clipboard!',
-          description: 'The shortened link has been copied successfully.',
-          placement: 'top',
+    if (selectedLink) {
+      navigator.clipboard.writeText(selectedLink.shortLink)
+        .then(() => {
+          notification.success({
+            message: 'Link copied to clipboard!',
+            description: 'The shortened link has been copied successfully.',
+            placement: 'top',
+          });
+        })
+        .catch((error) => {
+          console.error("Error copying text:", error);
+          notification.error({
+            message: 'Failed to copy link',
+            description: 'There was an error copying the link. Please try again.',
+            placement: 'top',
+          });
         });
-      })
-      .catch((error) => {
-        console.error("Error copying text:", error);
-        notification.error({
-          message: 'Failed to copy link',
-          description: 'There was an error copying the link. Please try again.',
-          placement: 'top',
-        });
-      });
+    }
   };
-
-  // Function to handle "Share" action
+  
   const handleShare = () => {
-    if (navigator.share) {
+    if (navigator.share && selectedLink) {
       navigator.share({
         title: "Check out this shortened link!",
         text: "Here is a link I shortened: ",
-        url: shortLinks,
-      })
-      .catch((error) => {
+        url: selectedLink.shortLink,
+      }).catch((error) => {
         console.error("Error sharing:", error);
         notification.error({
           message: 'Failed to share link',
@@ -109,34 +95,30 @@ const MainPage = () => {
     }
   };
 
-  // Define items with the necessary links
   const items: MenuProps['items'] = [
     {
       key: 'copy',
       icon: <CopyOutlined />,
       label: 'Copy',
-      onClick: () => handleCopy(link.shortLink), // Ensure link.shortLink is defined and passed
+      onClick: handleCopy,
     },
     {
       key: 'share',
       icon: <ShareAltOutlined />,
       label: 'Share',
-      render: () => {
-        <button onClick={handleShare}></button>
-      } // Ensure link.shortLink is defined and passed
+      onClick: handleShare,
     },
-    // Additional items can be added as needed
   ];
   
-  const HorizontalMenu = () => (
-    <Menu
-      items={items}
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-      }}
-    />
-  );
+  // const HorizontalMenu = () => (
+  //   <Menu
+  //     items={items}
+  //     style={{
+  //       display: 'flex',
+  //       flexDirection: 'row',
+  //     }}
+  //   />
+  // );
 
   const openNotification = (placement: NotificationPlacement) => {
     notification.info({
@@ -164,18 +146,21 @@ const MainPage = () => {
     setExpiredTime(null);
   };
 
-  const authToken = localStorage.getItem('Authorization'); // Replace 'authToken' with your actual key
+  const authToken = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/v1/users/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
+      const response = await fetch(
+        "http://localhost:3000/api/v1/users/logout",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
         }
-      });
-    
+      );
+
       if (response.status === 401) {
         // Handle unauthorized response (e.g., redirect to login or clear session)
         console.log("Session expired, redirecting to login...");
@@ -185,16 +170,15 @@ const MainPage = () => {
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
       }
-    
+
       console.log("Logout successful");
-    
     } catch (error) {
       console.error("Error during logout:", error);
     }
-    
   };
 
   const truncateUrl = (url: string, maxLength = 20) => {
+    if (!url) return "";
     if (url.length <= maxLength) return url;
     const start = url.slice(0, 20);
     return `${start}...`;
@@ -231,36 +215,64 @@ const MainPage = () => {
   useEffect(() => {
     const showAllURLs = async () => {
       try {
+        const token = localStorage.getItem("authToken");
+        if (token) {
+          try {
+            const decoded: DecodedToken = jwtDecode(token);
+            console.log(decoded);
+            if (decoded.exp < Date.now() / 1000) {
+              console.error("Token has expired");
+              // Handle token expiry (e.g., log out user or refresh token)
+            }
+          } catch (error) {
+            console.error("Error decoding token:", error);
+          }
+        } else {
+          console.error("No token found in localStorage");
+        }
+
         const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
           method: "GET",
-
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-          credentials: "include",
         });
 
-        if (!response.ok) throw new Error("Failed to fetch URLs");
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.error("Unauthorized access - possible invalid or expired token.");
+            localStorage.removeItem("authToken");
+            navigate("/main-menu")
+          } else {
+            console.error("Failed to fetch URLs. Status code:", response.status);
+          }
+          return;
+        }
+
         const data = await response.json();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const links = data.data.urls.map((item: any) => ({
+        const links: ShortLink[] = data.data.urls.map((item: any) => ({
           id: item.id,
           shortLink: `https://dnd.id/${item.shortlink}`,
-          originalUrl: item.url,
-          title: item.url_title, // `url_title` is used directly from the JSON
-          clicks: item.clickcount, // `clickcount` directly from `item`
-          status: item.status,
-          createdAt: item.createdat,
+          originalUrl: item.url || "",
+          title: item.url_title || "Untitled",
+          clicks: item.clickcount || 0,
+          status: item.status || "inactive",
+          createdAt: item.createdat || "N/A",
           lastAccessedAt: item.lastaccesedat || null,
-          qrCodeUrl: item.qr_code, // `qr_code` as in the JSON
+          qrCodeUrl: item.qr_code || "",
         }));
+
         setShortLinks(links);
+        console.log(links); // Log the final links array
       } catch (error) {
         console.error("Error fetching URLs:", error);
       }
     };
-    showAllURLs(); // Call fetch function on mount
-  }, []);
+
+    showAllURLs();
+  }, [navigate]);
 
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
@@ -538,8 +550,13 @@ const MainPage = () => {
                   </div>
                   <div className="grid items-center justify-center">
                   <Space direction="horizontal" wrap>
-                    <Dropdown overlay={<HorizontalMenu />} placement="top" arrow>
-                      <Button>---</Button>
+                    <Dropdown
+                      overlay={<Menu items={items} />}
+                      onVisibleChange={(visible) => visible && setSelectedLink(link)} // Set selected link here
+                    >
+                      <a onClick={(e) => e.preventDefault()}>
+                        Actions 
+                      </a>
                     </Dropdown>
                   </Space>
                   </div>

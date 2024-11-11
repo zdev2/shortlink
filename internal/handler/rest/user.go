@@ -133,9 +133,9 @@ func Login(c *fiber.Ctx) error {
 
     // Set the token as an HttpOnly cookie
     c.Cookie(&fiber.Cookie{
-        Name:     "Authorization",
+        Name:     "authToken",
         Value:    tokenString,
-        Expires:  time.Now().Add(24 * time.Hour), // Set expiry as needed
+        Expires:  time.Now().Add(time.Hour * 24 * 30), // Set expiry as needed
         HTTPOnly: true,
         Secure:   false, // Set to true if using HTTPS in production
         Path:     "/",
@@ -143,6 +143,7 @@ func Login(c *fiber.Ctx) error {
 
     // Return success response without the token
     return OK(c, fiber.Map{
+        "token": tokenString,
         "message": "Login successful",
         "user":    userAcc,
     })
