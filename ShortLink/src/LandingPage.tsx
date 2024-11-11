@@ -28,7 +28,7 @@ const LandingPage = () => {
 
   const openNotification = (placement: NotificationPlacement) => {
     notification.success({
-      message: `Succes Registrase`,
+      message: 'Succes Registrase',
       description:
         'Registrasi Berhasil silahkan kembali Login',
       placement,
@@ -98,7 +98,7 @@ const LandingPage = () => {
 
       if (response.ok) {
         notification.success({
-          message: `Login Berhasil`,
+          message: 'Login Berhasil',
           description:
             'Login Berhasil Selamat Datang di DnD Shortlink',
           placement: 'top',
