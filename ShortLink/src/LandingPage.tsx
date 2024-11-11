@@ -27,8 +27,8 @@ const LandingPage = () => {
   // const [api] = notification.useNotification();
 
   const openNotification = (placement: NotificationPlacement) => {
-    notification.info({
-      message: `Notification ${placement}`,
+    notification.success({
+      message: `Succes Registrase`,
       description:
         'Registrasi Berhasil silahkan kembali Login',
       placement,
@@ -97,6 +97,12 @@ const LandingPage = () => {
       localStorage.setItem('authToken', token);
 
       if (response.ok) {
+        notification.success({
+          message: `Login Berhasil`,
+          description:
+            'Login Berhasil Selamat Datang di DnD Shortlink',
+          placement: 'top',
+        });
         const token = data.token; // Make sure this matches the server's response
         Cookies.set('authToken', token, { expires: 7 }); // Save token as a cookie, expires in 7 days
         setErrorMessage('');
@@ -389,7 +395,7 @@ const LandingPage = () => {
                 />
               </div>
               <div className="flex gap-1">
-                 <p className="text-sm cursor-default lg:text-lg">
+                <p className="text-sm cursor-default lg:text-lg">
                   Didn't have account?
                 </p>
                 <a
