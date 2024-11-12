@@ -93,7 +93,7 @@ const LandingPage = () => {
       const data = await response.json();
       console.log(data)
 
-      const token = data.token; // pastikan sesuai dengan respons server
+      const token = data.data.token; // pastikan sesuai dengan respons server
       localStorage.setItem('authToken', token);
 
       if (response.ok) {

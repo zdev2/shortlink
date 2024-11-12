@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./App.css";
 import { notification } from 'antd';
-import type { NotificationArgsProps, MenuProps } from 'antd';
-import { CopyOutlined, ShareAltOutlined } from '@ant-design/icons';
+import type { NotificationArgsProps } from 'antd';
+import { CopyOutlined, ShareAltOutlined, MoreOutlined } from '@ant-design/icons';
 import { Dropdown, Space, Menu }  from 'antd';
 import {jwtDecode} from "jwt-decode";
 
@@ -95,7 +95,7 @@ const MainPage = () => {
     }
   };
 
-  const items: MenuProps['items'] = [
+  const items = [
     {
       key: 'copy',
       icon: <CopyOutlined />,
@@ -110,15 +110,15 @@ const MainPage = () => {
     },
   ];
   
-  // const HorizontalMenu = () => (
-  //   <Menu
-  //     items={items}
-  //     style={{
-  //       display: 'flex',
-  //       flexDirection: 'row',
-  //     }}
-  //   />
-  // );
+  const HorizontalMenu = () => (
+    <Menu
+      items={items}
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+      }}
+    />
+  );
 
   const openNotification = (placement: NotificationPlacement) => {
     notification.info({
@@ -283,35 +283,34 @@ const MainPage = () => {
       });
       return;
     }
-
+  
     try {
       const bodyData: BodyData = {
         url: originalUrl,
         shortlink: customSlug,
         title: customTitle,
       };
-
+  
       if (expiredTime !== null) {
         bodyData.expiredTime = expiredTime;
       }
-
+  
       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
+        credentials: "include", // Remove this line if cookies are not needed
         body: JSON.stringify(bodyData),
       });
-
+  
       if (!response.ok) {
         const errorText = await response.json();
         console.error(`Error: ${errorText.message}`);
         alert("Failed to shorten the link. Please try again.");
         return;
       }
-
+  
       const data = await response.json();
       const newLink: ShortLink = {
         id: data.data.url_details.id,
@@ -324,7 +323,7 @@ const MainPage = () => {
         lastAccessedAt: data.data.url_details.lastaccesedat || null,
         qrCodeUrl: data.data.url_details.qr_code,
       };
-
+  
       setShortLinks([newLink, ...shortLinks]);
       setOriginalUrl("");
       setCustomSlug("");
@@ -333,8 +332,9 @@ const MainPage = () => {
       setIsPopupOpen(false);
     } catch (error) {
       console.error("Error fetching API:", error);
+      alert("There was a problem connecting to the server. Please check your connection and try again.");
     }
-  };
+  };  
 
   const QrCodePopup: React.FC<QrCodePopupProps> = ({ qrCodeUrl, onClose }) => {
     const handleDownload = () => {
@@ -551,11 +551,19 @@ const MainPage = () => {
                   <div className="grid items-center justify-center">
                   <Space direction="horizontal" wrap>
                     <Dropdown
-                      overlay={<Menu items={items} />}
+                      overlay={HorizontalMenu}
+                      placement="topCenter" // Set the dropdown to appear above
                       onVisibleChange={(visible) => visible && setSelectedLink(link)} // Set selected link here
                     >
                       <a onClick={(e) => e.preventDefault()}>
-                        Actions 
+                        <MoreOutlined 
+                          style={{ 
+                            fontSize: '30px', 
+                            cursor: 'pointer', 
+                            transform: 'rotate(90deg)', 
+                            fontWeight: 'bold',
+                          }} 
+                        />
                       </a>
                     </Dropdown>
                   </Space>
