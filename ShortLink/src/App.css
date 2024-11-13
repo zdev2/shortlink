@@ -1,42 +1,58 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Menambahkan efek scale-up */
+/* Popup container */
+.popup-container {
+  opacity: 0;
+  transform: translateY(-50px); /* Mulai dengan posisi sedikit ke atas */
+  transition: opacity 0.3s ease-in, transform 0.3s ease-in;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.popup-container.show {
+  opacity: 1;
+  transform: translateY(0); /* Kembali ke posisi awal */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Background overlay */
+.popup-background {
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.popup-background.show {
+  opacity: 1;
 }
 
-.card {
-  padding: 2em;
+/* styles.css */
+.listsorlink {
+  display: grid;
+  grid-template-columns: 200px 240px 150px 150px 75px 60px 100px 100px ; /* Kolom tanpa nama */
+                      /*  Original|Shortlink|Title|Date|Status|Click|Qr|Action  */
+  grid-template-rows: auto;
+}
+.barki {
+  display: grid;
+  grid-template-columns: 200px 240px 150px 150px 75px 60px 100px 100px ; /* Kolom tanpa nama */
+                      /*  Original|Shortlink|Title|Date|Status|Click|Qr|Action  */
+  grid-template-rows: 70px;
 }
 
-.read-the-docs {
-  color: #888;
+.qr-code {
+  width: 4rem; /* Default size */
+  height: 4rem; /* Default size */
+  transition: transform 0.2s ease-in; /* Smooth transition */
+}
+
+.qr-code:hover, .qr-code:focus {
+  transform: scale(1.2); /* Enlarge on hover */
+}
+
+.shor:hover{
+  text-decoration: underline;
+}
+
+strong {
+  color: rgb(0, 0, 0);
 }
