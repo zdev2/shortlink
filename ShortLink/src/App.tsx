@@ -1,8 +1,8 @@
-
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LandingPage from "./LandingPage";
 import MainPage from "./mainpage";
 import AnalisiPage from "./analisis";
+
 
 function App() {
   return (
