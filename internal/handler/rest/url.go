@@ -349,9 +349,11 @@ func DeleteURL(c *fiber.Ctx) error {
 
 // GetUserUrlLogs retrieves logs (URLs) for the logged-in user
 func GetUserUrlLogs(c *fiber.Ctx) error {
-	user := c.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	userID := claims["sub"].(string)
+	claims := c.Locals("user").(jwt.MapClaims)
+	userID, ok := claims["sub"].(string)
+	if !ok {
+		return BadRequest(c, "User ID not found in token claims")
+	}
 
 	objectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
@@ -376,6 +378,7 @@ func GetUserUrlLogs(c *fiber.Ctx) error {
 		"urls":    urls,
 	})
 }
+
 
 func getUrlTitle(url string)(string, error){
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
