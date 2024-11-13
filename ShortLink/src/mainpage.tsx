@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./App.css";
-import { notification } from 'antd';
-import { CopyOutlined, ShareAltOutlined, MoreOutlined } from '@ant-design/icons';
-import { Dropdown, Space, Menu }  from 'antd';
-import {jwtDecode} from "jwt-decode";
+import { notification } from "antd";
+import {
+  CopyOutlined,
+  ShareAltOutlined,
+  MoreOutlined,
+} from "@ant-design/icons";
+import { Dropdown, Space, Menu } from "antd";
+import { jwtDecode } from "jwt-decode";
 
 interface DecodedToken {
   exp: number;
@@ -50,73 +54,78 @@ const MainPage = () => {
 
   const handleCopy = () => {
     if (selectedLink) {
-      navigator.clipboard.writeText(selectedLink.shortLink)
+      navigator.clipboard
+        .writeText(selectedLink.shortLink)
         .then(() => {
           notification.success({
-            message: 'Link copied to clipboard!',
-            description: 'The shortened link has been copied successfully.',
-            placement: 'top',
+            message: "Link copied to clipboard!",
+            description: "The shortened link has been copied successfully.",
+            placement: "top",
           });
         })
         .catch((error) => {
           console.error("Error copying text:", error);
           notification.error({
-            message: 'Failed to copy link',
-            description: 'There was an error copying the link. Please try again.',
-            placement: 'top',
+            message: "Failed to copy link",
+            description:
+              "There was an error copying the link. Please try again.",
+            placement: "top",
           });
         });
     }
   };
-  
+
   const handleShare = () => {
     if (navigator.share && selectedLink) {
-      navigator.share({
-        title: "Check out this shortened link!",
-        text: "Here is a link I shortened: ",
-        url: selectedLink.shortLink,
-      }).catch((error) => {
-        console.error("Error sharing:", error);
-        notification.error({
-          message: 'Failed to share link',
-          description: 'There was an error sharing the link. Please try again.',
-          placement: 'top',
+      navigator
+        .share({
+          title: "Check out this shortened link!",
+          text: "Here is a link I shortened: ",
+          url: selectedLink.shortLink,
+        })
+        .catch((error) => {
+          console.error("Error sharing:", error);
+          notification.error({
+            message: "Failed to share link",
+            description:
+              "There was an error sharing the link. Please try again.",
+            placement: "top",
+          });
         });
-      });
     } else {
       notification.info({
-        message: 'Share not supported',
+        message: "Share not supported",
         description: "Your browser doesn't support the Web Share API.",
-        placement: 'top',
+        placement: "top",
       });
     }
   };
 
   const items = [
     {
-      key: 'copy',
+      key: "copy",
       icon: <CopyOutlined />,
-      label: 'Copy',
+      label: "Copy",
       onClick: handleCopy,
     },
     {
-      key: 'share',
+      key: "share",
       icon: <ShareAltOutlined />,
-      label: 'Share',
+      label: "Share",
       onClick: handleShare,
     },
   ];
-  
+
   const HorizontalMenu = () => (
     <Menu
       items={items}
       style={{
-        display: 'flex',
-        flexDirection: 'row',
+        display: "flex",
+        flexDirection: "row",
       }}
     />
   );
-  
+
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -152,12 +161,11 @@ const MainPage = () => {
       if (response.status === 401) {
         // Handle unauthorized response (e.g., redirect to login or clear session)
         console.log("Session expired, redirecting to login...");
-        navigate("/")
+        navigate("/");
         notification.success({
           message: `logout`,
-          description:
-            'Logout Berhasil sampai berjumpa kembali✌️',
-          placement: 'top',
+          description: "Logout Berhasil sampai berjumpa kembali✌️",
+          placement: "top",
         });
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
@@ -192,9 +200,9 @@ const MainPage = () => {
   const handleShorten = async () => {
     if (!originalUrl || !validateUrl(originalUrl)) {
       notification.error({
-        message: 'Shorten Failed',
-        description: 'Please enter a valid URL.',
-        placement: 'top',
+        message: "Shorten Failed",
+        description: "Please enter a valid URL.",
+        placement: "top",
       });
       return;
     }
@@ -233,11 +241,16 @@ const MainPage = () => {
 
         if (!response.ok) {
           if (response.status === 401) {
-            console.error("Unauthorized access - possible invalid or expired token.");
+            console.error(
+              "Unauthorized access - possible invalid or expired token."
+            );
             localStorage.removeItem("authToken");
-            navigate("/main-menu")
+            navigate("/main-menu");
           } else {
-            console.error("Failed to fetch URLs. Status code:", response.status);
+            console.error(
+              "Failed to fetch URLs. Status code:",
+              response.status
+            );
           }
           return;
         }
@@ -269,40 +282,58 @@ const MainPage = () => {
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
       notification.error({
-        message: 'Shorten Failed',
-        description: 'Please complete all fields including custom slug and custom title.',
-        placement: 'top',
+        message: "Shorten Failed",
+        description:
+          "Please complete all fields including custom slug and custom title.",
+        placement: "top",
       });
       return;
     }
-  
+
     try {
       const bodyData: BodyData = {
         url: originalUrl,
         shortlink: customSlug,
         title: customTitle,
       };
-  
+
       if (expiredTime !== null) {
         bodyData.expiredTime = expiredTime;
       }
-  
+
+      const token = localStorage.getItem("authToken");
+      if (token) {
+        try {
+          const decoded: DecodedToken = jwtDecode(token);
+          console.log(decoded);
+          if (decoded.exp < Date.now() / 1000) {
+            console.error("Token has expired");
+            // Handle token expiry (e.g., log out user or refresh token)
+          }
+        } catch (error) {
+          console.error("Error decoding token:", error);
+        }
+      } else {
+        console.error("No token found in localStorage");
+      }
+
       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "include", // Remove this line if cookies are not needed
         body: JSON.stringify(bodyData),
       });
-  
+
       if (!response.ok) {
         const errorText = await response.json();
         console.error(`Error: ${errorText.message}`);
         alert("Failed to shorten the link. Please try again.");
         return;
       }
-  
+
       const data = await response.json();
       const newLink: ShortLink = {
         id: data.data.url_details.id,
@@ -315,7 +346,7 @@ const MainPage = () => {
         lastAccessedAt: data.data.url_details.lastaccesedat || null,
         qrCodeUrl: data.data.url_details.qr_code,
       };
-  
+
       setShortLinks([newLink, ...shortLinks]);
       setOriginalUrl("");
       setCustomSlug("");
@@ -325,12 +356,13 @@ const MainPage = () => {
     } catch (error) {
       console.error("Error fetching API:", error);
       notification.error({
-        message: 'Shorten Failed',
-        description: 'There was a problem connecting to the server. Please check your connection and try again.',
-        placement: 'top',
+        message: "Shorten Failed",
+        description:
+          "There was a problem connecting to the server. Please check your connection and try again.",
+        placement: "top",
       });
     }
-  };  
+  };
 
   const QrCodePopup: React.FC<QrCodePopupProps> = ({ qrCodeUrl, onClose }) => {
     const handleDownload = () => {
@@ -374,7 +406,6 @@ const MainPage = () => {
 
   return (
     <div className="min-h-screen relative flex flex-col justify-center items-center bg-gray-100 p-4 md:p-6">
-      
       {/* Logout Button */}
       <div className="flex justify-between mt-4 ">
         <h1 className="text-2xl md:text-4xl font-bold text-center ">
@@ -472,7 +503,7 @@ const MainPage = () => {
           </div>
         </div>
       )}
-      
+
       {/* QR Code Popup */}
       {selectedQrCode && (
         <QrCodePopup
@@ -483,12 +514,12 @@ const MainPage = () => {
       {/* Output Semua Link */}
       <div className="flex mt-5 flex-wrap justify-center">
         <div className="barki bg-[#4250CC]/50 max-h-[450px] shadow-md w-fit grid grid-cols-8 place-content-center text-center items-center rounded-b-none rounded-lg">
-          <strong className="text-white">Original Link</strong> 
+          <strong className="text-white">Original Link</strong>
           <strong className="text-white">Shortlink</strong>
-          <strong className="text-white">Title</strong> 
-          <strong className="text-white">Date</strong> 
+          <strong className="text-white">Title</strong>
+          <strong className="text-white">Date</strong>
           <strong className="text-white">Status</strong>
-          <strong className="text-white">Click</strong> 
+          <strong className="text-white">Click</strong>
           <strong className="text-white">QR Code</strong>
           <strong className="text-white">Action</strong>
         </div>
@@ -545,24 +576,26 @@ const MainPage = () => {
                     />
                   </div>
                   <div className="grid items-center justify-center">
-                  <Space direction="horizontal" wrap>
-                    <Dropdown
-                      overlay={HorizontalMenu}
-                      placement="topCenter" // Set the dropdown to appear above
-                      onVisibleChange={(visible) => visible && setSelectedLink(link)} // Set selected link here
-                    >
-                      <a onClick={(e) => e.preventDefault()}>
-                        <MoreOutlined 
-                          style={{ 
-                            fontSize: '30px', 
-                            cursor: 'pointer', 
-                            transform: 'rotate(90deg)', 
-                            fontWeight: 'bold',
-                          }} 
-                        />
-                      </a>
-                    </Dropdown>
-                  </Space>
+                    <Space direction="horizontal" wrap>
+                      <Dropdown
+                        overlay={HorizontalMenu}
+                        placement="topCenter" // Set the dropdown to appear above
+                        onVisibleChange={(visible) =>
+                          visible && setSelectedLink(link)
+                        } // Set selected link here
+                      >
+                        <a onClick={(e) => e.preventDefault()}>
+                          <MoreOutlined
+                            style={{
+                              fontSize: "30px",
+                              cursor: "pointer",
+                              transform: "rotate(90deg)",
+                              fontWeight: "bold",
+                            }}
+                          />
+                        </a>
+                      </Dropdown>
+                    </Space>
                   </div>
                 </li>
               ))}
