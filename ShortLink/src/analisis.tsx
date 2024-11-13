@@ -1,17 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
-
+import { AreaChart, Area } from 'recharts';
+import { XAxis,YAxis,CartesianGrid,Tooltip } from 'recharts';
 import { notification } from 'antd';
 import type { NotificationArgsProps } from 'antd';
 
@@ -23,18 +14,17 @@ interface DecodedToken {
   // Add other properties of the decoded token as needed
 }
 
-interface AnalyticsData {
-  name: string;
-  uv: number;
-  pv: number;
-  amt: number;
-}
-
 interface BodyData {
   url: string;
   shortlink: string;
   title: string;
   expiredTime?: number; // Optional property
+}
+
+interface DataItem {
+  name: string;
+  uv: number;
+  pv: number;
 }
 
 interface ShortLink {
@@ -57,6 +47,8 @@ const Analisis: React.FC = () => {
   const [expiredTime, setExpiredTime] = useState<number | null>(null);
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [totalUv, setTotalUv] = useState(0);
+  const [totalPv, setTotalPv] = useState(0);
 
   const openNotification = (placement: NotificationPlacement) => {
     notification.info({
@@ -264,171 +256,200 @@ const Analisis: React.FC = () => {
       setIsPopupOpen(false);
     } catch (error) {
       console.error("Error fetching API:", error);
+      notification.error({
+        message: 'Shorten Failed',
+        description: 'There was a problem connecting to the server. Please check your connection and try again.',
+        placement: 'top',
+      });
     }
   };
 
-  const data: AnalyticsData[] = [
-    { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
-    { name: 'Page B', uv: 3000, pv: 1398, amt: 2210 },
-    { name: 'Page C', uv: 2000, pv: 9800, amt: 2290 },
-    { name: 'Page D', uv: 2780, pv: 3908, amt: 2000 },
-    { name: 'Page E', uv: 1890, pv: 4800, amt: 2181 },
-    { name: 'Page F', uv: 2390, pv: 3800, amt: 2500 },
-    { name: 'Page G', uv: 3490, pv: 4300, amt: 2100 },
-  ];
+  const data3Days = useMemo(() => [
+    { name: 'Day 1', uv: 400, pv: 2400 },
+    { name: 'Day 2', uv: 300, pv: 2210 },
+    { name: 'Day 3', uv: 278, pv: 2000 },
+  ], []);
 
-  const [labelAngle, setLabelAngle] = useState(0);
-  const [bottomMargin, setBottomMargin] = useState(10);
+  const data7Days = useMemo(() => [
+    { name: 'Day 1', uv: 400, pv: 2400 },
+    { name: 'Day 2', uv: 300, pv: 2210 },
+    { name: 'Day 3', uv: 278, pv: 2000 },
+    { name: 'Day 4', uv: 189, pv: 2181 },
+    { name: 'Day 5', uv: 239, pv: 2500 },
+    { name: 'Day 6', uv: 349, pv: 2100 },
+    { name: 'Day 7', uv: 289, pv: 2250 },
+  ], []);
 
+  const data1Month = useMemo(() => [
+    { name: 'Week 1', uv: 1200, pv: 7800 },
+    { name: 'Week 2', uv: 1500, pv: 8100 },
+    { name: 'Week 3', uv: 1350, pv: 8500 },
+    { name: 'Week 4', uv: 1400, pv: 8700 },
+  ], []);
+
+  const [selectedData, setSelectedData] = useState<DataItem[]>(data3Days);
+
+  // Update data sesuai dengan total `uv` dan `pv`
   useEffect(() => {
-    const updateLabelSettings = () => {
-      const screenWidth = window.innerWidth;
-      if (screenWidth < 600) {
-        setLabelAngle(-90); // Mobile: Vertical labels
-        setBottomMargin(50); // Increased margin for vertical labels
-      } else if (screenWidth < 992) {
-        setLabelAngle(-45); // Tablet: Angled labels
-        setBottomMargin(30); // Moderate margin for angled labels
-      } else {
-        setLabelAngle(0); // Desktop: Horizontal labels
-        setBottomMargin(10); // Minimal margin for horizontal labels
-      }
-    };
+    const totalUvSum = selectedData.reduce((sum: number, item: DataItem) => sum + item.uv, 0);
+    const totalPvSum = selectedData.reduce((sum: number, item: DataItem) => sum + item.pv, 0);
 
-    updateLabelSettings();
-    window.addEventListener('resize', updateLabelSettings);
-    return () => window.removeEventListener('resize', updateLabelSettings);
-  }, []);
+    setTotalUv(totalUvSum);
+    setTotalPv(totalPvSum);
+  }, [selectedData]);
+
+  // Fungsi untuk mengubah data berdasarkan pilihan waktu
+  const handleTimeRangeChange = (range: string) => {
+    switch (range) {
+      case '3days':
+        setSelectedData(data3Days);
+        break;
+      case '7days':
+        setSelectedData(data7Days);
+        break;
+      case '1month':
+        setSelectedData(data1Month);
+        break;
+      default:
+        setSelectedData(data3Days);
+    }
+  };
 
   return (
-    <>
-    {/* Logout Button */}
-    <div className="flex justify-between mt-4 ">
-      <h1 className="text-2xl md:text-4xl font-bold text-center ">
-        URL Shortener
-      </h1>
-      <button
-        onClick={handleLogout}
-        className="bg-red-600 text-white text-xs font-semibold"
-      >
-        Logout
-      </button>
-    </div>
+    <div className='flex justify-center flex-col items-center'>
+      {/* Logout Button */}
+      <div className="flex justify-between mt-4 ">
+        <h1 className="text-2xl md:text-4xl font-bold text-center ">
+          URL Shortener
+        </h1>
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white text-xs font-semibold"
+        >
+          Logout
+        </button>
+      </div>
 
-    {/* Input Original Link */}
-    <div className="flex md:flex-row justify-center w-[1075px] py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
-      <input
-        type="text"
-        value={originalUrl}
-        onChange={(e) => setOriginalUrl(e.target.value)}
-        placeholder="Enter original URL"
-        className="p-3 border-gray-300 text-xs flex-1 rounded-lg"
-      />
-      <button
-        onClick={handleShorten}
-        className="bg-blue-600 text-white px-4 py-2 text-xs flex-shrink-0 min-w[100px] w-fit font-semibold rounded-full"
-      >
-        Shorten now
-      </button>
-    </div>
+      {/* Input Original Link */}
+      <div className="flex md:flex-row justify-center w-[1075px] py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
+        <input
+          type="text"
+          value={originalUrl}
+          onChange={(e) => setOriginalUrl(e.target.value)}
+          placeholder="Enter original URL"
+          className="p-3 border-gray-300 text-xs flex-1 rounded-lg"
+        />
+        <button
+          onClick={handleShorten}
+          className="bg-blue-600 text-white px-4 py-2 text-xs flex-shrink-0 min-w[100px] w-fit font-semibold rounded-full"
+        >
+          Shorten now
+        </button>
+      </div>
 
-    {/* Navigasi */}
-    <div className="flex justify-center mt-4">
-      <button
-        onClick={() => navigate("/main-menu")}
-        className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
-      >
-        Shortlink
-      </button>
-    </div>
+      {/* Navigasi */}
+      <div className="flex justify-center mt-4">
+        <button
+          onClick={() => navigate("/main-menu")}
+          className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
+        >
+          Shortlink
+        </button>
+      </div>
 
-    {/* Customize Your Link */}
-    {isPopupOpen && (
-      <div className="fixed inset-0 z-10 bg-black bg-opacity-50 flex justify-center items-center">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/3">
-          <h2 className="text-xl md:text-2xl font-bold mb-4">
-            Customize Your Link
-          </h2>
-          <div className="p-2 mb-2 bg-gray-200 rounded-lg w-fit ">
-            <p>
-              <strong>Shortlink:</strong>{" "}
-              {customSlug
-                ? `https://dnd.id/${customSlug}`
-                : "https://dnd.id/"}
-            </p>
-          </div>
-          <input
-            type="text"
-            value={customSlug}
-            onChange={(e) => setCustomSlug(e.target.value)}
-            placeholder="Enter custom slug"
-            className="p-2 border border-gray-300 rounded-lg w-full mb-4"
-          />
-          <input
-            type="text"
-            value={customTitle}
-            onChange={(e) => setCustomTitle(e.target.value)}
-            placeholder="Enter custom title"
-            className="p-2 border border-gray-300 rounded-lg w-full mb-4"
-          />
-          <input
-            type="number"
-            value={expiredTime || ""}
-            onChange={(e) =>
-              setExpiredTime(e.target.value ? parseInt(e.target.value) : null)
-            }
-            placeholder="Expired time in minutes (optional)"
-            className="p-2 border border-gray-300 rounded-lg w-full mb-4"
-          />
-          <div className="flex justify-end gap-4">
-            <button
-              onClick={handlePopupSubmit}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-            >
-              Submit
-            </button>
-            <button
-              onClick={() => {
-                resetInputs(); // Reset inputs saat popup ditutup
-                setIsPopupOpen(false);
-              }}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg"
-            >
-              Close
-            </button>
+      {/* Customize Your Link */}
+      {isPopupOpen && (
+        <div className="fixed inset-0 z-10 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/3">
+            <h2 className="text-xl md:text-2xl font-bold mb-4">
+              Customize Your Link
+            </h2>
+            <div className="p-2 mb-2 bg-gray-200 rounded-lg w-fit ">
+              <p>
+                <strong>Shortlink:</strong>{" "}
+                {customSlug
+                  ? `https://dnd.id/${customSlug}`
+                  : "https://dnd.id/"}
+              </p>
+            </div>
+            <input
+              type="text"
+              value={customSlug}
+              onChange={(e) => setCustomSlug(e.target.value)}
+              placeholder="Enter custom slug"
+              className="p-2 border border-gray-300 rounded-lg w-full mb-4"
+            />
+            <input
+              type="text"
+              value={customTitle}
+              onChange={(e) => setCustomTitle(e.target.value)}
+              placeholder="Enter custom title"
+              className="p-2 border border-gray-300 rounded-lg w-full mb-4"
+            />
+            <input
+              type="number"
+              value={expiredTime || ""}
+              onChange={(e) =>
+                setExpiredTime(e.target.value ? parseInt(e.target.value) : null)
+              }
+              placeholder="Expired time in minutes (optional)"
+              className="p-2 border border-gray-300 rounded-lg w-full mb-4"
+            />
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={handlePopupSubmit}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+              >
+                Submit
+              </button>
+              <button
+                onClick={() => {
+                  resetInputs(); // Reset inputs saat popup ditutup
+                  setIsPopupOpen(false);
+                }}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
-    <div className='z-0' 
-      style={{ width: '100%', height: '400px', maxWidth: '1000px', margin: 'auto' }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart
-          data={data}
-          margin={{
-            top: 10,
-            right: 30,
-            left: 20,
-            bottom: bottomMargin,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="name"
-            angle={labelAngle}
-            textAnchor={labelAngle === -90 ? 'end' : 'middle'}
-            dy={10} // Adjusted offset for better alignment
-          />
-          <YAxis />
+      <div className='z-0' 
+        style={{ width: '100%', height: '400px', maxWidth: '1000px', margin: 'auto' }}>
+        <AreaChart width={1000} height={300} data={selectedData}
+          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <XAxis strokeOpacity={0} dataKey="name" />
+          <YAxis strokeOpacity={0} />
+          <CartesianGrid strokeDasharray="1 1" />
           <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
-          <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
-        </LineChart>
-      </ResponsiveContainer>
+          <Area type="monotone" dataKey="uv" stroke="#8884d8" fillOpacity={1} fill="url(#colorUv)" />
+          <Area type="monotone" dataKey="pv" stroke="#82ca9d" fillOpacity={1} fill="url(#colorPv)" />
+        </AreaChart>
+      </div>
+
+      <div style={{ marginBottom: '20px' }}>
+        <h2>Informasi Total Data Chart</h2>
+        <p><strong>Total UV:</strong> {totalUv}</p>
+        <p><strong>Total PV:</strong> {totalPv}</p>
+      </div>
+
+      <button onClick={() => handleTimeRangeChange('3days')}>3 Hari</button>
+      <button onClick={() => handleTimeRangeChange('7days')}>7 Hari</button>
+      <button onClick={() => handleTimeRangeChange('1month')}>1 Bulan</button>
+
     </div>
-    </>
   );
 };
 

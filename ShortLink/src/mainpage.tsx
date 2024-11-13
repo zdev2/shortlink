@@ -2,12 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./App.css";
 import { notification } from 'antd';
-import type { NotificationArgsProps } from 'antd';
 import { CopyOutlined, ShareAltOutlined, MoreOutlined } from '@ant-design/icons';
 import { Dropdown, Space, Menu }  from 'antd';
 import {jwtDecode} from "jwt-decode";
-
-type NotificationPlacement = NotificationArgsProps['placement'];
 
 interface DecodedToken {
   exp: number;
@@ -119,16 +116,7 @@ const MainPage = () => {
       }}
     />
   );
-
-  const openNotification = (placement: NotificationPlacement) => {
-    notification.info({
-      message: `Notification ${placement}`,
-      description:
-        'Registrasi Berhasil silahkan kembali Login',
-      placement,
-    });
-  };
-
+  
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -165,8 +153,12 @@ const MainPage = () => {
         // Handle unauthorized response (e.g., redirect to login or clear session)
         console.log("Session expired, redirecting to login...");
         navigate("/")
-        openNotification("top")
-        // Clear any session data or redirect the user
+        notification.success({
+          message: `logout`,
+          description:
+            'Logout Berhasil sampai berjumpa kembali✌️',
+          placement: 'top',
+        });
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
       }
@@ -332,7 +324,11 @@ const MainPage = () => {
       setIsPopupOpen(false);
     } catch (error) {
       console.error("Error fetching API:", error);
-      alert("There was a problem connecting to the server. Please check your connection and try again.");
+      notification.error({
+        message: 'Shorten Failed',
+        description: 'There was a problem connecting to the server. Please check your connection and try again.',
+        placement: 'top',
+      });
     }
   };  
 
