@@ -1,18 +1,21 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from "react-router-dom";
-import {jwtDecode} from "jwt-decode";
+import { useNavigate, useParams } from "react-router-dom";
+// import {jwtDecode} from "jwt-decode";
 import { AreaChart, Area } from 'recharts';
 import { XAxis,YAxis,CartesianGrid,Tooltip } from 'recharts';
 import { notification } from 'antd';
 import type { NotificationArgsProps } from 'antd';
+import { Dropdown, Button, Menu, Space } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
+import { FaUser, FaHandPointer } from 'react-icons/fa';
 
 type NotificationPlacement = NotificationArgsProps['placement'];
 
-interface DecodedToken {
-  exp: number;
-  iat: number;
-  // Add other properties of the decoded token as needed
-}
+// interface DecodedToken {
+//   exp: number;
+//   iat: number;
+//   // Add other properties of the decoded token as needed
+// }
 
 interface BodyData {
   url: string;
@@ -49,6 +52,10 @@ const Analisis: React.FC = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [totalUv, setTotalUv] = useState(0);
   const [totalPv, setTotalPv] = useState(0);
+
+  const {id=''} = useParams()
+
+  console.log(id)
 
   const openNotification = (placement: NotificationPlacement) => {
     notification.info({
@@ -135,67 +142,67 @@ const Analisis: React.FC = () => {
     setIsPopupOpen(true);
   };
 
-  useEffect(() => {
-    const showAllURLs = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        if (token) {
-          try {
-            const decoded: DecodedToken = jwtDecode(token);
-            console.log(decoded);
-            if (decoded.exp < Date.now() / 1000) {
-              console.error("Token has expired");
-              // Handle token expiry (e.g., log out user or refresh token)
-            }
-          } catch (error) {
-            console.error("Error decoding token:", error);
-          }
-        } else {
-          console.error("No token found in localStorage");
-        }
+  // useEffect(() => {
+  //   const showAllURLs = async () => {
+  //     try {
+  //       const token = localStorage.getItem("authToken");
+  //       if (token) {
+  //         try {
+  //           const decoded: DecodedToken = jwtDecode(token);
+  //           console.log(decoded);
+  //           if (decoded.exp < Date.now() / 1000) {
+  //             console.error("Token has expired");
+  //             // Handle token expiry (e.g., log out user or refresh token)
+  //           }
+  //         } catch (error) {
+  //           console.error("Error decoding token:", error);
+  //         }
+  //       } else {
+  //         console.error("No token found in localStorage");
+  //       }
 
-        const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  //       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
 
-        if (!response.ok) {
-          if (response.status === 401) {
-            console.error("Unauthorized access - possible invalid or expired token.");
-            localStorage.removeItem("authToken");
-            // navigate("/main-menu")
-          } else {
-            console.error("Failed to fetch URLs. Status code:", response.status);
-          }
-          return;
-        }
+  //       if (!response.ok) {
+  //         if (response.status === 401) {
+  //           console.error("Unauthorized access - possible invalid or expired token.");
+  //           localStorage.removeItem("authToken");
+  //           // navigate("/main-menu")
+  //         } else {
+  //           console.error("Failed to fetch URLs. Status code:", response.status);
+  //         }
+  //         return;
+  //       }
 
-        const data = await response.json();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const links: ShortLink[] = data.data.urls.map((item: any) => ({
-          id: item.id,
-          shortLink: `https://dnd.id/${item.shortlink}`,
-          originalUrl: item.url || "",
-          title: item.url_title || "Untitled",
-          clicks: item.clickcount || 0,
-          status: item.status || "inactive",
-          createdAt: item.createdat || "N/A",
-          lastAccessedAt: item.lastaccesedat || null,
-          qrCodeUrl: item.qr_code || "",
-        }));
+  //       const data = await response.json();
+  //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //       const links: ShortLink[] = data.data.urls.map((item: any) => ({
+  //         id: item.id,
+  //         shortLink: `https://dnd.id/${item.shortlink}`,
+  //         originalUrl: item.url || "",
+  //         title: item.url_title || "Untitled",
+  //         clicks: item.clickcount || 0,
+  //         status: item.status || "inactive",
+  //         createdAt: item.createdat || "N/A",
+  //         lastAccessedAt: item.lastaccesedat || null,
+  //         qrCodeUrl: item.qr_code || "",
+  //       }));
 
-        setShortLinks(links);
-        console.log(links); // Log the final links array
-      } catch (error) {
-        console.error("Error fetching URLs:", error);
-      }
-    };
+  //       setShortLinks(links);
+  //       console.log(links); // Log the final links array
+  //     } catch (error) {
+  //       console.error("Error fetching URLs:", error);
+  //     }
+  //   };
 
-    showAllURLs();
-  }, []);
+  //   showAllURLs();
+  // }, []);
 
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
@@ -265,55 +272,67 @@ const Analisis: React.FC = () => {
   };
 
   const data3Days = useMemo(() => [
-    { name: 'Day 1', uv: 400, pv: 2400 },
-    { name: 'Day 2', uv: 300, pv: 2210 },
-    { name: 'Day 3', uv: 278, pv: 2000 },
+    { name: 'Day 1', uv: 2000, pv: 2500 },
+    { name: 'Day 2', uv: 1500, pv: 2000 },
+    { name: 'Day 3', uv: 2000, pv: 2500 },
   ], []);
 
   const data7Days = useMemo(() => [
-    { name: 'Day 1', uv: 400, pv: 2400 },
-    { name: 'Day 2', uv: 300, pv: 2210 },
-    { name: 'Day 3', uv: 278, pv: 2000 },
-    { name: 'Day 4', uv: 189, pv: 2181 },
-    { name: 'Day 5', uv: 239, pv: 2500 },
-    { name: 'Day 6', uv: 349, pv: 2100 },
-    { name: 'Day 7', uv: 289, pv: 2250 },
+    { name: 'Day 1', uv: 2500, pv: 3000 },
+    { name: 'Day 2', uv: 2000, pv: 2500 },
+    { name: 'Day 3', uv: 2500, pv: 3000 },
+    { name: 'Day 4', uv: 1500, pv: 2000 },
+    { name: 'Day 5', uv: 2000, pv: 2500 },
+    { name: 'Day 6', uv: 1000, pv: 1500 },
+    { name: 'Day 7', uv: 2500, pv: 3000 },
   ], []);
 
   const data1Month = useMemo(() => [
-    { name: 'Week 1', uv: 1200, pv: 7800 },
-    { name: 'Week 2', uv: 1500, pv: 8100 },
-    { name: 'Week 3', uv: 1350, pv: 8500 },
-    { name: 'Week 4', uv: 1400, pv: 8700 },
+    { name: 'Week 1', uv: 6300, pv: 7800 },
+    { name: 'Week 2', uv: 5000, pv: 6000 },
+    { name: 'Week 3', uv: 7500, pv: 8500 },
+    { name: 'Week 4', uv: 4000, pv: 5000 },
   ], []);
 
   const [selectedData, setSelectedData] = useState<DataItem[]>(data3Days);
+  type TimeRange = '3days' | '7days' | '1month';
+  const [selectedLabel, setSelectedLabel] = useState('3 Hari');
 
-  // Update data sesuai dengan total `uv` dan `pv`
   useEffect(() => {
-    const totalUvSum = selectedData.reduce((sum: number, item: DataItem) => sum + item.uv, 0);
-    const totalPvSum = selectedData.reduce((sum: number, item: DataItem) => sum + item.pv, 0);
-
+    const totalUvSum = selectedData.reduce((sum, item) => sum + item.uv, 0);
+    const totalPvSum = selectedData.reduce((sum, item) => sum + item.pv, 0);
     setTotalUv(totalUvSum);
     setTotalPv(totalPvSum);
   }, [selectedData]);
 
   // Fungsi untuk mengubah data berdasarkan pilihan waktu
-  const handleTimeRangeChange = (range: string) => {
+  const handleTimeRangeChange = (range: TimeRange) => {
     switch (range) {
       case '3days':
         setSelectedData(data3Days);
+        setSelectedLabel('3 Hari');
         break;
       case '7days':
         setSelectedData(data7Days);
+        setSelectedLabel('7 Hari');
         break;
       case '1month':
         setSelectedData(data1Month);
+        setSelectedLabel('1 Bulan');
         break;
       default:
         setSelectedData(data3Days);
+        setSelectedLabel('Pilih Rentang Waktu');
     }
   };
+
+  const menu = (
+    <Menu onClick={(e) => handleTimeRangeChange(e.key as TimeRange)}>
+      <Menu.Item key="3days">3 Hari</Menu.Item>
+      <Menu.Item key="7days">7 Hari</Menu.Item>
+      <Menu.Item key="1month">1 Bulan</Menu.Item>
+    </Menu>
+  );
 
   return (
     <div className='flex justify-center flex-col items-center'>
@@ -414,7 +433,24 @@ const Analisis: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+      ) }
+
+      {/* Dropdown pilihan rentang waktu */}
+      <div 
+      className='flex justify-between w-[1000px]'
+      style={{ marginBottom: '20px' }}>
+        <div>
+          <h4>Analystic</h4>
+        </div>
+        <Dropdown overlay={menu}>
+          <Button>
+            <Space>
+              {selectedLabel}
+              <DownOutlined />
+            </Space>
+          </Button>
+        </Dropdown>
+      </div>
 
       <div className='z-0' 
         style={{ width: '100%', height: '400px', maxWidth: '1000px', margin: 'auto' }}>
@@ -439,15 +475,46 @@ const Analisis: React.FC = () => {
         </AreaChart>
       </div>
 
-      <div style={{ marginBottom: '20px' }}>
-        <h2>Informasi Total Data Chart</h2>
-        <p><strong>Total UV:</strong> {totalUv}</p>
-        <p><strong>Total PV:</strong> {totalPv}</p>
+      <div className='flex gap-24'>
+        <div className="mb-5 p-5 border rounded-lg flex items-center justify-evenly shadow-md w-64">
+          <div className="bg-purple-100 p-3 rounded-full mb-3">
+            <FaHandPointer style={{ color: '#6A0DAD', fontSize: '24px' }} />
+          </div>
+          <div>
+            <div className="text-center">
+              <span className="text-2xl font-bold text-purple-800">{totalUv}</span>
+              <p className="text-purple-600">Total Click</p>
+            </div>
+            <Dropdown overlay={menu}>
+              <Button>
+                <Space>
+                  {selectedLabel}
+                  <DownOutlined />
+                </Space>
+              </Button>
+            </Dropdown>
+          </div>
+        </div>
+        <div className="mb-5 p-5 border rounded-lg flex items-center justify-evenly shadow-md w-64">
+          <div className="bg-purple-100 p-3 rounded-full mb-3">
+            <FaUser style={{ color: '#6A0DAD', fontSize: '24px' }} />
+          </div>
+          <div>
+            <div className="text-center">
+              <span className="text-2xl font-bold text-purple-800">{totalPv}</span>
+              <p className="text-purple-600">Total Click</p>
+            </div>
+            <Dropdown overlay={menu}>
+              <Button>
+                <Space>
+                  {selectedLabel}
+                  <DownOutlined />
+                </Space>
+              </Button>
+            </Dropdown>
+          </div>
+        </div>
       </div>
-
-      <button onClick={() => handleTimeRangeChange('3days')}>3 Hari</button>
-      <button onClick={() => handleTimeRangeChange('7days')}>7 Hari</button>
-      <button onClick={() => handleTimeRangeChange('1month')}>1 Bulan</button>
 
     </div>
   );

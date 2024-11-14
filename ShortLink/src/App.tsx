@@ -11,6 +11,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/main-menu" element={<MainPage />} />
         <Route path="/analisis" element={<AnalisiPage/>} />
+        <Route path="/analisis/:id" element={<AnalisiPage/>} />
       </Routes>
     </Router>
   );

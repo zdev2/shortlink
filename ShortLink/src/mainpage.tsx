@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./App.css";
 import { notification } from 'antd';
-import { CopyOutlined, ShareAltOutlined, MoreOutlined } from '@ant-design/icons';
+import { CopyOutlined, ShareAltOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Dropdown, Space, Menu }  from 'antd';
 import {jwtDecode} from "jwt-decode";
 
@@ -104,6 +104,18 @@ const MainPage = () => {
       icon: <ShareAltOutlined />,
       label: 'Share',
       onClick: handleShare,
+    },
+    {
+      key: 'edit',
+      icon: <EditOutlined />,
+      label: 'Edit',
+      // onClick: handleShare,
+    },
+    {
+      key: 'delete',
+      icon: <DeleteOutlined />,
+      label: 'Delete',
+      // onClick: handleShare,
     },
   ];
   
@@ -532,12 +544,9 @@ const MainPage = () => {
                     {/* <strong>Status:</strong>  */}
                     {link.status}
                   </p>
-                  <p>
-                    {/* <strong>Clicks:</strong>  */}
-                    {link.clicks}
-                  </p>
+                  <button onClick={() => navigate(`/analisis/${link.id}`)}>{link.clicks}</button>
                   <div className="flex items-center justify-center">
-                    <img
+                    <img 
                       src={`data:image/png;base64,${link.qrCodeUrl}`}
                       alt="QR Code"
                       className="qr-code w-16 h-16 my-1"
