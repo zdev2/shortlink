@@ -304,8 +304,9 @@ func RedirectURL(c *fiber.Ctx) error {
 
 // DeleteURL handles the deletion of a short URL
 func DeleteURL(c *fiber.Ctx) error {
-	// Parse the url_id parameter as int64
-	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	// Parse the url_id parameter as ObjectID
+	urlIDHex := c.Params("id")
+	urlID, err := primitive.ObjectIDFromHex(urlIDHex)
 	if err != nil {
 		return BadRequest(c, "Invalid URL ID format")
 	}
@@ -315,7 +316,7 @@ func DeleteURL(c *fiber.Ctx) error {
 
 	// Check if the URL exists and is not already deleted
 	var url model.Url
-	err = collection.FindOne(context.TODO(), bson.M{"url_id": urlID}).Decode(&url)
+	err = collection.FindOne(context.TODO(), bson.M{"_id": urlID}).Decode(&url)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return NotFound(c, "URL not found")
@@ -339,7 +340,7 @@ func DeleteURL(c *fiber.Ctx) error {
 		},
 	}
 
-	_, err = collection.UpdateOne(context.TODO(), bson.M{"url_id": urlID}, update)
+	_, err = collection.UpdateOne(context.TODO(), bson.M{"_id": urlID}, update)
 	if err != nil {
 		return InternalServerError(c, "Failed to delete URL")
 	}
