@@ -4,7 +4,7 @@ project_path = "."
 languages = ["go"]
 
 [phases.build]
-cmd = "go build -o main ./app"
+cmd = "go build -o main ."
 
 [phases.start]
 cmd = "./main"
