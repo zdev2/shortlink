@@ -9,8 +9,9 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Space, Menu } from "antd";
+import { Dropdown, Space, Menu, MenuProps } from "antd";
 import { jwtDecode } from "jwt-decode";
+import type { MenuInfo } from 'rc-menu/lib/interface';
 
 interface DecodedToken {
   exp: number;
@@ -53,6 +54,7 @@ const MainPage = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedQrCode, setSelectedQrCode] = useState<ShortLink | null>(null);
   const [selectedLink, setSelectedLink] = useState<ShortLink | null>(null);
+  const authToken = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
 
   const handleCopy = () => {
     if (selectedLink) {
@@ -103,77 +105,37 @@ const MainPage = () => {
     }
   };
 
-  const showAllURLs = async () => {
+  async function deleteShortlink(id: string) {
     try {
-      const token = localStorage.getItem("authToken");
-      if (token) {
-        try {
-          const decoded: DecodedToken = jwtDecode(token);
-          console.log(decoded);
-          if (decoded.exp < Date.now() / 1000) {
-            console.error("Token has expired");
-            // Handle token expiry (e.g., log out user or refresh token)
-          }
-        } catch (error) {
-          console.error("Error decoding token:", error);
-        }
-      } else {
-        console.error("No token found in localStorage");
-      }
-
-      const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
-        method: "GET",
+      const response = await fetch(`https://shortlink-production-933a.up.railway.app/api/v1/urls/${id}`, {
+        method: 'DELETE',
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
         },
       });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          console.error("Unauthorized access - possible invalid or expired token.");
-          localStorage.removeItem("authToken");
-          navigate("/main-menu")
-        } else {
-          console.error("Failed to fetch URLs. Status code:", response.status);
-        }
-        return;
+      if (response.ok) {
+        notification.success({
+          message: "Link succes has delete!",
+          description: "The shortened link has been delete successfully.",
+          placement: "top",
+        });
+        navigate('main-menu')
+      } else {
+        notification.error({
+          message: "Failed to delete link",
+          description:
+            "There was an error delete the link. Please try again.",
+          placement: "top",
+        });
       }
-
-      const data = await response.json();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const links: ShortLink[] = data.data.urls.map((item: any) => ({
-        id: item.id,
-        shortLink: `https://dnd.id/${item.shortlink}`,
-        originalUrl: item.url || "",
-        title: item.url_title || "Untitled",
-        clicks: item.clickcount || 0,
-        status: item.status || "inactive",
-        createdAt: item.createdat || "N/A",
-        lastAccessedAt: item.lastaccesedat || null,
-        qrCodeUrl: item.qr_code || "",
-      }));
-
-      setShortLinks(links);
-      console.log(links); // Log the final links array
     } catch (error) {
-      console.error("Error fetching URLs:", error);
+      console.error('Error deleting shortlink:', error);
     }
-  };
+  }
+  
 
-  const deleteShortlink = async (id: string) => {
-    try {
-      await fetch(`http://127.0.0.1:3000/api/v1/urls/${id}`, {
-        method: 'DELETE',
-      });
-      // Setelah menghapus, panggil fetchData untuk memperbarui daftar shortlinks
-      showAllURLs();
-    } catch (error) {
-      console.error("Error deleting shortlink:", error);
-    }
-  };
-
-  const items = [
+  const items: MenuProps['items'] = [
     {
       key: "copy",
       icon: <CopyOutlined />,
@@ -196,7 +158,7 @@ const MainPage = () => {
       key: "delete",
       icon: <DeleteOutlined />,
       label: 'Delete',
-      onClick: deleteShortlink,
+      onClick: (info: MenuInfo) => deleteShortlink(info.key as string),
     },
   ];
 
@@ -226,8 +188,6 @@ const MainPage = () => {
     setCustomTitle("");
     setExpiredTime(null);
   };
-
-  const authToken = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
 
   const handleLogout = async () => {
     try {
@@ -292,12 +252,21 @@ const MainPage = () => {
     const showAllURLs = async () => {
       try {
         const token = localStorage.getItem("authToken");
-
-        if (!token) {
-          console.error("No auth token found. Please log in first.");
-          return; // Stop the function if no token is available
+        if (token) {
+          try {
+            const decoded: DecodedToken = jwtDecode(token);
+            console.log(decoded);
+            if (decoded.exp < Date.now() / 1000) {
+              console.error("Token has expired");
+              // Handle token expiry (e.g., log out user or refresh token)
+            }
+          } catch (error) {
+            console.error("Error decoding token:", error);
+          }
+        } else {
+          console.error("No token found in localStorage");
         }
-
+  
         const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
           method: "GET",
           headers: {
@@ -305,41 +274,33 @@ const MainPage = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-
+  
         if (!response.ok) {
           if (response.status === 401) {
-            console.error(
-              "Unauthorized access - possible invalid or expired token."
-            );
-            localStorage.removeItem("authToken"); // Remove invalid token from localStorage
-            // Optional: Redirect to login if using React Router
-            // navigate("/login");
+            console.error("Unauthorized access - possible invalid or expired token.");
+            localStorage.removeItem("authToken");
+            navigate("/main-menu")
           } else {
-            console.error(
-              "Failed to fetch URLs. Status code:",
-              response.status
-            );
+            console.error("Failed to fetch URLs. Status code:", response.status);
           }
-          return; // Stop further execution if response is not ok
+          return;
         }
-
+  
         const data = await response.json();
-        console.log(data); // Log to inspect the full data structure
-
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const links: ShortLink[] = data.data.urls.map((item: any) => ({
           id: item.id,
-          shortLink: `https://dnd.id/${item.shortlink}`, // Correct field name here
-          originalUrl: item.url || "", // Correct field name here (item.url)
-          title: item.url_title || "Untitled", // Correct field name (item.url_title)
-          clicks: item.clickcount || 0, // Default to 0 if undefined
-          status: item.status || "inactive", // Default to "inactive" if undefined
-          createdAt: item.createdat || "N/A", // Default to "N/A" if undefined
-          lastAccessedAt: item.lastaccesedat || null, // Use correct field name
-          qrCodeUrl: item.qr_code || "", // Correct field name
+          shortLink: `https://dnd.id/${item.shortlink}`,
+          originalUrl: item.url || "",
+          title: item.url_title || "Untitled",
+          clicks: item.clickcount || 0,
+          status: item.status || "inactive",
+          createdAt: item.createdat || "N/A",
+          lastAccessedAt: item.lastaccesedat || null,
+          qrCodeUrl: item.qr_code || "",
         }));
-
-        setShortLinks(links); // Update the state with mapped links
+  
+        setShortLinks(links);
         console.log(links); // Log the final links array
       } catch (error) {
         console.error("Error fetching URLs:", error);
@@ -347,7 +308,7 @@ const MainPage = () => {
     };
 
     showAllURLs();
-  }, []);
+  }, [navigate]);
 
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
@@ -382,8 +343,12 @@ const MainPage = () => {
       if (!response.ok) {
         const errorText = await response.json();
         console.error(`Error: ${errorText.message}`);
-        alert("Failed to shorten the link. Please try again.");
-        return;
+        notification.error({
+          message: 'Shorten failed',
+          description:
+            'Gagal melakukan shortlink  ',
+          placement: 'top',
+        });
       }
 
       const data = await response.json();
