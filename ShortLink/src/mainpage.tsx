@@ -92,6 +92,76 @@ const MainPage = () => {
     }
   };
 
+  const showAllURLs = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (token) {
+        try {
+          const decoded: DecodedToken = jwtDecode(token);
+          console.log(decoded);
+          if (decoded.exp < Date.now() / 1000) {
+            console.error("Token has expired");
+            // Handle token expiry (e.g., log out user or refresh token)
+          }
+        } catch (error) {
+          console.error("Error decoding token:", error);
+        }
+      } else {
+        console.error("No token found in localStorage");
+      }
+
+      const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.error("Unauthorized access - possible invalid or expired token.");
+          localStorage.removeItem("authToken");
+          navigate("/main-menu")
+        } else {
+          console.error("Failed to fetch URLs. Status code:", response.status);
+        }
+        return;
+      }
+
+      const data = await response.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const links: ShortLink[] = data.data.urls.map((item: any) => ({
+        id: item.id,
+        shortLink: `https://dnd.id/${item.shortlink}`,
+        originalUrl: item.url || "",
+        title: item.url_title || "Untitled",
+        clicks: item.clickcount || 0,
+        status: item.status || "inactive",
+        createdAt: item.createdat || "N/A",
+        lastAccessedAt: item.lastaccesedat || null,
+        qrCodeUrl: item.qr_code || "",
+      }));
+
+      setShortLinks(links);
+      console.log(links); // Log the final links array
+    } catch (error) {
+      console.error("Error fetching URLs:", error);
+    }
+  };
+
+  const deleteShortlink = async (id: string) => {
+    try {
+      await fetch(`http://127.0.0.1:3000/api/v1/urls/${id}`, {
+        method: 'DELETE',
+      });
+      // Setelah menghapus, panggil fetchData untuk memperbarui daftar shortlinks
+      showAllURLs();
+    } catch (error) {
+      console.error("Error deleting shortlink:", error);
+    }
+  };
+
   const items = [
     {
       key: 'copy',
@@ -115,7 +185,7 @@ const MainPage = () => {
       key: 'delete',
       icon: <DeleteOutlined />,
       label: 'Delete',
-      // onClick: handleShare,
+      onClick: deleteShortlink,
     },
   ];
   
@@ -215,6 +285,16 @@ const MainPage = () => {
     setCustomSlug(randomSlug);
     setIsPopupOpen(true);
   };
+
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await fetch('http://127.0.0.1:3000/api/v1/urls');
+  //     const data = await response.json();
+  //     setShortLinks(data);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
 
   useEffect(() => {
     const showAllURLs = async () => {
