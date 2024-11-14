@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCopy, faShare } from "@fortawesome/free-solid-svg-icons";
 import "./App.css";
-import { notification } from 'antd';
-import { CopyOutlined, ShareAltOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Dropdown, Space, Menu }  from 'antd';
-import {jwtDecode} from "jwt-decode";
+import { notification } from "antd";
+import {
+  CopyOutlined,
+  ShareAltOutlined,
+  MoreOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+import { Dropdown, Space, Menu } from "antd";
+import { jwtDecode } from "jwt-decode";
 
 interface DecodedToken {
   exp: number;
@@ -50,85 +58,90 @@ const MainPage = () => {
 
   const handleCopy = () => {
     if (selectedLink) {
-      navigator.clipboard.writeText(selectedLink.shortLink)
+      navigator.clipboard
+        .writeText(selectedLink.shortLink)
         .then(() => {
           notification.success({
-            message: 'Link copied to clipboard!',
-            description: 'The shortened link has been copied successfully.',
-            placement: 'top',
+            message: "Link copied to clipboard!",
+            description: "The shortened link has been copied successfully.",
+            placement: "top",
           });
         })
         .catch((error) => {
           console.error("Error copying text:", error);
           notification.error({
-            message: 'Failed to copy link',
-            description: 'There was an error copying the link. Please try again.',
-            placement: 'top',
+            message: "Failed to copy link",
+            description:
+              "There was an error copying the link. Please try again.",
+            placement: "top",
           });
         });
     }
   };
-  
+
   const handleShare = () => {
     if (navigator.share && selectedLink) {
-      navigator.share({
-        title: "Check out this shortened link!",
-        text: "Here is a link I shortened: ",
-        url: selectedLink.shortLink,
-      }).catch((error) => {
-        console.error("Error sharing:", error);
-        notification.error({
-          message: 'Failed to share link',
-          description: 'There was an error sharing the link. Please try again.',
-          placement: 'top',
+      navigator
+        .share({
+          title: "Check out this shortened link!",
+          text: "Here is a link I shortened: ",
+          url: selectedLink.shortLink,
+        })
+        .catch((error) => {
+          console.error("Error sharing:", error);
+          notification.error({
+            message: "Failed to share link",
+            description:
+              "There was an error sharing the link. Please try again.",
+            placement: "top",
+          });
         });
-      });
     } else {
       notification.info({
-        message: 'Share not supported',
+        message: "Share not supported",
         description: "Your browser doesn't support the Web Share API.",
-        placement: 'top',
+        placement: "top",
       });
     }
   };
 
   const items = [
     {
-      key: 'copy',
+      key: "copy",
       icon: <CopyOutlined />,
-      label: 'Copy',
+      label: "Copy",
       onClick: handleCopy,
     },
     {
-      key: 'share',
+      key: "share",
       icon: <ShareAltOutlined />,
-      label: 'Share',
+      label: "Share",
       onClick: handleShare,
     },
     {
-      key: 'edit',
+      key: "edit",
       icon: <EditOutlined />,
-      label: 'Edit',
+      label: "Edit",
       // onClick: handleShare,
     },
     {
-      key: 'delete',
+      key: "delete",
       icon: <DeleteOutlined />,
-      label: 'Delete',
+      label: "Delete",
       // onClick: handleShare,
     },
   ];
-  
+
   const HorizontalMenu = () => (
     <Menu
       items={items}
       style={{
-        display: 'flex',
-        flexDirection: 'row',
+        display: "flex",
+        flexDirection: "row",
       }}
     />
   );
-  
+
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -164,13 +177,8 @@ const MainPage = () => {
       if (response.status === 401) {
         // Handle unauthorized response (e.g., redirect to login or clear session)
         console.log("Session expired, redirecting to login...");
-        navigate("/")
-        notification.success({
-          message: `logout`,
-          description:
-            'Logout Berhasil sampai berjumpa kembali✌️',
-          placement: 'top',
-        });
+        navigate("/");
+        // Clear any session data or redirect the user
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
       }
@@ -203,11 +211,7 @@ const MainPage = () => {
 
   const handleShorten = async () => {
     if (!originalUrl || !validateUrl(originalUrl)) {
-      notification.error({
-        message: 'Shorten Failed',
-        description: 'Please enter a valid URL.',
-        placement: 'top',
-      });
+      alert("Please enter a valid URL.");
       return;
     }
     // Generate a random slug and set it as customSlug
@@ -215,24 +219,14 @@ const MainPage = () => {
     setCustomSlug(randomSlug);
     setIsPopupOpen(true);
   };
-
   useEffect(() => {
     const showAllURLs = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        if (token) {
-          try {
-            const decoded: DecodedToken = jwtDecode(token);
-            console.log(decoded);
-            if (decoded.exp < Date.now() / 1000) {
-              console.error("Token has expired");
-              // Handle token expiry (e.g., log out user or refresh token)
-            }
-          } catch (error) {
-            console.error("Error decoding token:", error);
-          }
-        } else {
-          console.error("No token found in localStorage");
+
+        if (!token) {
+          console.error("No auth token found. Please log in first.");
+          return; // Stop the function if no token is available
         }
 
         const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
@@ -245,30 +239,37 @@ const MainPage = () => {
 
         if (!response.ok) {
           if (response.status === 401) {
-            console.error("Unauthorized access - possible invalid or expired token.");
-            localStorage.removeItem("authToken");
-            navigate("/main-menu")
+            console.error(
+              "Unauthorized access - possible invalid or expired token."
+            );
+            localStorage.removeItem("authToken"); // Remove invalid token from localStorage
+            // Optional: Redirect to login if using React Router
+            // navigate("/login");
           } else {
-            console.error("Failed to fetch URLs. Status code:", response.status);
+            console.error(
+              "Failed to fetch URLs. Status code:",
+              response.status
+            );
           }
-          return;
+          return; // Stop further execution if response is not ok
         }
 
         const data = await response.json();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        console.log(data); // Log to inspect the full data structure
+
         const links: ShortLink[] = data.data.urls.map((item: any) => ({
           id: item.id,
-          shortLink: `https://dnd.id/${item.shortlink}`,
-          originalUrl: item.url || "",
-          title: item.url_title || "Untitled",
-          clicks: item.clickcount || 0,
-          status: item.status || "inactive",
-          createdAt: item.createdat || "N/A",
-          lastAccessedAt: item.lastaccesedat || null,
-          qrCodeUrl: item.qr_code || "",
+          shortLink: `https://dnd.id/${item.shortlink}`, // Correct field name here
+          originalUrl: item.url || "", // Correct field name here (item.url)
+          title: item.url_title || "Untitled", // Correct field name (item.url_title)
+          clicks: item.clickcount || 0, // Default to 0 if undefined
+          status: item.status || "inactive", // Default to "inactive" if undefined
+          createdAt: item.createdat || "N/A", // Default to "N/A" if undefined
+          lastAccessedAt: item.lastaccesedat || null, // Use correct field name
+          qrCodeUrl: item.qr_code || "", // Correct field name
         }));
 
-        setShortLinks(links);
+        setShortLinks(links); // Update the state with mapped links
         console.log(links); // Log the final links array
       } catch (error) {
         console.error("Error fetching URLs:", error);
@@ -276,45 +277,44 @@ const MainPage = () => {
     };
 
     showAllURLs();
-  }, [navigate]);
+  }, []);
 
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
-      notification.error({
-        message: 'Shorten Failed',
-        description: 'Please complete all fields including custom slug and custom title.',
-        placement: 'top',
-      });
+      alert(
+        "Please complete all fields including custom slug and custom title."
+      );
       return;
     }
-  
+
     try {
       const bodyData: BodyData = {
         url: originalUrl,
         shortlink: customSlug,
         title: customTitle,
       };
-  
+
       if (expiredTime !== null) {
         bodyData.expiredTime = expiredTime;
       }
-  
+
       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Remove this line if cookies are not needed
+        credentials: "include",
         body: JSON.stringify(bodyData),
       });
-  
+
       if (!response.ok) {
         const errorText = await response.json();
         console.error(`Error: ${errorText.message}`);
         alert("Failed to shorten the link. Please try again.");
         return;
       }
-  
+
       const data = await response.json();
       const newLink: ShortLink = {
         id: data.data.url_details.id,
@@ -327,7 +327,7 @@ const MainPage = () => {
         lastAccessedAt: data.data.url_details.lastaccesedat || null,
         qrCodeUrl: data.data.url_details.qr_code,
       };
-  
+
       setShortLinks([newLink, ...shortLinks]);
       setOriginalUrl("");
       setCustomSlug("");
@@ -336,13 +336,28 @@ const MainPage = () => {
       setIsPopupOpen(false);
     } catch (error) {
       console.error("Error fetching API:", error);
-      notification.error({
-        message: 'Shorten Failed',
-        description: 'There was a problem connecting to the server. Please check your connection and try again.',
-        placement: 'top',
-      });
     }
-  };  
+  };
+
+  const handleCopy = (shortLink: string) => {
+    navigator.clipboard.writeText(shortLink).then(() => {
+      alert("Link copied to clipboard!");
+    });
+  };
+
+  const handleShare = (shortLink: string) => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: "Check out this shortened link!",
+          text: "Here is a link I shortened: ",
+          url: shortLink,
+        })
+        .catch((error) => console.error("Error sharing:", error));
+    } else {
+      alert("Your browser doesn't support the Web Share API.");
+    }
+  };
 
   const QrCodePopup: React.FC<QrCodePopupProps> = ({ qrCodeUrl, onClose }) => {
     const handleDownload = () => {
@@ -385,37 +400,35 @@ const MainPage = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col justify-center items-center bg-gray-100 p-4 md:p-6">
-      
+    <div className="min-h-screen relative flex flex-col justify-center bg-gray-100 p-4 md:p-6">
       {/* Logout Button */}
-      <div className="flex justify-between mt-4 ">
-        <h1 className="text-2xl md:text-4xl font-bold text-center ">
+      <div className="flex justify-center mt-4">
+        <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8">
           URL Shortener
         </h1>
         <button
           onClick={handleLogout}
-          className="bg-red-600 text-white text-xs font-semibold"
+          className="bg-red-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
         >
           Logout
         </button>
       </div>
       {/* Input Original Link */}
-      <div className="flex md:flex-row justify-center w-[1075px] py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
+      <div className="flex flex-row md:flex-row justify-center w-auto py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
           type="text"
           value={originalUrl}
           onChange={(e) => setOriginalUrl(e.target.value)}
           placeholder="Enter original URL"
-          className="p-3 border-gray-300 text-xs flex-1 rounded-lg"
+          className="p-2 border-gray-300 text-xs rounded-lg w-[65%] md:w-1/2"
         />
         <button
           onClick={handleShorten}
-          className="bg-blue-600 text-white px-4 py-2 text-xs flex-shrink-0 min-w[100px] w-fit font-semibold rounded-full"
+          className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
         >
           Shorten now
         </button>
       </div>
-
       {/* Navigasi */}
       <div className="flex justify-center mt-4">
         <button
@@ -425,7 +438,6 @@ const MainPage = () => {
           Go to Analisi
         </button>
       </div>
-
       {/* Customize Your Link */}
       {isPopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -484,7 +496,6 @@ const MainPage = () => {
           </div>
         </div>
       )}
-      
       {/* QR Code Popup */}
       {selectedQrCode && (
         <QrCodePopup
@@ -494,23 +505,19 @@ const MainPage = () => {
       )}
       {/* Output Semua Link */}
       <div className="flex mt-5 flex-wrap justify-center">
-        <div className="barki bg-[#4250CC]/50 max-h-[450px] shadow-md w-fit grid grid-cols-8 place-content-center text-center items-center rounded-b-none rounded-lg">
-          <strong className="text-white">Original Link</strong> 
-          <strong className="text-white">Shortlink</strong>
-          <strong className="text-white">Title</strong> 
-          <strong className="text-white">Date</strong> 
-          <strong className="text-white">Status</strong>
-          <strong className="text-white">Click</strong> 
-          <strong className="text-white">QR Code</strong>
-          <strong className="text-white">Action</strong>
+        <div className="barki bg-white max-h-[450px] shadow-md w-fit  grid grid-cols-8 place-content-center text-center items-center rounded-b-none rounded-lg">
+          <strong>Original Link</strong> <strong>Shortlink</strong>{" "}
+          <strong>Title</strong> <strong>Date</strong> <strong>Status</strong>{" "}
+          <strong>Click</strong> <strong>QR Code</strong>{" "}
+          <strong>Action</strong>{" "}
         </div>
-        <div className="w-fit max-h-[450px] flex  flex-col justify-start scrollbar-hide overflow-y-auto rounded-t-none bg-[#4250CC]/50 shadow-md rounded-lg">
+        <div className="w-fit max-h-[450px] flex flex-col justify-start scrollbar-hide overflow-y-auto rounded-t-none bg-white shadow-md rounded-lg">
           {shortLinks.length > 0 ? (
             <ul className="space-y-4">
               {shortLinks.map((link, index) => (
                 <li
                   key={index}
-                  className="listsorlink bg-white/50 shadow-md w-fit border font-semibold grid grid-cols-8 place-content-center text-center items-center "
+                  className="listsorlink bg-white shadow-md w-fit border grid grid-cols-8 place-content-center text-center items-center rounded-3xl"
                 >
                   <p>
                     <a
@@ -544,34 +551,46 @@ const MainPage = () => {
                     {/* <strong>Status:</strong>  */}
                     {link.status}
                   </p>
-                  <button onClick={() => navigate(`/analisis/${link.id}`)}>{link.clicks}</button>
+                  <button onClick={() => navigate(`/analisis/${link.id}`)}>
+                    {link.clicks}
+                  </button>
                   <div className="flex items-center justify-center">
-                    <img 
+                    <img
                       src={`data:image/png;base64,${link.qrCodeUrl}`}
                       alt="QR Code"
                       className="qr-code w-16 h-16 my-1"
                       onClick={() => handleQrCodeClick(link)}
                     />
                   </div>
-                  <div className="grid items-center justify-center">
-                  <Space direction="horizontal" wrap>
-                    <Dropdown
-                      overlay={HorizontalMenu}
-                      placement="topCenter" // Set the dropdown to appear above
-                      onVisibleChange={(visible) => visible && setSelectedLink(link)} // Set selected link here
-                    >
-                      <a onClick={(e) => e.preventDefault()}>
-                        <MoreOutlined 
-                          style={{ 
-                            fontSize: '30px', 
-                            cursor: 'pointer', 
-                            transform: 'rotate(90deg)', 
-                            fontWeight: 'bold',
-                          }} 
-                        />
-                      </a>
-                    </Dropdown>
-                  </Space>
+                  <div className="grid grid-cols-2">
+                    <div className="flex justify-center">
+                      <FontAwesomeIcon
+                        onClick={() => handleShare(link.shortLink)}
+                        className="px-4 py-2"
+                        icon={faShare}
+                      />
+                    </div>
+                    <div className="flex justify-center">
+                      <FontAwesomeIcon
+                        onClick={() => handleCopy(link.shortLink)}
+                        className="px-4 py-2"
+                        icon={faCopy}
+                      />
+                    </div>
+                    <div className="flex justify-center">
+                      <FontAwesomeIcon
+                        onClick={() => handleShare(link.shortLink)}
+                        className="px-4 py-2"
+                        icon={faShare}
+                      />
+                    </div>
+                    <div className="flex justify-center">
+                      <FontAwesomeIcon
+                        onClick={() => handleCopy(link.shortLink)}
+                        className="px-4 py-2"
+                        icon={faCopy}
+                      />
+                    </div>
                   </div>
                 </li>
               ))}
