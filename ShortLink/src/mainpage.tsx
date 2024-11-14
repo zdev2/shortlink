@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./App.css";
-import { notification } from 'antd';
-import { CopyOutlined, ShareAltOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { notification } from "antd";
+import {
+  CopyOutlined,
+  ShareAltOutlined,
+  MoreOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import { Dropdown, Space, Menu } from "antd";
 import { jwtDecode } from "jwt-decode";
 
@@ -187,7 +193,7 @@ const MainPage = () => {
       // onClick: handleShare,
     },
     {
-      key: 'delete',
+      key: "delete",
       icon: <DeleteOutlined />,
       label: 'Delete',
       onClick: deleteShortlink,
@@ -345,11 +351,9 @@ const MainPage = () => {
 
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
-      notification.error({
-        message: 'Shorten Failed',
-        description: 'Please complete all fields including custom slug and custom title.',
-        placement: 'top',
-      });
+      alert(
+        "Please complete all fields including custom slug and custom title."
+      );
       return;
     }
 
@@ -369,6 +373,7 @@ const MainPage = () => {
 
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
         },
         credentials: "include",
         body: JSON.stringify(bodyData),
@@ -446,31 +451,31 @@ const MainPage = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col justify-center bg-gray-100 p-4 md:p-6">
+    <div className="min-h-screen relative flex flex-col justify-center items-center bg-gray-100 p-4 md:p-6">
       {/* Logout Button */}
-      <div className="flex justify-center mt-4">
-        <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8">
+      <div className="flex justify-between mt-4 ">
+        <h1 className="text-2xl md:text-4xl font-bold text-center ">
           URL Shortener
         </h1>
         <button
           onClick={handleLogout}
-          className="bg-red-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
+          className="bg-red-600 text-white text-xs font-semibold"
         >
           Logout
         </button>
       </div>
       {/* Input Original Link */}
-      <div className="flex flex-row md:flex-row justify-center w-auto py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
+      <div className="flex md:flex-row justify-center w-[1075px] py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
           type="text"
           value={originalUrl}
           onChange={(e) => setOriginalUrl(e.target.value)}
           placeholder="Enter original URL"
-          className="p-2 border-gray-300 text-xs rounded-lg w-[65%] md:w-1/2"
+          className="p-3 border-gray-300 text-xs flex-1 rounded-lg"
         />
         <button
           onClick={handleShorten}
-          className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
+          className="bg-blue-600 text-white px-4 py-2 text-xs flex-shrink-0 min-w[100px] w-fit font-semibold rounded-full"
         >
           Shorten now
         </button>
