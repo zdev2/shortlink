@@ -1,2 +1,3 @@
 .env
-dockerfile
+.env.production
+.env.development
