@@ -9,9 +9,9 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Space, Menu, MenuProps } from "antd";
+import { Dropdown, Space, MenuProps } from "antd";
 import { jwtDecode } from "jwt-decode";
-import type { MenuInfo } from 'rc-menu/lib/interface';
+// import type { MenuInfo } from "rc-menu/lib/interface";
 
 interface DecodedToken {
   exp: number;
@@ -54,7 +54,7 @@ const MainPage = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedQrCode, setSelectedQrCode] = useState<ShortLink | null>(null);
   const [selectedLink, setSelectedLink] = useState<ShortLink | null>(null);
-  const authToken = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
+  const authToken = localStorage.getItem("authToken"); // Replace 'authToken' with your actual key
 
   const handleCopy = () => {
     if (selectedLink) {
@@ -107,11 +107,12 @@ const MainPage = () => {
 
   async function deleteShortlink(id: string) {
     try {
-      const response = await fetch(`https://shortlink-production-933a.up.railway.app/api/v1/urls/${id}`, {
-        method: 'DELETE',
+      console.log(authToken);
+      const response = await fetch(`http://127.0.0.1:3000/api/v1/urls/${id}`, {
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
         },
       });
       if (response.ok) {
@@ -120,22 +121,20 @@ const MainPage = () => {
           description: "The shortened link has been delete successfully.",
           placement: "top",
         });
-        navigate('main-menu')
+        navigate("main-menu");
       } else {
         notification.error({
           message: "Failed to delete link",
-          description:
-            "There was an error delete the link. Please try again.",
+          description: "There was an error delete the link. Please try again.",
           placement: "top",
         });
       }
     } catch (error) {
-      console.error('Error deleting shortlink:', error);
+      console.error("Error deleting shortlink:", error);
     }
   }
-  
 
-  const items: MenuProps['items'] = [
+  const items: (row:ShortLink ) => MenuProps["items"] = (row) => [
     {
       key: "copy",
       icon: <CopyOutlined />,
@@ -157,20 +156,20 @@ const MainPage = () => {
     {
       key: "delete",
       icon: <DeleteOutlined />,
-      label: 'Delete',
-      onClick: (info: MenuInfo) => deleteShortlink(info.key as string),
+      label: "Delete",
+      onClick: () => deleteShortlink(row.id as string),
     },
   ];
 
-  const HorizontalMenu = () => (
-    <Menu
-      items={items}
-      style={{
-        display: "flex",
-        flexDirection: "row",
-      }}
-    />
-  );
+  // const HorizontalMenu = () => (
+  //   <Menu
+  //     items={items}
+  //     style={{
+  //       display: "flex",
+  //       flexDirection: "row",
+  //     }}
+  //   />
+  // );
 
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
@@ -266,7 +265,7 @@ const MainPage = () => {
         } else {
           console.error("No token found in localStorage");
         }
-  
+
         const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
           method: "GET",
           headers: {
@@ -274,18 +273,23 @@ const MainPage = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-  
+
         if (!response.ok) {
           if (response.status === 401) {
-            console.error("Unauthorized access - possible invalid or expired token.");
+            console.error(
+              "Unauthorized access - possible invalid or expired token."
+            );
             localStorage.removeItem("authToken");
-            navigate("/main-menu")
+            navigate("/main-menu");
           } else {
-            console.error("Failed to fetch URLs. Status code:", response.status);
+            console.error(
+              "Failed to fetch URLs. Status code:",
+              response.status
+            );
           }
           return;
         }
-  
+
         const data = await response.json();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const links: ShortLink[] = data.data.urls.map((item: any) => ({
@@ -299,7 +303,7 @@ const MainPage = () => {
           lastAccessedAt: item.lastaccesedat || null,
           qrCodeUrl: item.qr_code || "",
         }));
-  
+
         setShortLinks(links);
         console.log(links); // Log the final links array
       } catch (error) {
@@ -344,10 +348,9 @@ const MainPage = () => {
         const errorText = await response.json();
         console.error(`Error: ${errorText.message}`);
         notification.error({
-          message: 'Shorten failed',
-          description:
-            'Gagal melakukan shortlink  ',
-          placement: 'top',
+          message: "Shorten failed",
+          description: "Gagal melakukan shortlink  ",
+          placement: "top",
         });
       }
 
@@ -413,6 +416,10 @@ const MainPage = () => {
 
   const handleQrCodeClick = (link: ShortLink) => {
     setSelectedQrCode(link);
+  };
+
+  const onClick: MenuProps["onClick"] = ({ key }) => {
+    console.log(`Click on item ${key}`);
   };
 
   return (
@@ -522,12 +529,12 @@ const MainPage = () => {
       {/* Output Semua Link */}
       <div className="flex mt-5 flex-wrap justify-center">
         <div className="barki bg-[#4250CC]/50 max-h-[450px] shadow-md w-fit grid grid-cols-8 place-content-center text-center items-center rounded-b-none rounded-lg">
-          <strong className="text-white">Original Link</strong> 
+          <strong className="text-white">Original Link</strong>
           <strong className="text-white">Shortlink</strong>
-          <strong className="text-white">Title</strong> 
-          <strong className="text-white">Date</strong> 
+          <strong className="text-white">Title</strong>
+          <strong className="text-white">Date</strong>
           <strong className="text-white">Status</strong>
-          <strong className="text-white">Click</strong> 
+          <strong className="text-white">Click</strong>
           <strong className="text-white">QR Code</strong>
           <strong className="text-white">Action</strong>
         </div>
@@ -571,31 +578,41 @@ const MainPage = () => {
                     {/* <strong>Status:</strong>  */}
                     {link.status}
                   </p>
-                  <button onClick={() => navigate(`/analisis/${link.id}`)}>{link.clicks}</button>
+                  <button onClick={() => navigate(`/analisis/${link.id}`)}>
+                    {link.clicks}
+                  </button>
                   <div className="flex items-center justify-center">
-                    <img 
+                    <img
                       src={`data:image/png;base64,${link.qrCodeUrl}`}
                       alt="QR Code"
                       className="qr-code w-16 h-16 my-1"
                       onClick={() => handleQrCodeClick(link)}
                     />
                   </div>
-                  <div className="grid items-center justify-center">
+                  <div className="items-center justify-center">
                   <Space direction="horizontal" wrap>
-                    <Dropdown
-                      overlay={HorizontalMenu}
+                    {/* <Dropdown
+                      // menu={HorizontalMenu}
                       placement="topCenter" // Set the dropdown to appear above
-                      onVisibleChange={(visible) => visible && setSelectedLink(link)} // Set selected link here
+                      // onVisibleChange={(visible) => visible && setSelectedLink(link)} // Set selected link here
                     >
                       <a onClick={(e) => e.preventDefault()}>
-                        <MoreOutlined 
-                          style={{ 
-                            fontSize: '30px', 
-                            cursor: 'pointer', 
-                            transform: 'rotate(90deg)', 
-                            fontWeight: 'bold',
-                          }} 
+                        <MoreOutlined
+                          style={{
+                            fontSize: "30px",
+                            cursor: "pointer",
+                            transform: "rotate(90deg)",
+                            fontWeight: "bold",
+                          }}
                         />
+                      </a>
+                    </Dropdown> */}
+                    <Dropdown menu={{ items: items(link), onClick }}>
+                      <a onClick={(e) => e.preventDefault()}>
+                        <Space>
+                          <MoreOutlined />
+                          {/* <HorizontalMenu /> */}
+                        </Space>
                       </a>
                     </Dropdown>
                   </Space>
