@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"shortlink/config"
 	"shortlink/internal/database"
 	"shortlink/internal/handler/rest"
@@ -43,7 +45,7 @@ func main() {
 	})
 	
 	// open fiber on http://localhost:3000
-	err = app.Listen(":3000")
+	err = app.Listen(fmt.Sprintf(":%s", os.Getenv("PORT")))
 	if err != nil {
 		logrus.Fatalf("Error on running Fiber: %v", err)
 	}

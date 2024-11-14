@@ -16,7 +16,7 @@ var MongoClient *mongo.Client
 
 // OpenDB initializes the MongoDB client and stores it in the global `client` variable.
 func OpenDB() (*mongo.Client, error) {
-	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO"))
+	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_URI"))
 	var err error
 	MongoClient, err = mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -41,7 +41,7 @@ func CreateCollectionsAndIndexes(client *mongo.Client) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	db := client.Database("shortlink")
+	db := client.Database(os.Getenv("DB_NAME"))
 
 	// Creating collections (if they don't exist)
 	collections := []string{"user", "urls", "audit_log", "analytics"}
