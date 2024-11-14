@@ -26,7 +26,7 @@ func GenerateURL(c *fiber.Ctx) error {
 	var urlReq struct {
 		URL         string `json:"url"`
 		URLPassword string `json:"url_password"`
-		Title 		string `json:"url_title"`
+		Title       string `json:"url_title"`
 		ShortLink   string `json:"shortlink"`
 		ExpDate     string `json:"expdate"` // Use string to capture empty value
 	}
@@ -41,10 +41,12 @@ func GenerateURL(c *fiber.Ctx) error {
 		return BadRequest(c, "Invalid URL format")
 	}
 
-	// Retrieve the user from the JWT token stored in context
-	user := c.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	userID := claims["sub"].(string)
+	// Retrieve the user ID from the claims stored in context
+	claims := c.Locals("user").(jwt.MapClaims)
+	userID, ok := claims["sub"].(string)
+	if !ok {
+		return BadRequest(c, "Invalid UserID in token")
+	}
 
 	// Convert userID (which is a string) to MongoDB ObjectID
 	objectID, err := primitive.ObjectIDFromHex(userID)
@@ -102,17 +104,17 @@ func GenerateURL(c *fiber.Ctx) error {
 		URLID:          urlID,
 		UserID:         objectID,
 		URL:            urlReq.URL,
-		Title: 			urlTitle,	
+		Title:          urlTitle,
 		ShortLink:      shortLink,
 		ClickCount:     0,
 		LastAccessedAt: currentTime,
 		ExpDate:        expDate, // This can be nil
 		Status:         "active",
 		URLPassword:    urlReq.URLPassword,
-		CreatedAt: 		currentTime,
-		UpdateAt:  		currentTime,
-		DeletedAt: 		nil, // Not deleted initially
-		QRCode:   		qrcode,
+		CreatedAt:      currentTime,
+		UpdateAt:       currentTime,
+		DeletedAt:      nil, // Not deleted initially
+		QRCode:         qrcode,
 	}
 
 	// Insert the new URL document into the MongoDB collection
@@ -130,6 +132,7 @@ func GenerateURL(c *fiber.Ctx) error {
 		"url_details": url,
 	})
 }
+
 
 
 // EditShortLink handles updating the URL or its details
@@ -346,9 +349,11 @@ func DeleteURL(c *fiber.Ctx) error {
 
 // GetUserUrlLogs retrieves logs (URLs) for the logged-in user
 func GetUserUrlLogs(c *fiber.Ctx) error {
-	user := c.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	userID := claims["sub"].(string)
+	claims := c.Locals("user").(jwt.MapClaims)
+	userID, ok := claims["sub"].(string)
+	if !ok {
+		return BadRequest(c, "User ID not found in token claims")
+	}
 
 	objectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
@@ -373,6 +378,7 @@ func GetUserUrlLogs(c *fiber.Ctx) error {
 		"urls":    urls,
 	})
 }
+
 
 func getUrlTitle(url string)(string, error){
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
