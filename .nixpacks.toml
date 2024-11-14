@@ -1,0 +1,10 @@
+project_path = "."
+
+[phases.setup]
+languages = ["go"]
+
+[phases.build]
+cmd = "cd api && go build -o main ."
+
+[phases.start]
+cmd = "cd api && ./main"
