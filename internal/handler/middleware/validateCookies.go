@@ -27,7 +27,7 @@ func ValidateToken(c *fiber.Ctx) error {
     }
 
     // Retrieve secret key from environment variables
-    secretKey := os.Getenv("SUPERDUPERMEGABIGTOPSECRETINTHISPROJECTWHYIUSETHISNAMEFORMYCODEBRUHLOL")
+    secretKey := os.Getenv("JWT_TOKEN")
     if secretKey == "" {
         return rest.Unauthorized(c, "Server error")
     }
