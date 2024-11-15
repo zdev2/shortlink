@@ -120,7 +120,7 @@ func Login(c *fiber.Ctx) error {
     })
 
     // Get the secret key from environment variable
-    secret := os.Getenv("SUPERDUPERMEGABIGTOPSECRETINTHISPROJECTWHYIUSETHISNAMEFORMYCODEBRUHLOL")
+    secret := os.Getenv("JWT_TOKEN")
     if secret == "" {
         return InternalServerError(c, "Secret key not set")
     }
