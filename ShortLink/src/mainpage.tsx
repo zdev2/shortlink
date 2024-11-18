@@ -134,7 +134,7 @@ const MainPage = () => {
     }
   }
 
-  const items: (row:ShortLink ) => MenuProps["items"] = (row) => [
+  const items: (row: ShortLink) => MenuProps["items"] = (row) => [
     {
       key: "copy",
       icon: <CopyOutlined />,
@@ -191,7 +191,7 @@ const MainPage = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/v1/users/logout",
+        "http://127.0.0.1:3000/api/v1/users/logout",
         {
           method: "POST",
           headers: {
@@ -590,8 +590,8 @@ const MainPage = () => {
                     />
                   </div>
                   <div className="items-center justify-center">
-                  <Space direction="horizontal" wrap>
-                    {/* <Dropdown
+                    <Space direction="horizontal" wrap>
+                      {/* <Dropdown
                       // menu={HorizontalMenu}
                       placement="topCenter" // Set the dropdown to appear above
                       // onVisibleChange={(visible) => visible && setSelectedLink(link)} // Set selected link here
@@ -607,15 +607,15 @@ const MainPage = () => {
                         />
                       </a>
                     </Dropdown> */}
-                    <Dropdown menu={{ items: items(link), onClick }}>
-                      <a onClick={(e) => e.preventDefault()}>
-                        <Space>
-                          <MoreOutlined />
-                          {/* <HorizontalMenu /> */}
-                        </Space>
-                      </a>
-                    </Dropdown>
-                  </Space>
+                      <Dropdown menu={{ items: items(link), onClick }}>
+                        <a onClick={(e) => e.preventDefault()}>
+                          <Space>
+                            <MoreOutlined />
+                            {/* <HorizontalMenu /> */}
+                          </Space>
+                        </a>
+                      </Dropdown>
+                    </Space>
                   </div>
                 </li>
               ))}

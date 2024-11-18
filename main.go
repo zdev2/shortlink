@@ -44,7 +44,7 @@ func main() {
 		})
 	})
 	
-	// open fiber on http://localhost:3000
+	// open fiber on http://127.0.0.1:3000
 	err = app.Listen(fmt.Sprintf(":%s", os.Getenv("PORT")))
 	if err != nil {
 		logrus.Fatalf("Error on running Fiber: %v", err)
