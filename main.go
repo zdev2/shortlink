@@ -7,12 +7,19 @@ import (
 	"shortlink/internal/database"
 	"shortlink/internal/handler/rest"
 	"shortlink/internal/routes"
+	"shortlink/logger"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
+
+	logger.InitLog("app.log")
+    log := logger.GetLogger()
+    log.Info("START", "Application started")
+
+	
 	config.InitEnv()
 	
 	// Initialize MongoDB connection

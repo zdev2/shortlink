@@ -11,3 +11,4 @@ func InitEnv() {
 		logrus.Warn("Cannot load env file, using system env")
 	}
 }
+

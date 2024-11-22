@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"shortlink/internal/database"
+	"shortlink/internal/utils"
+	"shortlink/logger"
 	"shortlink/model"
 	"strings"
 	"time"
@@ -17,180 +19,191 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+
 var logReq struct {
-    Username string `json:"username" bson:"username"`
-    Password string `json:"password" bson:"password"`
+	Username string `json:"username" bson:"username"`
+	Password string `json:"password" bson:"password"`
 }
 
 var registerReq struct {
-    Username string `json:"username" bson:"username"`
-    Email    string `json:"email" bson:"email"`
-    Password string `json:"password" bson:"password"`
+	Username string `json:"username" bson:"username"`
+	Email    string `json:"email" bson:"email"`
+	Password string `json:"password" bson:"password"`
 }
 
 func Register(c *fiber.Ctx) error {
-    if err := c.BodyParser(&registerReq); err != nil {
-        return BadRequest(c, "Failed to read body request")
-    }
-    if registerReq.Username == "" {
-        return BadRequest(c, "Username cannot be empty")
-    }
-    if registerReq.Password == "" {
-        return BadRequest(c, "Password cannot be empty")
-    }
-    registerReq.Username = strings.TrimSpace(registerReq.Username)
-	registerReq.Password = strings.TrimSpace(registerReq.Password)
-    hash, err := bcrypt.GenerateFromPassword([]byte(registerReq.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return BadRequest(c, "Failed to hashed password")
+	log := logger.GetLogger()
+	if err := c.BodyParser(&registerReq); err != nil {
+		log.Warning("BAD_REQUEST", "Failed to parse body in register request")
+		return utils.BadRequest(c, "Invalid request body")
 	}
-    collection := database.MongoClient.Database("shortlink").Collection("user")
-    var existUser model.User
-    filter := bson.M{"username": registerReq.Username}
-    err = collection.FindOne(context.TODO(), filter).Decode(&existUser)
+	if registerReq.Username == "" {
+		log.Warning("BAD_REQUEST", "Username field is empty")
+		return utils.BadRequest(c, "Username is required")
+	}
+	if registerReq.Password == "" {
+		log.Warning("BAD_REQUEST", "Password field is empty")
+		return utils.BadRequest(c, "Password is required")
+	}
+	
+	registerReq.Username = strings.TrimSpace(registerReq.Username)
+	registerReq.Password = strings.TrimSpace(registerReq.Password)
+	hash, err := bcrypt.GenerateFromPassword([]byte(registerReq.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Error("INTERNAL_SERVER_ERROR", "Failed to hash password")
+		return utils.InternalServerError(c, "Error generating password hash")
+	}
+
+	collection := database.MongoClient.Database("shortlink").Collection("user")
+	var existUser model.User
+	filter := bson.M{"username": registerReq.Username}
+	err = collection.FindOne(context.TODO(), filter).Decode(&existUser)
 	if err == nil {
-		return Conflict(c, "Admin name already exists")
+		log.Warning("CONFLICT", "Username already exists")
+		return utils.Conflict(c, "Username already exists")
 	} else if err != mongo.ErrNoDocuments {
-		return InternalServerError(c, "Error checking for existing admin name")
-    }
+		log.Error("INTERNAL_SERVER_ERROR", "Database error during user check")
+		return utils.InternalServerError(c, "Database error")
+	}
+
 	user := model.User{
-		ID:            primitive.NewObjectID(),
-		Username: registerReq.Username,
-        Email: registerReq.Email,
-        Password: string(hash),
-        IsActive: false,
-        CreatedAt: time.Now(),
-        UpdateAt: time.Now(),
-        DeletedAt: nil,
+		ID:        primitive.NewObjectID(),
+		Username:  registerReq.Username,
+		Email:     registerReq.Email,
+		Password:  string(hash),
+		IsActive:  false,
+		CreatedAt: time.Now(),
+		UpdateAt:  time.Now(),
+		DeletedAt: nil,
 	}
 	_, err = collection.InsertOne(context.TODO(), user)
 	if err != nil {
-		return InternalServerError(c, "Failed to create admin account")
+		log.Error("INTERNAL_SERVER_ERROR", "Failed to insert user in database")
+		return utils.InternalServerError(c, "Failed to create user")
 	}
-	return OK(c, fiber.Map{
-        "text": "user account created successfully", 
-        "user_acc": user,
-    })
+
+	log.Info("INFO", "User registered successfully")
+	return utils.OK(c, fiber.Map{
+		"text":      "User account created successfully",
+		"user_acc": user,
+	})
 }
 
 func Login(c *fiber.Ctx) error {
-    // Parse the request body
-    if err := c.BodyParser(&logReq); err != nil {
-        return BadRequest(c, "Failed to read body request")
-    }
-    logReq.Username = strings.TrimSpace(logReq.Username)
-    logReq.Password = strings.TrimSpace(logReq.Password)
+	log := logger.GetLogger()
+	if err := c.BodyParser(&logReq); err != nil {
+		log.Warning("BAD_REQUEST", "Failed to parse body in login request")
+		return utils.BadRequest(c, "Invalid request body")
+	}
 
-    // Initialize user account struct
-    var userAcc model.User
-    collection := database.MongoClient.Database("shortlink").Collection("user")
-    var query bson.M
+	logReq.Username = strings.TrimSpace(logReq.Username)
+	logReq.Password = strings.TrimSpace(logReq.Password)
+	var userAcc model.User
+	collection := database.MongoClient.Database("shortlink").Collection("user")
+	var query bson.M
+	if strings.Contains(logReq.Username, "@") {
+		query = bson.M{"email": logReq.Username}
+	} else {
+		query = bson.M{"username": logReq.Username}
+	}
 
-    // Determine if login is by email or username
-    if strings.Contains(logReq.Username, "@") {
-        query = bson.M{"email": logReq.Username}
-    } else {
-        query = bson.M{"username": logReq.Username}
-    }
+	err := collection.FindOne(context.TODO(), query).Decode(&userAcc)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			log.Warning("UNAUTHORIZED", "Invalid username or email")
+			return utils.Unauthorized(c, "Invalid username or email")
+		}
+		log.Error("INTERNAL_SERVER_ERROR", "Database error during login")
+		return utils.InternalServerError(c, "Database error")
+	}
 
-    // Find the user account
-    err := collection.FindOne(context.TODO(), query).Decode(&userAcc)
-    if err != nil {
-        if err == mongo.ErrNoDocuments {
-            return Unauthorized(c, "Invalid username")
-        }
-        return InternalServerError(c, "Database error")
-    }
+	if userAcc.DeletedAt != nil && !userAcc.DeletedAt.IsZero() {
+		log.Warning("GONE", "Attempt to access a deleted account")
+		return utils.Gone(c, fmt.Sprintf("This account was deleted on %s", userAcc.DeletedAt))
+	}
 
-    // Check if the account is deleted
-    if userAcc.DeletedAt != nil && !userAcc.DeletedAt.IsZero() {
-        return Gone(c, fmt.Sprintf("This account has already been deleted, %s", userAcc.DeletedAt))
-    }
+	err = bcrypt.CompareHashAndPassword([]byte(userAcc.Password), []byte(logReq.Password))
+	if err != nil {
+		log.Warning("UNAUTHORIZED", "Invalid password")
+		return utils.Unauthorized(c, "Invalid password")
+	}
 
-    // Verify the password
-    err = bcrypt.CompareHashAndPassword([]byte(userAcc.Password), []byte(logReq.Password))
-    if err != nil {
-        return Unauthorized(c, "Invalid password")
-    }
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": userAcc.ID.Hex(),
+		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+	})
+	secret := os.Getenv("JWT_TOKEN")
+	if secret == "" {
+		log.Error("INTERNAL_SERVER_ERROR", "JWT secret key is not set")
+		return utils.InternalServerError(c, "Internal server error")
+	}
 
-    // Create JWT token
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-        "sub": userAcc.ID.Hex(),
-        "exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
-    })
+	tokenString, err := token.SignedString([]byte(secret))
+	if err != nil {
+		log.Error("INTERNAL_SERVER_ERROR", "Failed to sign JWT token")
+		return utils.InternalServerError(c, "Failed to generate token")
+	}
 
-    // Get the secret key from environment variable
-    secret := os.Getenv("JWT_TOKEN")
-    if secret == "" {
-        return InternalServerError(c, "Secret key not set")
-    }
+	c.Cookie(&fiber.Cookie{
+		Name:     "authToken",
+		Value:    tokenString,
+		Expires:  time.Now().Add(time.Hour * 24 * 30),
+		HTTPOnly: true,
+		Secure:   false,
+		Path:     "/",
+	})
 
-    // Sign the token
-    tokenString, err := token.SignedString([]byte(secret))
-    if err != nil {
-        return BadRequest(c, "Failed to create token")
-    }
-
-    // Set the token as an HttpOnly cookie
-    c.Cookie(&fiber.Cookie{
-        Name:     "authToken",
-        Value:    tokenString,
-        Expires:  time.Now().Add(time.Hour * 24 * 30), // Set expiry as needed
-        HTTPOnly: true,
-        Secure:   false, // Set to true if using HTTPS in production
-        Path:     "/",
-    })
-
-    // Return success response without the token
-    return OK(c, fiber.Map{
-        "token": tokenString,
-        "message": "Login successful",
-        "user":    userAcc,
-    })
+	log.Success("SUCCESS", "User logged in successfully")
+	return utils.OK(c, fiber.Map{
+		"token":   tokenString,
+		"message": "Login successful",
+		"user":    userAcc,
+	})
 }
 
-
 func GetAllUsers(c *fiber.Ctx) error {
-    // Define an empty slice to hold users
-    var users []model.User
+	log := logger.GetLogger()
+	var users []model.User
 
-    // Connect to the user collection
-    collection := database.MongoClient.Database("shortlink").Collection("user")
+	collection := database.MongoClient.Database("shortlink").Collection("user")
+	cursor, err := collection.Find(context.TODO(), bson.M{})
+	if err != nil {
+		log.Error("INTERNAL_SERVER_ERROR", "Failed to retrieve users from the database")
+		return utils.InternalServerError(c, "Failed to retrieve users")
+	}
+	defer cursor.Close(context.TODO())
 
-    // Query the collection for all users
-    cursor, err := collection.Find(context.TODO(), bson.M{})
-    if err != nil {
-        return InternalServerError(c, "Failed to retrieve users from the database")
-    }
-    defer cursor.Close(context.TODO())
+	for cursor.Next(context.TODO()) {
+		var user model.User
+		if err := cursor.Decode(&user); err != nil {
+			log.Error("INTERNAL_SERVER_ERROR", "Error decoding user")
+			return utils.InternalServerError(c, "Error decoding user")
+		}
+		users = append(users, user)
+	}
 
-    // Iterate over the cursor to decode all users
-    for cursor.Next(context.TODO()) {
-        var user model.User
-        if err := cursor.Decode(&user); err != nil {
-            return InternalServerError(c, "Error decoding user")
-        }
-        users = append(users, user)
-    }
+	if err := cursor.Err(); err != nil {
+		log.Error("INTERNAL_SERVER_ERROR", "Cursor error")
+		return utils.InternalServerError(c, "Cursor error")
+	}
 
-    if err := cursor.Err(); err != nil {
-        return InternalServerError(c, "Cursor error")
-    }
-
-    // Return the list of users as JSON
-    return OK(c, fiber.Map{
-        "users": users,
-    })
+	log.Info("INFO", "Users retrieved successfully")
+	return utils.OK(c, fiber.Map{
+		"users": users,
+	})
 }
 
 func Logout(c *fiber.Ctx) error {
-    c.ClearCookie("Authorization")
-    return OK(c, fiber.Map{
-        "message": "Logout successful",
-    })
+	log := logger.GetLogger()
+	c.ClearCookie("Authorization")
+	log.Info("INFO", "User logged out successfully")
+	return utils.OK(c, fiber.Map{
+		"message": "Logout successful",
+	})
 }
 
 func GetUserByID(c *fiber.Ctx) error {
+	log := logger.GetLogger()
 	userID := c.Params("id")
 	collection := database.MongoClient.Database("shortlink").Collection("user")
 
@@ -198,55 +211,63 @@ func GetUserByID(c *fiber.Ctx) error {
 	err := collection.FindOne(context.TODO(), bson.M{"_id": userID}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return NotFound(c, "User not found")
+			log.Warning("NOT_FOUND", "User not found")
+			return utils.NotFound(c, "User not found")
 		}
-		return InternalServerError(c, "Error fetching user")
+		log.Error("INTERNAL_SERVER_ERROR", "Error fetching user")
+		return utils.InternalServerError(c, "Error fetching user")
 	}
 
-	return OK(c, fiber.Map{
+	log.Info("INFO", "User retrieved successfully")
+	return utils.OK(c, fiber.Map{
 		"user": user,
 	})
 }
 
 func UpdateUser(c *fiber.Ctx) error {
+	log := logger.GetLogger()
 	userID := c.Params("id")
-	var updateReq model.User // Assume model.User holds fields that can be updated
+	var updateReq model.User
 
 	if err := c.BodyParser(&updateReq); err != nil {
-		return BadRequest(c, "Failed to read body request")
+		log.Warning("BAD_REQUEST", "Failed to parse update request")
+		return utils.BadRequest(c, "Failed to read body request")
 	}
 
 	collection := database.MongoClient.Database("shortlink").Collection("user")
 	update := bson.M{
 		"$set": bson.M{
-			"email":    updateReq.Email,
-			"username": updateReq.Username,
-			// Include more fields as necessary
+			"email":     updateReq.Email,
+			"username":  updateReq.Username,
 			"update_at": time.Now(),
 		},
 	}
 
 	_, err := collection.UpdateOne(context.TODO(), bson.M{"_id": userID}, update)
 	if err != nil {
-		return InternalServerError(c, "Error updating user")
+		log.Error("INTERNAL_SERVER_ERROR", "Error updating user")
+		return utils.InternalServerError(c, "Error updating user")
 	}
 
-	return OK(c, fiber.Map{
+	log.Info("INFO", "User updated successfully")
+	return utils.OK(c, fiber.Map{
 		"message": "User updated successfully",
 	})
 }
 
 func DeleteUser(c *fiber.Ctx) error {
+	log := logger.GetLogger()
 	userID := c.Params("id")
 	collection := database.MongoClient.Database("shortlink").Collection("user")
 
-	// Soft delete the user (mark as deleted)
 	_, err := collection.UpdateOne(context.TODO(), bson.M{"_id": userID}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
 	if err != nil {
-		return InternalServerError(c, "Error deleting user")
+		log.Error("INTERNAL_SERVER_ERROR", "Error deleting user")
+		return utils.InternalServerError(c, "Error deleting user")
 	}
 
-	return OK(c, fiber.Map{
+	log.Info("INFO", "User deleted successfully")
+	return utils.OK(c, fiber.Map{
 		"message": "User deleted successfully",
 	})
 }

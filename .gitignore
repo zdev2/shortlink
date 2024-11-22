@@ -1,3 +1,5 @@
 .env
 .env.production
 .env.development
+
+app.log
