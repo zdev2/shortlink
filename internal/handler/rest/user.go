@@ -153,6 +153,18 @@ func Login(c *fiber.Ctx) error {
 		Path:     "/",
 	})
 
+	lastLogin := bson.M{
+		"$set": bson.M{
+			"last_login": time.Now(),
+		},
+	}
+
+	_, err = collection.UpdateOne(context.TODO(), bson.M{"username": logReq.Username}, lastLogin)
+	if err != nil {
+		log.Error("INTERNAL_SERVER_ERROR", "Error updating user")
+		return utils.InternalServerError(c, "Error updating user")
+	}
+
 	log.Success("SUCCESS", "User logged in successfully")
 	return utils.OK(c, fiber.Map{
 		"token":   tokenString,
