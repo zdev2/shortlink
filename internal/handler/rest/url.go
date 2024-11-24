@@ -11,7 +11,6 @@ import (
 	"shortlink/internal/utils"
 	"shortlink/logger"
 	"shortlink/model"
-	"strconv"
 	"strings"
 	"time"
 
@@ -165,7 +164,7 @@ func EditShortLink(c *fiber.Ctx) error {
 	}
 
 	// Get the URL ID from the URL params and convert to int64
-	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	urlID, err := primitive.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
 		log.Error("BAD_REQUEST", "Invalid URL ID format")
 		return utils.BadRequest(c, "Invalid URL ID format")
@@ -259,7 +258,7 @@ func DeleteURL(c *fiber.Ctx) error {
 	log := logger.GetLogger()
 
 	// Get the URL ID from the URL params and convert to int64
-	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	urlID, err := primitive.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
 		log.Warning("BAD_REQUEST", "Invalid URL ID format")
 		return utils.BadRequest(c, "Invalid URL ID format")
@@ -335,7 +334,7 @@ func GetURLs(c *fiber.Ctx) error {
 // GetURLbyID retrieves a specific URL by its ID
 func GetURLbyID(c *fiber.Ctx) error {
 	log := logger.GetLogger()
-	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	urlID, err := primitive.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
 		log.Warning("BAD_REQUEST", "Invalid URL ID format")
 		return utils.BadRequest(c, "Invalid URL ID format")
