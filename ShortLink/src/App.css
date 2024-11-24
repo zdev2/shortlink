@@ -39,6 +39,25 @@
   grid-template-rows: 70px;
 }
 
+@media(max-width: 768px) {
+  .barki {
+    display: grid;
+    grid-template-columns: 200px 240px 150px 100px 100px ;
+    grid-template-rows: 70px;
+  }
+  .listsorlink {
+    display: grid;
+    grid-template-columns: 200px 240px 150px 100px 100px ;
+    grid-template-rows: 70px;
+  }
+}
+
+@media (max-width: 1440px){
+  .jawir {
+    width: 1075px;
+  }
+}
+
 .qr-code {
   width: 4rem; /* Default size */
   height: 4rem; /* Default size */

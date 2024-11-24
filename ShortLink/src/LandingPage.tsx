@@ -1,7 +1,8 @@
 import "./App.css";
 import { FaArrowRight } from "react-icons/fa";
-import Icon from "./assets/Icon.svg";
-import Logo from "./assets/logo.svg";
+import Icon from "./assets/www-bro.svg";
+import iconv2 from "./assets/www.gif";
+import Logo from "./assets/Group 105.svg";
 import { useState } from "react";
 import foto from "./assets/Group 86.svg";
 import feat from "./assets/feat-links 1.svg";
@@ -148,9 +149,8 @@ const LandingPage = () => {
       });
     }
   };
-
   return (
-    <div className="bg-gradient-to-r from-pink-100 via-white to-purple-100 min-h-screen text-gray-900  md:pt-5">
+    <div className=" min-h-screen text-gray-900  md:pt-14">
       {/* Header */}
       <header className="md:px-[50px] px-6">
         <section className="pt-4 md:px-14 border-none md:border-black md:rounded-xl md:border md:border-solid xl:py-14">
@@ -159,7 +159,7 @@ const LandingPage = () => {
               <img
                 src={Logo}
                 alt="Logo"
-                className=" w-5 h-auto md:w-11 xl:w-14"
+                className=" w-4 h-auto md:w-[1.25rem] xl:w-8"
               />
               <div className="text-2xl font-bold text-indigo-600 lg:text-4xl">
                 DnD
@@ -173,17 +173,17 @@ const LandingPage = () => {
             </button>
           </div>
 
-          <div className="flex mt-[35px] flex-col md:flex-row-reverse md:pb-10 justify-between ">
+          <div className="flex flex-col md:flex-row-reverse justify-between ">
             <div className="flex justify-center">
               <img
                 src={Icon}
                 alt="Icon"
-                className="w-80 md:w-[450px] xl:w-[700px]"
+                className="w-80 md:w-[300px] xl:w-[700px]"
               />
             </div>
 
             <div className="flex flex-col items-center justify-center text-center md:items-start md:text-left">
-              <h1 className="text-4xl font-bold mb-4 md:text-5xl xl:text-7xl">
+              <h1 className="text-4xl font-bold mb-4 md:text-3xl xl:text-7xl">
                 Welcome to <span className="text-indigo-600">DnD</span>
               </h1>
               <p className="text-sm font-semibold mb-4 text-center md:text-left md:text-xl xl:text-2xl">
@@ -207,9 +207,9 @@ const LandingPage = () => {
       {/* end header */}
 
       {/* About Us Section */}
-      <section className="mt-[50px] p-6 md:px-10 xl:px-40">
-        <div className="from-pink-100 via-white to-purple-100">
-          <div className="flex justify-between bg-white rounded-xl border border-black px-[10px] py-[15px] md:items-start md:border-none  md:gap-10 md:bg-gradient-to-r md:from-pink-100 md:via-white md:to-purple-100">
+      <section className="my-[50px] p-6 md:px-10 xl:px-40">
+        <div className="">
+          <div className="flex justify-between flex-row-reverse bg-white rounded-xl border border-black px-[10px] py-[15px] md:items-center md:border-none  md:gap-10 ">
             <div className="flex flex-col justify-center">
               <h2 className="text-2xl font-bold mb-4 text-center md:text-left md:text-4xl xl:text-7xl">
                 About <span className="text-indigo-500">Us</span>
@@ -230,9 +230,9 @@ const LandingPage = () => {
 
             <div>
               <img
-                src={Icon}
+                src={iconv2}
                 alt="Icon"
-                className="hidden md:block md:w-[450px] xl:w-[700px]"
+                className="hidden md:block md:w-[500px] xl:w-[500px]"
               />
             </div>
           </div>

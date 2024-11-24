@@ -1,21 +1,21 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-// import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { AreaChart, Area } from "recharts";
 import { XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { notification } from "antd";
-import type { NotificationArgsProps } from "antd";
-import { Dropdown, Button, Menu, Space } from "antd";
+// import type { NotificationArgsProps } from 'antd';
+import { Dropdown, Button, Menu, Space, Modal } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { FaUser, FaHandPointer } from "react-icons/fa";
 
-type NotificationPlacement = NotificationArgsProps["placement"];
+// type NotificationPlacement = NotificationArgsProps['placement'];
 
-// interface DecodedToken {
-//   exp: number;
-//   iat: number;
-//   // Add other properties of the decoded token as needed
-// }
+interface DecodedToken {
+  exp: number;
+  iat: number;
+  // Add other properties of the decoded token as needed
+}
 
 interface BodyData {
   url: string;
@@ -52,18 +52,36 @@ const Analisis: React.FC = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [totalUv, setTotalUv] = useState(0);
   const [totalPv, setTotalPv] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [modalText, setModalText] = useState(
+    "Are you sure you want to log out? You will need to log in again to access your account."
+  );
+
+  const showModal = () => {
+    setOpen(true);
+  };
+
+  const handleOk = () => {
+    setModalText(
+      "Are you sure you want to log out? You will need to log in again to access your account."
+    );
+    setConfirmLoading(true);
+    setTimeout(() => {
+      handleLogout();
+      setOpen(false);
+      setConfirmLoading(false);
+    }, 5000);
+  };
+
+  const handleCancel = () => {
+    console.log("Clicked cancel button");
+    setOpen(false);
+  };
 
   const { id = "" } = useParams();
 
   console.log(id);
-
-  const openNotification = (placement: NotificationPlacement) => {
-    notification.info({
-      message: `Notification ${placement}`,
-      description: "Registrasi Berhasil silahkan kembali Login",
-      placement,
-    });
-  };
 
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
@@ -101,7 +119,12 @@ const Analisis: React.FC = () => {
         // Handle unauthorized response (e.g., redirect to login or clear session)
         console.log("Session expired, redirecting to login...");
         navigate("/");
-        openNotification("top");
+        notification.success({
+          message: "Logout has Succes",
+          description: "Logout successfully.",
+          placement: "top",
+        });
+        // openNotification("top")
         // Clear any session data or redirect the user
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
@@ -141,67 +164,72 @@ const Analisis: React.FC = () => {
     setIsPopupOpen(true);
   };
 
-  // useEffect(() => {
-  //   const showAllURLs = async () => {
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-  //       if (token) {
-  //         try {
-  //           const decoded: DecodedToken = jwtDecode(token);
-  //           console.log(decoded);
-  //           if (decoded.exp < Date.now() / 1000) {
-  //             console.error("Token has expired");
-  //             // Handle token expiry (e.g., log out user or refresh token)
-  //           }
-  //         } catch (error) {
-  //           console.error("Error decoding token:", error);
-  //         }
-  //       } else {
-  //         console.error("No token found in localStorage");
-  //       }
+  useEffect(() => {
+    const showAllURLs = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (token) {
+          try {
+            const decoded: DecodedToken = jwtDecode(token);
+            console.log(decoded);
+            if (decoded.exp < Date.now() / 1000) {
+              console.error("Token has expired");
+              // Handle token expiry (e.g., log out user or refresh token)
+            }
+          } catch (error) {
+            console.error("Error decoding token:", error);
+          }
+        } else {
+          console.error("No token found in localStorage");
+        }
 
-  //       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
+        const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  //       if (!response.ok) {
-  //         if (response.status === 401) {
-  //           console.error("Unauthorized access - possible invalid or expired token.");
-  //           localStorage.removeItem("authToken");
-  //           // navigate("/main-menu")
-  //         } else {
-  //           console.error("Failed to fetch URLs. Status code:", response.status);
-  //         }
-  //         return;
-  //       }
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.error(
+              "Unauthorized access - possible invalid or expired token."
+            );
+            localStorage.removeItem("authToken");
+            // navigate("/main-menu")
+          } else {
+            console.error(
+              "Failed to fetch URLs. Status code:",
+              response.status
+            );
+          }
+          return;
+        }
 
-  //       const data = await response.json();
-  //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //       const links: ShortLink[] = data.data.urls.map((item: any) => ({
-  //         id: item.id,
-  //         shortLink: `https://dnd.id/${item.shortlink}`,
-  //         originalUrl: item.url || "",
-  //         title: item.url_title || "Untitled",
-  //         clicks: item.clickcount || 0,
-  //         status: item.status || "inactive",
-  //         createdAt: item.createdat || "N/A",
-  //         lastAccessedAt: item.lastaccesedat || null,
-  //         qrCodeUrl: item.qr_code || "",
-  //       }));
+        const data = await response.json();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const links: ShortLink[] = data.data.urls.map((item: any) => ({
+          id: item.id,
+          shortLink: `https://dnd.id/${item.shortlink}`,
+          originalUrl: item.url || "",
+          title: item.url_title || "Untitled",
+          clicks: item.clickcount || 0,
+          status: item.status || "inactive",
+          createdAt: item.createdat || "N/A",
+          lastAccessedAt: item.lastaccesedat || null,
+          qrCodeUrl: item.qr_code || "",
+        }));
 
-  //       setShortLinks(links);
-  //       console.log(links); // Log the final links array
-  //     } catch (error) {
-  //       console.error("Error fetching URLs:", error);
-  //     }
-  //   };
+        setShortLinks(links);
+        console.log(links); // Log the final links array
+      } catch (error) {
+        console.error("Error fetching URLs:", error);
+      }
+    };
 
-  //   showAllURLs();
-  // }, []);
+    showAllURLs();
+  }, []);
 
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
@@ -261,6 +289,7 @@ const Analisis: React.FC = () => {
       setExpiredTime(null);
       setCustomTitle("");
       setIsPopupOpen(false);
+      navigate("/main-menu");
     } catch (error) {
       console.error("Error fetching API:", error);
       notification.error({
@@ -347,18 +376,23 @@ const Analisis: React.FC = () => {
   return (
     <div className="flex justify-center flex-col items-center">
       {/* Logout Button */}
-      <div className="flex justify-between mt-4 ">
+      <div className="flex justify-between mt-4 w-[1075px] mb-10">
         <h1 className="text-2xl md:text-4xl font-bold text-center ">
           URL Shortener
         </h1>
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white text-xs font-semibold"
-        >
+        <Button type="primary" onClick={showModal}>
           Logout
-        </button>
+        </Button>
+        <Modal
+          title="Logout Confirmation"
+          open={open}
+          onOk={handleOk}
+          confirmLoading={confirmLoading}
+          onCancel={handleCancel}
+        >
+          <p>{modalText}</p>
+        </Modal>
       </div>
-
       {/* Input Original Link */}
       <div className="flex md:flex-row justify-center w-[1075px] py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
@@ -377,12 +411,18 @@ const Analisis: React.FC = () => {
       </div>
 
       {/* Navigasi */}
-      <div className="flex justify-center mt-4">
+      <div className="flex justify-center gap-5 mt-4">
         <button
           onClick={() => navigate("/main-menu")}
-          className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
+          className="font-semibold border-blue-500 hover:text-blue-500"
         >
           Shortlink
+        </button>
+        <button
+          onClick={() => navigate("/analisis")}
+          className="border-b-4 font-semibold text-blue-500 border-blue-500"
+        >
+          Analytics
         </button>
       </div>
 
