@@ -1,6 +1,6 @@
 FROM node:latest AS builder
 
-WORKDIR /app/ShorrtLink
+WORKDIR /app/ShortLink
 
 COPY package*.json ./
 
