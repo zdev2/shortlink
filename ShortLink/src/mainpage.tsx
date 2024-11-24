@@ -8,8 +8,10 @@ import {
   MoreOutlined,
   EditOutlined,
   DeleteOutlined,
+  DownloadOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Space, MenuProps } from "antd";
+import { Dropdown, Space, MenuProps, Button, Modal } from "antd";
 import { jwtDecode } from "jwt-decode";
 // import type { MenuInfo } from "rc-menu/lib/interface";
 
@@ -17,14 +19,6 @@ interface DecodedToken {
   exp: number;
   iat: number;
   // Add other properties of the decoded token as needed
-}
-
-// Define the interface for the body data sent to the API
-interface BodyData {
-  url: string;
-  shortlink: string;
-  title: string;
-  expiredTime?: number; // Optional property
 }
 
 interface QrCodePopupProps {
@@ -55,7 +49,52 @@ const MainPage = () => {
   const [selectedQrCode, setSelectedQrCode] = useState<ShortLink | null>(null);
   const [selectedLink, setSelectedLink] = useState<ShortLink | null>(null);
   const authToken = localStorage.getItem("authToken"); // Replace 'authToken' with your actual key
+  const alala = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
+  const [open, setOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [modalText, setModalText] = useState('Are you sure you want to log out? You will need to log in again to access your account.');
+  const [modalTexts, setModalTexts] = useState('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
 
+  const showModal = () => {
+    setOpen(true);
+  };
+
+  const handleOk = () => {
+    setModalText('Are you sure you want to log out? You will need to log in again to access your account.');
+    setConfirmLoading(true);
+    setTimeout(() => {
+      handleLogout()
+      setOpen(false);
+      setConfirmLoading(false);
+    }, 5000);
+  };
+
+  const handleCancel = () => {
+    console.log('Clicked cancel button');
+    setOpen(false);
+  };
+
+  const showModals = () => {
+    setOpen(true);
+  };
+
+  const handleOks = () => {
+    setModalTexts('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
+    setConfirmDelete(true);
+    setTimeout(() => {
+      deleteShortlink('')
+      setOpen(false);
+      setConfirmDelete(false);
+    }, 5000);
+  };
+
+  const handleCancels = () => {
+    console.log('Clicked cancel button');
+    setOpen(false);
+  };
+
+  // Handle Untuk Copy Link Pendek
   const handleCopy = () => {
     if (selectedLink) {
       navigator.clipboard
@@ -79,6 +118,7 @@ const MainPage = () => {
     }
   };
 
+  // Handle Untuk Share Link Pendek
   const handleShare = () => {
     if (navigator.share && selectedLink) {
       navigator
@@ -105,9 +145,10 @@ const MainPage = () => {
     }
   };
 
+  // Handle Untuk Menghapus Link Pendek
   async function deleteShortlink(id: string) {
     try {
-      console.log(authToken);
+      // console.log(authToken);
       const response = await fetch(`http://127.0.0.1:3000/api/v1/urls/${id}`, {
         method: "DELETE",
         headers: {
@@ -121,8 +162,9 @@ const MainPage = () => {
           description: "The shortened link has been delete successfully.",
           placement: "top",
         });
-        navigate("main-menu");
+        navigate("/main-menu");
       } else {
+
         notification.error({
           message: "Failed to delete link",
           description: "There was an error delete the link. Please try again.",
@@ -134,6 +176,8 @@ const MainPage = () => {
     }
   }
 
+  // Variable items yang mengisi di bagian action dropdown
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const items: (row:ShortLink ) => MenuProps["items"] = (row) => [
     {
       key: "copy",
@@ -157,20 +201,20 @@ const MainPage = () => {
       key: "delete",
       icon: <DeleteOutlined />,
       label: "Delete",
-      onClick: () => deleteShortlink(row.id as string),
+      onClick: showModals,
+      render: <Modal
+                title="Logout Confirmation"
+                open={open}
+                onOk={handleOks}
+                confirmDelete={confirmDelete}
+                onCancel={handleCancels}
+              >
+                <p>{modalTexts}</p>
+              </Modal>
     },
   ];
 
-  // const HorizontalMenu = () => (
-  //   <Menu
-  //     items={items}
-  //     style={{
-  //       display: "flex",
-  //       flexDirection: "row",
-  //     }}
-  //   />
-  // );
-
+  // Handle Untuk Menggenerate Link Pendek Secara Acak
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -181,6 +225,7 @@ const MainPage = () => {
     return slug;
   };
 
+  // Handle Untuk Meriset Input saat ingin Menggenerate
   const resetInputs = () => {
     setOriginalUrl("");
     setCustomSlug("");
@@ -188,6 +233,7 @@ const MainPage = () => {
     setExpiredTime(null);
   };
 
+  // Handle Untuk Logout Account
   const handleLogout = async () => {
     try {
       const response = await fetch(
@@ -196,7 +242,7 @@ const MainPage = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
+            Authorization: `Bearer ${alala}`,
           },
         }
       );
@@ -205,7 +251,11 @@ const MainPage = () => {
         // Handle unauthorized response (e.g., redirect to login or clear session)
         console.log("Session expired, redirecting to login...");
         navigate("/");
-        // Clear any session data or redirect the user
+        notification.success({
+          message: "Logout has Succes",
+          description: "Logout successfully.",
+          placement: "top",
+        });
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
       }
@@ -216,6 +266,7 @@ const MainPage = () => {
     }
   };
 
+  // Funcation Untuk Mempersingkat Tampilan Original Link Agar Lebih Pendek
   const truncateUrl = (url: string, maxLength = 20) => {
     if (!url) return "";
     if (url.length <= maxLength) return url;
@@ -223,6 +274,7 @@ const MainPage = () => {
     return `${start}...`;
   };
 
+  // Funcation Untuk Mengvalidasi Link Original 
   const validateUrl = (url: string) => {
     const urlPattern = new RegExp(
       "^(https?:\\/\\/)?" +
@@ -236,6 +288,7 @@ const MainPage = () => {
     return !!urlPattern.test(url);
   };
 
+  // Funcation Untuk Mengvalidasi Link Original 
   const handleShorten = async () => {
     if (!originalUrl || !validateUrl(originalUrl)) {
       alert("Please enter a valid URL.");
@@ -248,6 +301,7 @@ const MainPage = () => {
   };
 
   useEffect(() => {
+    // Funcation Untuk Menampilkan Data Yang Sudah Pernah di Buat
     const showAllURLs = async () => {
       try {
         const token = localStorage.getItem("authToken");
@@ -314,28 +368,39 @@ const MainPage = () => {
     showAllURLs();
   }, [navigate]);
 
+  // Format Penanggalan
+  const formatDate = (isoString: string): string => {
+    const date = new Date(isoString); // Ubah string ISO ke objek Date
+    const day = date.getDate().toString().padStart(2, "0"); // Ambil tanggal
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Ambil bulan
+    const year = date.getFullYear(); // Ambil tahun
+  
+    return `${day}-${month}-${year}`; // Format DD-MM-YYYY
+  };
+  
+
+  // Handle Yang digunakan Untuk Menggenerate Shortlink
   const handlePopupSubmit = async () => {
-    if (!customSlug || !customTitle) {
-      alert(
-        "Please complete all fields including custom slug and custom title."
-      );
+    // Check for required fields and show error notification if empty
+    if (!customSlug || !customTitle || !originalUrl) {
+      notification.error({
+        message: "Form Incomplete",
+        description: "Please complete all fields including original URL, custom slug, and custom title.",
+        placement: "top",
+      });
       return;
     }
-
+  
     try {
-      const bodyData: BodyData = {
+      const bodyData = {
         url: originalUrl,
         shortlink: customSlug,
         title: customTitle,
+        expiredTime: expiredTime || null,
       };
-
-      if (expiredTime !== null) {
-        bodyData.expiredTime = expiredTime;
-      }
-
+  
       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
@@ -343,30 +408,47 @@ const MainPage = () => {
         credentials: "include",
         body: JSON.stringify(bodyData),
       });
-
+  
       if (!response.ok) {
         const errorText = await response.json();
         console.error(`Error: ${errorText.message}`);
         notification.error({
-          message: "Shorten failed",
-          description: "Gagal melakukan shortlink  ",
+          message: "Failed to create a shortened link. ",
+          description: "The alias already exists. Please use a different one or let the system generate it automatically.",
           placement: "top",
         });
+        return;
       }
-
+  
       const data = await response.json();
-      const newLink: ShortLink = {
+      const newLink = {
         id: data.data.url_details.id,
         shortLink: `https://dnd.id/${data.data.shortlink}`,
         originalUrl: originalUrl,
         title: customTitle,
         clicks: data.data.url_details.clickcount,
-        status: data.data.url_details.status,
-        createdAt: data.data.url_details.createdat,
-        lastAccessedAt: data.data.url_details.lastaccesedat || null,
+        status: "active", // Default status as active
+        createdAt: formatDate(data.data.url_details.createdat), // Format tanggal
+        lastAccessedAt: data.data.url_details.lastaccesedat
+          ? formatDate(data.data.url_details.lastaccesedat)
+          : null, // Format tanggal jika ada
         qrCodeUrl: data.data.url_details.qr_code,
       };
+  
+      // Check if the link is expired
+      if (expiredTime && new Date(expiredTime) < new Date()) {
+        newLink.status = "expired"; // Update status if expired
+        notification.warning({
+          message: "Link Expired",
+          description: "This link has expired.",
+          placement: "top",
+        });
+      }
 
+      if (customTitle) {
+        bodyData.title = customTitle; // Add customTitle if provided
+      }
+  
       setShortLinks([newLink, ...shortLinks]);
       setOriginalUrl("");
       setCustomSlug("");
@@ -375,10 +457,17 @@ const MainPage = () => {
       setIsPopupOpen(false);
     } catch (error) {
       console.error("Error fetching API:", error);
+      notification.error({
+        message: "Error",
+        description: "An unexpected error occurred while creating the link.",
+        placement: "top",
+      });
     }
   };
 
+  // Fncation Yang Bekerja sebagai Generate QR CODE 
   const QrCodePopup: React.FC<QrCodePopupProps> = ({ qrCodeUrl, onClose }) => {
+    // Funcation Untuk Download QR CODE
     const handleDownload = () => {
       const link = document.createElement("a");
       link.href = `data:image/png;base64,${qrCodeUrl}`;
@@ -388,25 +477,25 @@ const MainPage = () => {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/3">
-          <h2 className="text-xl md:text-2xl font-bold mb-4">QR Code</h2>
+        <div className="bg-white flex flex-col items-center p-6 rounded-lg shadow-lg w-11/12 md:w-[300px]">
+          <h2 className="text-xl md:text-2xl font-bold mb-4">Download QR Code</h2>
           <img
             src={`data:image/png;base64,${qrCodeUrl}`}
             alt="QR Code"
-            className="w-full h-auto mb-4"
+            className="w-[100%] h-[50%] mb-4"
           />
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-10">
             <button
               onClick={handleDownload}
               className="bg-green-500 text-white px-4 py-2 rounded-lg"
             >
-              Download QR Code
+              <DownloadOutlined />
             </button>
             <button
               onClick={onClose}
               className="bg-red-500 text-white px-4 py-2 rounded-lg"
             >
-              Close
+              <CloseOutlined />
             </button>
           </div>
         </div>
@@ -414,6 +503,7 @@ const MainPage = () => {
     );
   };
 
+  // Handle untuk membuka bagian QR Code
   const handleQrCodeClick = (link: ShortLink) => {
     setSelectedQrCode(link);
   };
@@ -425,25 +515,31 @@ const MainPage = () => {
   return (
     <div className="min-h-screen relative flex flex-col justify-center items-center bg-gray-100 p-4 md:p-6">
       {/* Logout Button */}
-      <div className="flex justify-between mt-4 ">
+      <div className="flex justify-between mt-4 w-[1075px] mb-10">
         <h1 className="text-2xl md:text-4xl font-bold text-center ">
           URL Shortener
         </h1>
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white text-xs font-semibold"
-        >
+        <Button type="primary" onClick={showModal}>
           Logout
-        </button>
+        </Button>
+        <Modal
+          title="Logout Confirmation"
+          open={open}
+          onOk={handleOk}
+          confirmLoading={confirmLoading}
+          onCancel={handleCancel}
+        >
+          <p>{modalText}</p>
+        </Modal>
       </div>
       {/* Input Original Link */}
-      <div className="flex md:flex-row justify-center w-[1075px] py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
+      <div className="jawir flex md:flex-row justify-center sm:w-[768px] md:w-[1075px] w-[1075px] py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
           type="text"
           value={originalUrl}
           onChange={(e) => setOriginalUrl(e.target.value)}
           placeholder="Enter original URL"
-          className="p-3 border-gray-300 text-xs flex-1 rounded-lg"
+          className=" p-3 border-gray-300 text-xs flex-1 rounded-lg"
         />
         <button
           onClick={handleShorten}
@@ -453,12 +549,18 @@ const MainPage = () => {
         </button>
       </div>
       {/* Navigasi */}
-      <div className="flex justify-center mt-4">
+      <div className="flex justify-center gap-5 mt-4">
+        <button
+          onClick={() => navigate("/main-menu")}
+          className="border-b-4 font-semibold text-blue-500 border-blue-500 "
+        >
+          Shortlink
+        </button>
         <button
           onClick={() => navigate("/analisis")}
-          className="bg-blue-600 text-white px-4 py-2 text-xs w-fit font-semibold rounded-full"
+          className="font-semibold border-blue-500 hover:text-blue-500"
         >
-          Go to Analisi
+          Analytics
         </button>
       </div>
       {/* Customize Your Link */}
@@ -535,6 +637,9 @@ const MainPage = () => {
           <strong className="text-white">Date</strong>
           <strong className="text-white">Status</strong>
           <strong className="text-white">Click</strong>
+          {/* <strong className="text-white 2xl:hidden sm:hidden">Date</strong>
+          <strong className="text-white 2xl:hidden sm:hidden">Status</strong>
+          <strong className="text-white 2xl:hidden sm:hidden">Click</strong> */}
           <strong className="text-white">QR Code</strong>
           <strong className="text-white">Action</strong>
         </div>
@@ -590,32 +695,27 @@ const MainPage = () => {
                     />
                   </div>
                   <div className="items-center justify-center">
-                  <Space direction="horizontal" wrap>
-                    {/* <Dropdown
-                      // menu={HorizontalMenu}
-                      placement="topCenter" // Set the dropdown to appear above
-                      // onVisibleChange={(visible) => visible && setSelectedLink(link)} // Set selected link here
-                    >
-                      <a onClick={(e) => e.preventDefault()}>
-                        <MoreOutlined
-                          style={{
-                            fontSize: "30px",
-                            cursor: "pointer",
-                            transform: "rotate(90deg)",
-                            fontWeight: "bold",
-                          }}
-                        />
-                      </a>
-                    </Dropdown> */}
-                    <Dropdown menu={{ items: items(link), onClick }}>
-                      <a onClick={(e) => e.preventDefault()}>
-                        <Space>
-                          <MoreOutlined />
-                          {/* <HorizontalMenu /> */}
-                        </Space>
-                      </a>
-                    </Dropdown>
-                  </Space>
+                    <Space direction="horizontal" wrap>
+                      <Dropdown 
+                        menu={{ items: items(link), onClick }} 
+                        placement="top" 
+                        className="flex" 
+                        onVisibleChange={(visible) => visible && setSelectedLink(link)}
+                      >
+                        <a onClick={(e) => e.preventDefault()}>
+                          <Space direction="horizontal">
+                            <MoreOutlined
+                              style={{
+                                fontSize: "40px",
+                                cursor: "pointer",
+                                transform: "rotate(90deg)",
+                                fontWeight: "bold",
+                              }}
+                            />
+                          </Space>
+                        </a>
+                      </Dropdown>
+                    </Space>
                   </div>
                 </li>
               ))}
