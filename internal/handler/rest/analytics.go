@@ -3,6 +3,7 @@ package rest
 import (
 	"context"
 	"shortlink/internal/database"
+	"shortlink/internal/utils"
 	"shortlink/model"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,7 +21,7 @@ func GetGlobalAnalytics(c *fiber.Ctx) error {
 	// Convert the userID string to an ObjectID
 	objectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return BadRequest(c, "Invalid UserID format")
+		return utils.BadRequest(c, "Invalid UserID format")
 	}
 
 	// Access the analytics collection
@@ -30,18 +31,18 @@ func GetGlobalAnalytics(c *fiber.Ctx) error {
 	filter := bson.M{"user_id": objectID}
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
-		return InternalServerError(c, "Error fetching analytics")
+		return utils.InternalServerError(c, "Error fetching analytics")
 	}
 	defer cursor.Close(context.TODO())
 
 	// Store analytics records in a slice
 	var analytics []model.Analytics
 	if err := cursor.All(context.TODO(), &analytics); err != nil {
-		return InternalServerError(c, "Error decoding analytics")
+		return utils.InternalServerError(c, "Error decoding analytics")
 	}
 
 	// Return all analytics related to the user as JSON
-	return OK(c, fiber.Map{
+	return utils.OK(c, fiber.Map{
 		"message":   "User's global analytics fetched successfully",
 		"analytics": analytics,
 	})
@@ -55,7 +56,7 @@ func GetAnalyticsByURL(c *fiber.Ctx) error {
 	// Convert the urlID string to ObjectID
 	objectID, err := primitive.ObjectIDFromHex(urlID)
 	if err != nil {
-		return BadRequest(c, "Invalid URL ID format")
+		return utils.BadRequest(c, "Invalid URL ID format")
 	}
 
 	// Access the analytics collection
@@ -65,18 +66,18 @@ func GetAnalyticsByURL(c *fiber.Ctx) error {
 	filter := bson.M{"url_id": objectID}
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
-		return InternalServerError(c, "Error fetching analytics by URL")
+		return utils.InternalServerError(c, "Error fetching analytics by URL")
 	}
 	defer cursor.Close(context.TODO())
 
 	// Store the results in a slice
 	var analytics []model.Analytics
 	if err := cursor.All(context.TODO(), &analytics); err != nil {
-		return InternalServerError(c, "Error decoding analytics for the URL")
+		return utils.InternalServerError(c, "Error decoding analytics for the URL")
 	}
 
 	// Return analytics related to the specific URL as JSON
-	return OK(c, fiber.Map{
+	return utils.OK(c, fiber.Map{
 		"message":   "Analytics for the specific URL fetched successfully",
 		"analytics": analytics,
 	})

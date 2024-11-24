@@ -7,12 +7,19 @@ import (
 	"shortlink/internal/database"
 	"shortlink/internal/handler/rest"
 	"shortlink/internal/routes"
+	"shortlink/logger"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
+
+	logger.InitLog("app.log")
+    log := logger.GetLogger()
+    log.Info("START", "Application started")
+
+	
 	config.InitEnv()
 	
 	// Initialize MongoDB connection
@@ -44,7 +51,7 @@ func main() {
 		})
 	})
 	
-	// open fiber on http://localhost:3000
+	// open fiber on http://127.0.0.1:3000
 	err = app.Listen(fmt.Sprintf(":%s", os.Getenv("PORT")))
 	if err != nil {
 		logrus.Fatalf("Error on running Fiber: %v", err)
