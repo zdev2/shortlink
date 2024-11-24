@@ -52,9 +52,9 @@ const MainPage = () => {
   const alala = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  // const [confirmDelete, setConfirmDelete] = useState(false);
   const [modalText, setModalText] = useState('Are you sure you want to log out? You will need to log in again to access your account.');
-  const [modalTexts, setModalTexts] = useState('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
+  // const [modalTexts, setModalTexts] = useState('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
 
   const showModal = () => {
     setOpen(true);
@@ -75,24 +75,24 @@ const MainPage = () => {
     setOpen(false);
   };
 
-  const showModals = () => {
-    setOpen(true);
-  };
+  // const showModals = () => {
+  //   setOpen(true);
+  // };
 
-  const handleOks = () => {
-    setModalTexts('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
-    setConfirmDelete(true);
-    setTimeout(() => {
-      deleteShortlink('')
-      setOpen(false);
-      setConfirmDelete(false);
-    }, 5000);
-  };
+  // const handleOks = () => {
+  //   setModalTexts('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
+  //   setConfirmDelete(true);
+  //   setTimeout(() => {
+  //     deleteShortlink('')
+  //     setOpen(false);
+  //     setConfirmDelete(false);
+  //   }, 5000);
+  // };
 
-  const handleCancels = () => {
-    console.log('Clicked cancel button');
-    setOpen(false);
-  };
+  // const handleCancels = () => {
+  //   console.log('Clicked cancel button');
+  //   setOpen(false);
+  // };
 
   // Handle Untuk Copy Link Pendek
   const handleCopy = () => {
@@ -177,7 +177,6 @@ const MainPage = () => {
   }
 
   // Variable items yang mengisi di bagian action dropdown
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const items: (row:ShortLink ) => MenuProps["items"] = (row) => [
     {
       key: "copy",
@@ -201,18 +200,10 @@ const MainPage = () => {
       key: "delete",
       icon: <DeleteOutlined />,
       label: "Delete",
-      onClick: showModals,
-      render: <Modal
-                title="Logout Confirmation"
-                open={open}
-                onOk={handleOks}
-                confirmDelete={confirmDelete}
-                onCancel={handleCancels}
-              >
-                <p>{modalTexts}</p>
-              </Modal>
+      onClick: () => deleteShortlink(row.id as string),
     },
   ];
+
 
   // Handle Untuk Menggenerate Link Pendek Secara Acak
   const generateRandomSlug = (length: number = 6): string => {

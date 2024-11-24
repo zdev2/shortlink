@@ -83,7 +83,7 @@ const LandingPage = () => {
   // Fungsi untuk menangani login
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:3000/api/v1/users/login", {
+      const response = await fetch("https://shortlink-production-933a.up.railway.app/api/v1/users/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -119,7 +119,7 @@ const LandingPage = () => {
   // Fungsi untuk menangani Register
   const handleRegister = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:3000/api/v1/users/register", {
+      const response = await fetch("https://shortlink-production-933a.up.railway.app/api/v1/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
