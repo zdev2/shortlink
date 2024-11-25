@@ -30,6 +30,12 @@ interface DataItem {
   pv: number;
 }
 
+interface AnalysticData {
+  name: string;
+  clicks: number;
+  visitor: number;
+}
+
 interface ShortLink {
   id: string;
   shortLink: string;
@@ -54,9 +60,13 @@ const Analisis: React.FC = () => {
   const [totalPv, setTotalPv] = useState(0);
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [modalText, setModalText] = useState(
-    "Are you sure you want to log out? You will need to log in again to access your account."
-  );
+  const [modalText, setModalText] = useState("Are you sure you want to log out? You will need to log in again to access your account.");
+  const {id} = useParams<{id : string}>();
+  const [globalAnalystics, setGlobalAnalystics] = useState<AnalysticData[]>([]);
+  const [SpecificLinkAnalytics, setSpecificLinkAnalytics] = useState<AnalysticData | null>(null);
+  const [totalClick, setTotalClick] = useState(0);
+  const [totalVisitor, setTotalVisitor] = useState(0);
+  const authToken = localStorage.getItem("authToken");
 
   const showModal = () => {
     setOpen(true);
@@ -79,7 +89,7 @@ const Analisis: React.FC = () => {
     setOpen(false);
   };
 
-  const { id = "" } = useParams();
+  // const { id = "" } = useParams();
 
   console.log(id);
 
@@ -100,7 +110,7 @@ const Analisis: React.FC = () => {
     setExpiredTime(null);
   };
 
-  const authToken = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
+  // const authToken = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
 
   const handleLogout = async () => {
     try {
@@ -300,6 +310,73 @@ const Analisis: React.FC = () => {
       });
     }
   };
+
+  const fetchGlobalAnalystics = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:3000/api/v1/analytics", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`, 
+        },
+    });
+
+    if (!response.ok) {
+      console.log("Failed to fetch global analytics");
+    }
+
+    const data = await response.json();
+    
+    setGlobalAnalystics(data.analytics);
+    console.log(data); // Harus ada properti analytics
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setTotalClick(data.analytics.reduce((sum:number, item:any) => sum + item.clicks, 0));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setTotalVisitor(data.analytics.reduce((sum:number, item:any) => sum + item.clicks, 0));
+    } catch (error) {
+      console.error("Error fetching API:", error);
+      notification.error({
+        message: "Error",
+        description: "Failed to Fetch Global Analytics",
+        placement: "top",
+      });
+    }
+  }
+
+  const fetchSpecificLinkAnalystics = async (id: string) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:3000/api/v1/analytics/${id}`,{
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.log("Failed to fetch specific link analytics");
+      }
+
+      const data = await response.json
+      console.log(data)
+      setSpecificLinkAnalytics(data.analystics)
+    } catch (error) {
+      console.error("Error fetching API:", error);
+      notification.error({
+        message: "Error",
+        description: "Failed to Fetch Specific Link Analytics",
+        placement: "top",
+      })
+    }
+  }
+
+  useEffect(() => {
+    fetchGlobalAnalystics();
+    if (id) {
+      fetchSpecificLinkAnalystics(id);
+    }
+  })
 
   const data3Days = useMemo(
     () => [
@@ -593,6 +670,39 @@ const Analisis: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <div>
+        <h1>Analisis Page</h1>
+
+        <div>
+          <h2>Global Analystics</h2>
+          <p>Total Clicks: {totalClick}</p>
+          <p>Total Visitor: {totalVisitor}</p>
+          <AreaChart
+            width={500}
+            height={300}
+            data={globalAnalystics}
+            margin={{top : 10, right: 30, left: 0, bottom: 0}}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Area type="monotone" dataKey="clicks" stroke="#8884d8" fill="#8884d8" />
+            <Area type="monotone" dataKey="Visitor" stroke="#82ca9d" fill="#82ca9d" />
+          </AreaChart>
+        </div>
+      </div>
+
+      {SpecificLinkAnalytics && (
+        <div>
+          <h2>Analystic for Link ID: {id}</h2>
+          <p>Total Clicks: {SpecificLinkAnalytics.clicks}</p>
+          <p>Total Clicks: {SpecificLinkAnalytics.visitor}</p>
+        </div> 
+      )}
+
+
     </div>
   );
 };
