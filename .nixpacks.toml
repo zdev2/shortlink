@@ -1,10 +1,17 @@
-project_path = "."
+project_path = "./ShortLink"
 
 [phases.setup]
-languages = ["go"]
+# Use Node.js as the environment for the project
+runtime = "nodejs"
+
+[phases.install]
+# Install dependencies using npm or yarn (modify based on your setup)
+cmds = ["npm install"]
 
 [phases.build]
-cmd = "go build -o main ."
+# Build the Vite project
+cmds = ["npm run build"]
 
 [phases.start]
-cmd = "./main"
+# Serve the static files using a simple HTTP server (or Railway's built-in static hosting)
+cmds = ["npx serve -s dist"]
