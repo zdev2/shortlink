@@ -6,7 +6,7 @@ runtime = "nodejs"
 
 [phases.install]
 # Install dependencies using npm or yarn (modify based on your setup)
-cmds = ["npm install"]
+cmds = ["npm install --omit=dev"]
 
 [phases.build]
 # Build the Vite project
