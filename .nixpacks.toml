@@ -1,4 +1,4 @@
-project_path = "./ShortLink"
+project_path = "ShortLink"
 
 [phases.setup]
 # Use Node.js as the environment for the project
