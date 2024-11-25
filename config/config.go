@@ -6,8 +6,9 @@ import (
 )
 
 func InitEnv() {
-	err := godotenv.Load(".env")
+	err := godotenv.Load(".env.production")
 	if err != nil {
 		logrus.Warn("Cannot load env file, using system env")
 	}
 }
+

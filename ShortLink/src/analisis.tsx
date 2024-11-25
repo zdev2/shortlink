@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {jwtDecode} from "jwt-decode";
-import { AreaChart, Area } from 'recharts';
-import { XAxis,YAxis,CartesianGrid,Tooltip } from 'recharts';
-import { notification } from 'antd';
+import { jwtDecode } from "jwt-decode";
+import { AreaChart, Area } from "recharts";
+import { XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { notification } from "antd";
 // import type { NotificationArgsProps } from 'antd';
-import { Dropdown, Button, Menu, Space, Modal } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
-import { FaUser, FaHandPointer } from 'react-icons/fa';
+import { Dropdown, Button, Menu, Space, Modal } from "antd";
+import { DownOutlined } from "@ant-design/icons";
+import { FaUser, FaHandPointer } from "react-icons/fa";
 
 // type NotificationPlacement = NotificationArgsProps['placement'];
 
@@ -54,31 +54,34 @@ const Analisis: React.FC = () => {
   const [totalPv, setTotalPv] = useState(0);
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [modalText, setModalText] = useState('Are you sure you want to log out? You will need to log in again to access your account.');
+  const [modalText, setModalText] = useState(
+    "Are you sure you want to log out? You will need to log in again to access your account."
+  );
 
   const showModal = () => {
     setOpen(true);
   };
 
   const handleOk = () => {
-    setModalText('Are you sure you want to log out? You will need to log in again to access your account.');
+    setModalText(
+      "Are you sure you want to log out? You will need to log in again to access your account."
+    );
     setConfirmLoading(true);
     setTimeout(() => {
-      handleLogout()
+      handleLogout();
       setOpen(false);
       setConfirmLoading(false);
     }, 5000);
   };
 
   const handleCancel = () => {
-    console.log('Clicked cancel button');
+    console.log("Clicked cancel button");
     setOpen(false);
   };
 
+  const { id = "" } = useParams();
 
-  const {id=''} = useParams()
-
-  console.log(id)
+  console.log(id);
 
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
@@ -102,7 +105,7 @@ const Analisis: React.FC = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/v1/users/logout",
+        "http://127.0.0.1:3000/api/v1/users/logout",
         {
           method: "POST",
           headers: {
@@ -115,7 +118,7 @@ const Analisis: React.FC = () => {
       if (response.status === 401) {
         // Handle unauthorized response (e.g., redirect to login or clear session)
         console.log("Session expired, redirecting to login...");
-        navigate("/")
+        navigate("/");
         notification.success({
           message: "Logout has Succes",
           description: "Logout successfully.",
@@ -149,9 +152,9 @@ const Analisis: React.FC = () => {
   const handleShorten = async () => {
     if (!originalUrl || !validateUrl(originalUrl)) {
       notification.error({
-        message: 'Shorten Failed',
-        description: 'Please enter a valid URL.',
-        placement: 'top',
+        message: "Shorten Failed",
+        description: "Please enter a valid URL.",
+        placement: "top",
       });
       return;
     }
@@ -190,11 +193,16 @@ const Analisis: React.FC = () => {
 
         if (!response.ok) {
           if (response.status === 401) {
-            console.error("Unauthorized access - possible invalid or expired token.");
+            console.error(
+              "Unauthorized access - possible invalid or expired token."
+            );
             localStorage.removeItem("authToken");
             // navigate("/main-menu")
           } else {
-            console.error("Failed to fetch URLs. Status code:", response.status);
+            console.error(
+              "Failed to fetch URLs. Status code:",
+              response.status
+            );
           }
           return;
         }
@@ -226,9 +234,10 @@ const Analisis: React.FC = () => {
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
       notification.error({
-        message: 'Shorten Failed',
-        description: 'Please complete all fields including custom slug and custom title.',
-        placement: 'top',
+        message: "Shorten Failed",
+        description:
+          "Please complete all fields including custom slug and custom title.",
+        placement: "top",
       });
       return;
     }
@@ -280,43 +289,53 @@ const Analisis: React.FC = () => {
       setExpiredTime(null);
       setCustomTitle("");
       setIsPopupOpen(false);
-      navigate("/main-menu")
+      navigate("/main-menu");
     } catch (error) {
       console.error("Error fetching API:", error);
       notification.error({
-        message: 'Shorten Failed',
-        description: 'There was a problem connecting to the server. Please check your connection and try again.',
-        placement: 'top',
+        message: "Shorten Failed",
+        description:
+          "There was a problem connecting to the server. Please check your connection and try again.",
+        placement: "top",
       });
     }
   };
 
-  const data3Days = useMemo(() => [
-    { name: 'Day 1', uv: 2000, pv: 2500 },
-    { name: 'Day 2', uv: 1500, pv: 2000 },
-    { name: 'Day 3', uv: 2000, pv: 2500 },
-  ], []);
+  const data3Days = useMemo(
+    () => [
+      { name: "Day 1", uv: 2000, pv: 2500 },
+      { name: "Day 2", uv: 1500, pv: 2000 },
+      { name: "Day 3", uv: 2000, pv: 2500 },
+    ],
+    []
+  );
 
-  const data7Days = useMemo(() => [
-    { name: 'Day 1', uv: 2500, pv: 3000 },
-    { name: 'Day 2', uv: 2000, pv: 2500 },
-    { name: 'Day 3', uv: 2500, pv: 3000 },
-    { name: 'Day 4', uv: 1500, pv: 2000 },
-    { name: 'Day 5', uv: 2000, pv: 2500 },
-    { name: 'Day 6', uv: 1000, pv: 1500 },
-    { name: 'Day 7', uv: 2500, pv: 3000 },
-  ], []);
+  const data7Days = useMemo(
+    () => [
+      { name: "Day 1", uv: 2500, pv: 3000 },
+      { name: "Day 2", uv: 2000, pv: 2500 },
+      { name: "Day 3", uv: 2500, pv: 3000 },
+      { name: "Day 4", uv: 1500, pv: 2000 },
+      { name: "Day 5", uv: 2000, pv: 2500 },
+      { name: "Day 6", uv: 1000, pv: 1500 },
+      { name: "Day 7", uv: 2500, pv: 3000 },
+    ],
+    []
+  );
 
-  const data1Month = useMemo(() => [
-    { name: 'Week 1', uv: 6300, pv: 7800 },
-    { name: 'Week 2', uv: 5000, pv: 6000 },
-    { name: 'Week 3', uv: 7500, pv: 8500 },
-    { name: 'Week 4', uv: 4000, pv: 5000 },
-  ], []);
+  const data1Month = useMemo(
+    () => [
+      { name: "Week 1", uv: 6300, pv: 7800 },
+      { name: "Week 2", uv: 5000, pv: 6000 },
+      { name: "Week 3", uv: 7500, pv: 8500 },
+      { name: "Week 4", uv: 4000, pv: 5000 },
+    ],
+    []
+  );
 
   const [selectedData, setSelectedData] = useState<DataItem[]>(data3Days);
-  type TimeRange = '3days' | '7days' | '1month';
-  const [selectedLabel, setSelectedLabel] = useState('3 Hari');
+  type TimeRange = "3days" | "7days" | "1month";
+  const [selectedLabel, setSelectedLabel] = useState("3 Hari");
 
   useEffect(() => {
     const totalUvSum = selectedData.reduce((sum, item) => sum + item.uv, 0);
@@ -328,21 +347,21 @@ const Analisis: React.FC = () => {
   // Fungsi untuk mengubah data berdasarkan pilihan waktu
   const handleTimeRangeChange = (range: TimeRange) => {
     switch (range) {
-      case '3days':
+      case "3days":
         setSelectedData(data3Days);
-        setSelectedLabel('3 Hari');
+        setSelectedLabel("3 Hari");
         break;
-      case '7days':
+      case "7days":
         setSelectedData(data7Days);
-        setSelectedLabel('7 Hari');
+        setSelectedLabel("7 Hari");
         break;
-      case '1month':
+      case "1month":
         setSelectedData(data1Month);
-        setSelectedLabel('1 Bulan');
+        setSelectedLabel("1 Bulan");
         break;
       default:
         setSelectedData(data3Days);
-        setSelectedLabel('Pilih Rentang Waktu');
+        setSelectedLabel("Pilih Rentang Waktu");
     }
   };
 
@@ -355,14 +374,14 @@ const Analisis: React.FC = () => {
   );
 
   return (
-    <div className='flex justify-center flex-col items-center'>
+    <div className="flex justify-center flex-col items-center">
       {/* Logout Button */}
       <div className="flex justify-between mt-4 w-[1075px] mb-10">
         <h1 className="text-2xl md:text-4xl font-bold text-center ">
           URL Shortener
         </h1>
         <Button type="primary" onClick={showModal}>
-        Logout
+          Logout
         </Button>
         <Modal
           title="Logout Confirmation"
@@ -464,12 +483,13 @@ const Analisis: React.FC = () => {
             </div>
           </div>
         </div>
-      ) }
+      )}
 
       {/* Dropdown pilihan rentang waktu */}
-      <div 
-      className='flex justify-between w-[1000px]'
-      style={{ marginBottom: '20px' }}>
+      <div
+        className="flex justify-between w-[1000px]"
+        style={{ marginBottom: "20px" }}
+      >
         <div>
           <h4>Analystic</h4>
         </div>
@@ -483,10 +503,21 @@ const Analisis: React.FC = () => {
         </Dropdown>
       </div>
 
-      <div className='z-0' 
-        style={{ width: '100%', height: '400px', maxWidth: '1000px', margin: 'auto' }}>
-        <AreaChart width={1000} height={300} data={selectedData}
-          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <div
+        className="z-0"
+        style={{
+          width: "100%",
+          height: "400px",
+          maxWidth: "1000px",
+          margin: "auto",
+        }}
+      >
+        <AreaChart
+          width={1000}
+          height={300}
+          data={selectedData}
+          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+        >
           <defs>
             <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
@@ -501,19 +532,33 @@ const Analisis: React.FC = () => {
           <YAxis strokeOpacity={0} />
           <CartesianGrid strokeDasharray="1 1" />
           <Tooltip />
-          <Area type="monotone" dataKey="uv" stroke="#8884d8" fillOpacity={1} fill="url(#colorUv)" />
-          <Area type="monotone" dataKey="pv" stroke="#82ca9d" fillOpacity={1} fill="url(#colorPv)" />
+          <Area
+            type="monotone"
+            dataKey="uv"
+            stroke="#8884d8"
+            fillOpacity={1}
+            fill="url(#colorUv)"
+          />
+          <Area
+            type="monotone"
+            dataKey="pv"
+            stroke="#82ca9d"
+            fillOpacity={1}
+            fill="url(#colorPv)"
+          />
         </AreaChart>
       </div>
 
-      <div className='flex gap-24'>
+      <div className="flex gap-24">
         <div className="mb-5 p-5 border rounded-lg flex items-center justify-evenly shadow-md w-64">
           <div className="bg-purple-100 p-3 rounded-full mb-3">
-            <FaHandPointer style={{ color: '#6A0DAD', fontSize: '24px' }} />
+            <FaHandPointer style={{ color: "#6A0DAD", fontSize: "24px" }} />
           </div>
           <div>
             <div className="text-center">
-              <span className="text-2xl font-bold text-purple-800">{totalUv}</span>
+              <span className="text-2xl font-bold text-purple-800">
+                {totalUv}
+              </span>
               <p className="text-purple-600">Total Click</p>
             </div>
             <Dropdown overlay={menu}>
@@ -528,11 +573,13 @@ const Analisis: React.FC = () => {
         </div>
         <div className="mb-5 p-5 border rounded-lg flex items-center justify-evenly shadow-md w-64">
           <div className="bg-purple-100 p-3 rounded-full mb-3">
-            <FaUser style={{ color: '#6A0DAD', fontSize: '24px' }} />
+            <FaUser style={{ color: "#6A0DAD", fontSize: "24px" }} />
           </div>
           <div>
             <div className="text-center">
-              <span className="text-2xl font-bold text-purple-800">{totalPv}</span>
+              <span className="text-2xl font-bold text-purple-800">
+                {totalPv}
+              </span>
               <p className="text-purple-600">Total Click</p>
             </div>
             <Dropdown overlay={menu}>
@@ -546,7 +593,6 @@ const Analisis: React.FC = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };

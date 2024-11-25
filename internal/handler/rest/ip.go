@@ -26,9 +26,9 @@ func GetPublicIP() (string, error) {
 	return string(ip), nil
 }
 
-// Dummy function for getting location from IP (implement as per your needs)
+// function for getting location from IP
 func GetLocationFromIP(ip string) string {
-	apiToken := os.Getenv("IPINFOTOKEN")
+	apiToken := os.Getenv("IPINFO_TOKEN")
 	if apiToken == "" {
 		return "API Token not found"
 	}
