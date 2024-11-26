@@ -1,7 +1,5 @@
 [build]
-# Use `npm ci --omit=dev` to install production dependencies only, then build using Vite
-command = "npm ci --omit=dev && npm run build"
+command = "npm ci --omit=dev && tsc -b && vite build"
 
 [start]
-# Start the app using Vite's preview mode (serve the production build)
 command = "npm run preview"
