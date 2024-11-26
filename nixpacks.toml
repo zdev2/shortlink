@@ -1,7 +1,7 @@
 [build]
-# Navigate to the subdirectory and build the project
-command = "cd ShortLink && npm ci --omit=dev && npm run build"
+# Use `npm ci --omit=dev` to install production dependencies only, then build using Vite
+command = "npm ci --omit=dev && npm run build"
 
 [start]
-# Serve the app from the subdirectory build folder
-command = "npx serve -s ShortLink/build"
+# Start the app using Vite's preview mode (serve the production build)
+command = "npm run preview"
