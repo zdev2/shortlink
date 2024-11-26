@@ -7,7 +7,7 @@ COPY package.json ./
 COPY package-lock.json ./
 
 # Install dependencies excluding development dependencies
-RUN npm ci --omit=dev
+RUN npm run install:prod
 
 # Copy all project files into the container
 COPY . ./
