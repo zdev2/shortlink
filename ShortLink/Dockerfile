@@ -3,7 +3,8 @@ FROM node:latest AS builder
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY package.json ./
+COPY package-lock.json ./
 
 # Install dependencies excluding development dependencies
 RUN npm install --omit=dev
