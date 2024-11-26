@@ -1,6 +1,6 @@
 FROM node:18-alpine AS builder
 
-WORKDIR /app
+WORKDIR /app/ShortLink
 
 # Copy package.json and package-lock.json
 COPY package.json ./
