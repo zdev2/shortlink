@@ -105,7 +105,7 @@ const Analisis: React.FC = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://shortlink-production-dnd.up.railway.app/api/v1/users/logout",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/users/logout",
         {
           method: "POST",
           headers: {
@@ -184,7 +184,7 @@ const Analisis: React.FC = () => {
         }
 
         const response = await fetch(
-          "http://shortlink-production-dnd.up.railway.app/api/v1/urls",
+          "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
           {
             method: "GET",
             headers: {
@@ -257,7 +257,7 @@ const Analisis: React.FC = () => {
       }
 
       const response = await fetch(
-        "http://shortlink-production-dnd.up.railway.app/api/v1/urls",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
         {
           method: "POST",
 

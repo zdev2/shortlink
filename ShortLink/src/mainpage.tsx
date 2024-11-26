@@ -177,7 +177,7 @@ const MainPage = () => {
     try {
       // console.log(authToken);
       const response = await fetch(
-        `http://shortlink-production-dnd.up.railway.app/api/v1/urls/${id}`,
+        `https://shortlink-production-dnd.up.railway.app/api/v1/urls/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -268,7 +268,7 @@ const MainPage = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://shortlink-production-dnd.up.railway.app/api/v1/users/logout",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/users/logout",
         {
           method: "POST",
           headers: {
@@ -352,7 +352,7 @@ const MainPage = () => {
         }
 
         const response = await fetch(
-          "http://shortlink-production-dnd.up.railway.app/api/v1/urls",
+          "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
           {
             method: "GET",
             headers: {
@@ -434,7 +434,7 @@ const MainPage = () => {
       };
 
       const response = await fetch(
-        "http://shortlink-production-dnd.up.railway.app/api/v1/urls",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
         {
           method: "POST",
           headers: {

@@ -83,7 +83,7 @@ const LandingPage = () => {
   const handleLogin = async () => {
     try {
       const response = await fetch(
-        "http://shortlink-production-dnd.up.railway.app/api/v1/users/login",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/users/login",
         {
           method: "POST",
           headers: {
@@ -121,7 +121,7 @@ const LandingPage = () => {
   const handleRegister = async () => {
     try {
       const response = await fetch(
-        "http://shortlink-production-dnd.up.railway.app/api/v1/users/register",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/users/register",
         {
           method: "POST",
           headers: {
