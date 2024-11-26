@@ -1,0 +1,7 @@
+[build]
+# Navigate to the subdirectory and build the project
+command = "cd ShortLink && npm ci --omit=dev && npm run build"
+
+[start]
+# Serve the app from the subdirectory build folder
+command = "npx serve -s ShortLink/build"
