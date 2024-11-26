@@ -105,7 +105,7 @@ const Analisis: React.FC = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:3000/api/v1/users/logout",
+        "http://shortlink-production-dnd.up.railway.app/api/v1/users/logout",
         {
           method: "POST",
           headers: {
@@ -183,13 +183,16 @@ const Analisis: React.FC = () => {
           console.error("No token found in localStorage");
         }
 
-        const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "http://shortlink-production-dnd.up.railway.app/api/v1/urls",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           if (response.status === 401) {
@@ -253,15 +256,18 @@ const Analisis: React.FC = () => {
         bodyData.expiredTime = expiredTime;
       }
 
-      const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
-        method: "POST",
+      const response = await fetch(
+        "http://shortlink-production-dnd.up.railway.app/api/v1/urls",
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(bodyData),
-      });
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(bodyData),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.json();

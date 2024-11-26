@@ -53,7 +53,9 @@ const MainPage = () => {
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   // const [confirmDelete, setConfirmDelete] = useState(false);
-  const [modalText, setModalText] = useState('Are you sure you want to log out? You will need to log in again to access your account.');
+  const [modalText, setModalText] = useState(
+    "Are you sure you want to log out? You will need to log in again to access your account."
+  );
   // const [modalTexts, setModalTexts] = useState('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
   // const [confirmDelete, setConfirmDelete] = useState(false);
   // const [modalText, setModalText] = useState(
@@ -174,13 +176,16 @@ const MainPage = () => {
   async function deleteShortlink(id: string) {
     try {
       // console.log(authToken);
-      const response = await fetch(`http://127.0.0.1:3000/api/v1/urls/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `http://shortlink-production-dnd.up.railway.app/api/v1/urls/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (response.ok) {
         notification.success({
           message: "Link succes has delete!",
@@ -201,7 +206,7 @@ const MainPage = () => {
   }
 
   // Variable items yang mengisi di bagian action dropdown
-  const items: (row:ShortLink ) => MenuProps["items"] = (row) => [
+  const items: (row: ShortLink) => MenuProps["items"] = (row) => [
     {
       key: "copy",
       icon: <CopyOutlined />,
@@ -240,7 +245,6 @@ const MainPage = () => {
     },
   ];
 
-
   // Handle Untuk Menggenerate Link Pendek Secara Acak
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
@@ -264,7 +268,7 @@ const MainPage = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:3000/api/v1/users/logout",
+        "http://shortlink-production-dnd.up.railway.app/api/v1/users/logout",
         {
           method: "POST",
           headers: {
@@ -347,13 +351,16 @@ const MainPage = () => {
           console.error("No token found in localStorage");
         }
 
-        const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "http://shortlink-production-dnd.up.railway.app/api/v1/urls",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           if (response.status === 401) {
@@ -426,15 +433,18 @@ const MainPage = () => {
         expiredTime: expiredTime || null,
       };
 
-      const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        credentials: "include",
-        body: JSON.stringify(bodyData),
-      });
+      const response = await fetch(
+        "http://shortlink-production-dnd.up.railway.app/api/v1/urls",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          credentials: "include",
+          body: JSON.stringify(bodyData),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.json();
