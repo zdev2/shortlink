@@ -214,7 +214,7 @@ const Analisis: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const links: ShortLink[] = data.data.urls.map((item: any) => ({
           id: item.id,
-          shortLink: `https://dnd.id/${item.shortlink}`,
+          shortLink: `https://shortlink-production-dnd.up.railway.app/${item.shortlink}`,
           originalUrl: item.url || "",
           title: item.url_title || "Untitled",
           clicks: item.clickcount || 0,
@@ -279,7 +279,7 @@ const Analisis: React.FC = () => {
       const data = await response.json();
       const newLink: ShortLink = {
         id: data.data.url_details.id,
-        shortLink: `https://dnd.id/${data.data.shortlink}`,
+        shortLink: `https://shortlink-production-dnd.up.railway.app/${data.data.shortlink}`,
         originalUrl: originalUrl,
         title: customTitle,
         clicks: data.data.url_details.clickcount,
@@ -443,8 +443,8 @@ const Analisis: React.FC = () => {
               <p>
                 <strong>Shortlink:</strong>{" "}
                 {customSlug
-                  ? `https://dnd.id/${customSlug}`
-                  : "https://dnd.id/"}
+                  ? `https://shortlink-production-dnd.up.railway.app/${customSlug}`
+                  : "https://shortlink-production-dnd.up.railway.app/"}
               </p>
             </div>
             <input
