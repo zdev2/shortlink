@@ -51,7 +51,7 @@ func Register(c *fiber.Ctx) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(registerReq.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Failed to hash password")
-		return utils.InternalServerError(c, "Error generating password hash")
+		return utils.Conflict(c, "Error generating password hash")
 	}
 
 	collection := database.MongoClient.Database("shortlink").Collection("user")
@@ -63,7 +63,7 @@ func Register(c *fiber.Ctx) error {
 		return utils.Conflict(c, "Username already exists")
 	} else if err != mongo.ErrNoDocuments {
 		log.Error("INTERNAL_SERVER_ERROR", "Database error during user check")
-		return utils.InternalServerError(c, "Database error")
+		return utils.Conflict(c, "Database error")
 	}
 
 	user := model.User{
@@ -79,7 +79,7 @@ func Register(c *fiber.Ctx) error {
 	_, err = collection.InsertOne(context.TODO(), user)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Failed to insert user in database")
-		return utils.InternalServerError(c, "Failed to create user")
+		return utils.Conflict(c, "Failed to create user")
 	}
 
 	log.Info("INFO", "User registered successfully")
@@ -114,7 +114,7 @@ func Login(c *fiber.Ctx) error {
 			return utils.Unauthorized(c, "Invalid username or email")
 		}
 		log.Error("INTERNAL_SERVER_ERROR", "Database error during login")
-		return utils.InternalServerError(c, "Database error")
+		return utils.Conflict(c, "Database error")
 	}
 
 	if userAcc.DeletedAt != nil && !userAcc.DeletedAt.IsZero() {
@@ -135,13 +135,13 @@ func Login(c *fiber.Ctx) error {
 	secret := os.Getenv("JWT_TOKEN")
 	if secret == "" {
 		log.Error("INTERNAL_SERVER_ERROR", "JWT secret key is not set")
-		return utils.InternalServerError(c, "Internal server error")
+		return utils.Conflict(c, "Internal server error")
 	}
 
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Failed to sign JWT token")
-		return utils.InternalServerError(c, "Failed to generate token")
+		return utils.Conflict(c, "Failed to generate token")
 	}
 
 	c.Cookie(&fiber.Cookie{
@@ -162,7 +162,7 @@ func Login(c *fiber.Ctx) error {
 	_, err = collection.UpdateOne(context.TODO(), bson.M{"username": logReq.Username}, lastLogin)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error updating user")
-		return utils.InternalServerError(c, "Error updating user")
+		return utils.Conflict(c, "Error updating user")
 	}
 
 	log.Success("SUCCESS", "User logged in successfully")
@@ -181,7 +181,7 @@ func GetAllUsers(c *fiber.Ctx) error {
 	cursor, err := collection.Find(context.TODO(), bson.M{})
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Failed to retrieve users from the database")
-		return utils.InternalServerError(c, "Failed to retrieve users")
+		return utils.Conflict(c, "Failed to retrieve users")
 	}
 	defer cursor.Close(context.TODO())
 
@@ -189,14 +189,14 @@ func GetAllUsers(c *fiber.Ctx) error {
 		var user model.User
 		if err := cursor.Decode(&user); err != nil {
 			log.Error("INTERNAL_SERVER_ERROR", "Error decoding user")
-			return utils.InternalServerError(c, "Error decoding user")
+			return utils.Conflict(c, "Error decoding user")
 		}
 		users = append(users, user)
 	}
 
 	if err := cursor.Err(); err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Cursor error")
-		return utils.InternalServerError(c, "Cursor error")
+		return utils.Conflict(c, "Cursor error")
 	}
 
 	log.Info("INFO", "Users retrieved successfully")
@@ -227,7 +227,7 @@ func GetUserByID(c *fiber.Ctx) error {
 			return utils.NotFound(c, "User not found")
 		}
 		log.Error("INTERNAL_SERVER_ERROR", "Error fetching user")
-		return utils.InternalServerError(c, "Error fetching user")
+		return utils.Conflict(c, "Error fetching user")
 	}
 
 	log.Info("INFO", "User retrieved successfully")
@@ -258,7 +258,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	_, err := collection.UpdateOne(context.TODO(), bson.M{"_id": userID}, update)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error updating user")
-		return utils.InternalServerError(c, "Error updating user")
+		return utils.Conflict(c, "Error updating user")
 	}
 
 	log.Info("INFO", "User updated successfully")
@@ -275,7 +275,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	_, err := collection.UpdateOne(context.TODO(), bson.M{"_id": userID}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error deleting user")
-		return utils.InternalServerError(c, "Error deleting user")
+		return utils.Conflict(c, "Error deleting user")
 	}
 
 	log.Info("INFO", "User deleted successfully")

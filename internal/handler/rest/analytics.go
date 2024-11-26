@@ -31,14 +31,14 @@ func GetGlobalAnalytics(c *fiber.Ctx) error {
 	filter := bson.M{"user_id": objectID}
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
-		return utils.InternalServerError(c, "Error fetching analytics")
+		return utils.Conflict(c, "Error fetching analytics")
 	}
 	defer cursor.Close(context.TODO())
 
 	// Store analytics records in a slice
 	var analytics []model.Analytics
 	if err := cursor.All(context.TODO(), &analytics); err != nil {
-		return utils.InternalServerError(c, "Error decoding analytics")
+		return utils.Conflict(c, "Error decoding analytics")
 	}
 
 	// Return all analytics related to the user as JSON
@@ -66,14 +66,14 @@ func GetAnalyticsByURL(c *fiber.Ctx) error {
 	filter := bson.M{"url_id": objectID}
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
-		return utils.InternalServerError(c, "Error fetching analytics by URL")
+		return utils.Conflict(c, "Error fetching analytics by URL")
 	}
 	defer cursor.Close(context.TODO())
 
 	// Store the results in a slice
 	var analytics []model.Analytics
 	if err := cursor.All(context.TODO(), &analytics); err != nil {
-		return utils.InternalServerError(c, "Error decoding analytics for the URL")
+		return utils.Conflict(c, "Error decoding analytics for the URL")
 	}
 
 	// Return analytics related to the specific URL as JSON
