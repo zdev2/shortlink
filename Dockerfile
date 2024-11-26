@@ -1,16 +1,16 @@
 FROM node:18-alpine AS builder
 
-WORKDIR /app/ShortLink
+WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package.json ./
-COPY package-lock.json ./
+COPY ShortLink/package.json ./
+COPY ShortLink/package-lock.json ./
 
 # Install dependencies excluding development dependencies
 RUN npm run install:prod
 
 # Copy all project files into the container
-COPY . ./
+COPY ./ShortLink/ ./
 
 # Build the project for production
 RUN npm run build
