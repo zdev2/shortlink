@@ -429,7 +429,7 @@ const MainPage = () => {
       const bodyData = {
         url: originalUrl,
         shortlink: customSlug,
-        title: customTitle,
+        url_title: customTitle,
         expiredTime: expiredTime || null,
       };
 
@@ -627,7 +627,6 @@ const MainPage = () => {
             />
             <input
               type="text"
-              id="url_title"
               value={customTitle}
               onChange={(e) => setCustomTitle(e.target.value)}
               placeholder="Enter custom title"
