@@ -484,7 +484,7 @@ const MainPage = () => {
       }
 
       if (customTitle) {
-        bodyData.title = customTitle; // Add customTitle if provided
+        bodyData.url_title = customTitle; // Add customTitle if provided
       }
 
       setShortLinks([newLink, ...shortLinks]);
