@@ -53,7 +53,9 @@ const MainPage = () => {
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   // const [confirmDelete, setConfirmDelete] = useState(false);
-  const [modalText, setModalText] = useState('Are you sure you want to log out? You will need to log in again to access your account.');
+  const [modalText, setModalText] = useState(
+    "Are you sure you want to log out? You will need to log in again to access your account."
+  );
   // const [modalTexts, setModalTexts] = useState('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
   // const [confirmDelete, setConfirmDelete] = useState(false);
   // const [modalText, setModalText] = useState(
@@ -201,7 +203,7 @@ const MainPage = () => {
   }
 
   // Variable items yang mengisi di bagian action dropdown
-  const items: (row:ShortLink ) => MenuProps["items"] = (row) => [
+  const items: (row: ShortLink) => MenuProps["items"] = (row) => [
     {
       key: "copy",
       icon: <CopyOutlined />,
@@ -239,7 +241,6 @@ const MainPage = () => {
       // ),
     },
   ];
-
 
   // Handle Untuk Menggenerate Link Pendek Secara Acak
   const generateRandomSlug = (length: number = 6): string => {
@@ -422,9 +423,11 @@ const MainPage = () => {
       const bodyData = {
         url: originalUrl,
         shortlink: customSlug,
-        title: customTitle,
+        url_title: customTitle,
         expiredTime: expiredTime || null,
       };
+
+      console.log("Request Body:", bodyData);
 
       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
         method: "POST",
@@ -474,7 +477,7 @@ const MainPage = () => {
       }
 
       if (customTitle) {
-        bodyData.title = customTitle; // Add customTitle if provided
+        bodyData.url_title = customTitle; // Add customTitle if provided
       }
 
       setShortLinks([newLink, ...shortLinks]);

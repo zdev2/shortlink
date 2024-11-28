@@ -266,16 +266,21 @@ func DeleteURL(c *fiber.Ctx) error {
 
 	// Perform the delete operation by marking as deleted (soft delete)
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
-	filter := bson.M{"url_id": urlID}
+	filter := bson.M{"_id": urlID}
 	update := bson.M{"$set": bson.M{
 		"deleted_at": time.Now(),
 	}}
 
 	// Execute the update
-	_, err = collection.UpdateOne(context.TODO(), filter, update)
+	result, err := collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error deleting URL")
 		return utils.Conflict(c, "Error deleting URL")
+	}
+
+	if result.MatchedCount == 0 {
+		log.Warning("NOT_FOUND", "URL not found")
+		return utils.NotFound(c, "URL not found")
 	}
 
 	log.Success("SUCCESS", "URL deleted successfully")
@@ -343,7 +348,7 @@ func GetURLbyID(c *fiber.Ctx) error {
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
 	var url model.Url
 	err = collection.FindOne(context.TODO(), bson.M{
-		"url_id": urlID,
+		"_id": urlID,
 		"$or": []bson.M{
 			{"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
 			{"deleted_at": bson.M{"$eq": nil}},       // DeletedAt field is nil
