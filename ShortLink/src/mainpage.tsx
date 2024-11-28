@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./App.css";
 import { notification } from "antd";
 import {
@@ -13,12 +13,12 @@ import {
 } from "@ant-design/icons";
 import { Dropdown, Space, MenuProps, Button, Modal } from "antd";
 import { jwtDecode } from "jwt-decode";
-// import type { MenuInfo } from "rc-menu/lib/interface";
+import axios from "axios";
+
 
 interface DecodedToken {
   exp: number;
   iat: number;
-  // Add other properties of the decoded token as needed
 }
 
 interface QrCodePopupProps {
@@ -52,16 +52,40 @@ const MainPage = () => {
   const alala = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  // const [confirmDelete, setConfirmDelete] = useState(false);
   const [modalText, setModalText] = useState('Are you sure you want to log out? You will need to log in again to access your account.');
-  // const [modalTexts, setModalTexts] = useState('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
-  // const [confirmDelete, setConfirmDelete] = useState(false);
-  // const [modalText, setModalText] = useState(
-  //   "Are you sure you want to log out? You will need to log in again to access your account."
-  // );
-  // const [modalTexts, setModalTexts] = useState(
-  //   "Are you sure you want to delete this item? Once deleted, it cannot be recovered."
-  // );
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [currentShortlink, setCurrentShortlink] = useState("example-shortlink");
+  const [newShortlink, setNewShortlink] = useState(currentShortlink);
+  const [loading, setLoading] = useState(false);
+  const { id = "" } = useParams();
+  console.log(id);
+
+  const handleEdit = () => {
+    setIsEditOpen(true);
+  }
+
+  const handleSave = async () => {
+    setLoading(true);
+    // setError("");
+    try {
+      const response = await axios.put(`http://127.0.0.1:3000/api/v1/urls/${id}`, {
+        shortlink: shortLinks,
+      });
+      if (response.status === 200) {
+        alert("Shortlink updated successfully!");
+        setIsPopupOpen(false);
+      }
+    } catch (error) {
+      console.error(error);
+      notification.error({
+        message: "Error updating shortlink",
+        description: "Failed to update shortlink",
+        placement: "top"
+      })
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const showModal = () => {
     setOpen(true);
@@ -76,48 +100,13 @@ const MainPage = () => {
       handleLogout();
       setOpen(false);
       setConfirmLoading(false);
-    }, 5000);
+    }, 3000);
   };
 
   const handleCancel = () => {
     console.log("Clicked cancel button");
     setOpen(false);
   };
-
-  // const showModals = () => {
-  //   setOpen(true);
-  // };
-
-  // const handleOks = () => {
-  //   setModalTexts('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
-  //   setConfirmDelete(true);
-  //   setTimeout(() => {
-  //     deleteShortlink('')
-  //     setOpen(false);
-  //     setConfirmDelete(false);
-  //   }, 5000);
-  // };
-
-  // const handleCancels = () => {
-  //   console.log('Clicked cancel button');
-  //   setOpen(false);
-  // };
-  // const handleOks = () => {
-  //   setModalTexts(
-  //     "Are you sure you want to delete this item? Once deleted, it cannot be recovered."
-  //   );
-  //   setConfirmDelete(true);
-  //   setTimeout(() => {
-  //     deleteShortlink("");
-  //     setOpen(false);
-  //     setConfirmDelete(false);
-  //   }, 5000);
-  // };
-
-  // const handleCancels = () => {
-  //   console.log("Clicked cancel button");
-  //   setOpen(false);
-  // };
 
   // Handle Untuk Copy Link Pendek
   const handleCopy = () => {
@@ -181,6 +170,10 @@ const MainPage = () => {
           "Content-Type": "application/json",
         },
       });
+
+      const data = await response.json();
+      console.log(data)
+
       if (response.ok) {
         notification.success({
           message: "Link succes has delete!",
@@ -201,7 +194,7 @@ const MainPage = () => {
   }
 
   // Variable items yang mengisi di bagian action dropdown
-  const items: (row:ShortLink ) => MenuProps["items"] = (row) => [
+  const items: (row: ShortLink) => MenuProps["items"] = (row) => [
     {
       key: "copy",
       icon: <CopyOutlined />,
@@ -218,27 +211,16 @@ const MainPage = () => {
       key: "edit",
       icon: <EditOutlined />,
       label: "Edit",
-      // onClick: handleShare,
+      onClick: handleEdit, // Bungkus dalam fungsi
     },
     {
       key: "delete",
       icon: <DeleteOutlined />,
       label: "Delete",
       onClick: () => deleteShortlink(row.id as string),
-      // onClick: showModals,
-      // render: (
-      //   <Modal
-      //     title="Logout Confirmation"
-      //     open={open}
-      //     onOk={handleOks}
-      //     confirmDelete={confirmDelete}
-      //     onCancel={handleCancels}
-      //   >
-      //     <p>{modalTexts}</p>
-      //   </Modal>
-      // ),
     },
   ];
+  
 
 
   // Handle Untuk Menggenerate Link Pendek Secara Acak
@@ -318,7 +300,12 @@ const MainPage = () => {
   // Funcation Untuk Mengvalidasi Link Original
   const handleShorten = async () => {
     if (!originalUrl || !validateUrl(originalUrl)) {
-      alert("Please enter a valid URL.");
+      // alert("Please enter a valid URL.");
+      notification.info({
+        message: "Invalid URL",
+        description: "Please enter a valid URL.",
+        placement: "top",
+      })
       return;
     }
     // Generate a random slug and set it as customSlug
@@ -380,10 +367,27 @@ const MainPage = () => {
           title: item.url_title || "Untitled",
           clicks: item.clickcount || 0,
           status: item.status || "inactive",
-          createdAt: item.createdat || "N/A",
-          lastAccessedAt: item.lastaccesedat || null,
+          createdAt: formatDate(item.createdat) || "N/A",
+          lastAccessedAt: formatDate(item.lastaccesedat) || null,
           qrCodeUrl: item.qr_code || "",
         }));
+        
+        // Fungsi untuk memformat tanggal
+        function formatDate(dateString: string): string {
+          if (!dateString) return ""; // Jika tidak ada tanggal
+          const date = new Date(dateString);
+          if (isNaN(date.getTime())) return ""; // Pastikan validitas tanggal
+        
+          // Ambil bulan dalam format angka (1 - 12) dan tahun, hari
+          const month = date.getMonth() + 1; // Menambahkan 1 agar bulan dimulai dari 1
+          const day = date.getDate();
+          const year = date.getFullYear();
+        
+          // Formatkan tanggal dengan bulan berupa angka
+          return `${day}-${month < 10 ? '0' + month : month}-${year}`;
+        }
+        
+        
 
         setShortLinks(links);
         console.log(links); // Log the final links array
@@ -393,7 +397,7 @@ const MainPage = () => {
     };
 
     showAllURLs();
-  }, [navigate]);
+  }, [id, navigate]);
 
   // Format Penanggalan
   const formatDate = (isoString: string): string => {
@@ -453,7 +457,7 @@ const MainPage = () => {
         id: data.data.url_details.id,
         shortLink: `https://dnd.id/${data.data.shortlink}`,
         originalUrl: originalUrl,
-        title: customTitle,
+        title: data.data.url_details.url_title,
         clicks: data.data.url_details.clickcount,
         status: "active", // Default status as active
         createdAt: formatDate(data.data.url_details.createdat), // Format tanggal
@@ -562,6 +566,41 @@ const MainPage = () => {
           <p>{modalText}</p>
         </Modal>
       </div>
+      {/* Input Edit Shortlink */}
+      {isEditOpen && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
+            <h2 className="text-xl font-bold mb-4">Edit Shortlink</h2>
+            <label htmlFor="shortlink" className="block text-sm font-medium text-gray-700">
+              New Shortlink
+            </label>
+            <input
+              id="shortlink"
+              type="text"
+              value={newShortlink}
+              onChange={(e) => setNewShortlink(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            {/* {error && <p className="text-red-500 text-sm mt-2">{error}</p>} */}
+            <div className="mt-4 flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                onClick={() => setIsEditOpen(false)}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={handleSave}
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Input Original Link */}
       <div className="jawir flex md:flex-row justify-center sm:w-[768px] md:w-[1075px] w-[1075px] py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
