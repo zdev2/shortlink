@@ -1,21 +1,17 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-// import { jwtDecode } from "jwt-decode";
 import { AreaChart, Area } from "recharts";
 import { XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { notification } from "antd";
-// import type { NotificationArgsProps } from 'antd';
 import { Dropdown, Button, Menu, Space, Modal } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { FaUser, FaHandPointer } from "react-icons/fa";
 
-// type NotificationPlacement = NotificationArgsProps['placement'];
+interface AnalyticsItem {
+  clicks: number;
+  visitors: number;
+}
 
-// interface DecodedToken {
-//   exp: number;
-//   iat: number;
-//   // Add other properties of the decoded token as needed
-// }
 
 interface BodyData {
   url: string;
@@ -244,85 +240,105 @@ const Analisis: React.FC = () => {
 
   const fetchGlobalAnalystics = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:3000/api/v1/analytics", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`, 
-        },
-        credentials: "include",
-        // body: JSON.stringify(AnalysticData),
-    });
+        const response = await fetch("http://127.0.0.1:3000/api/v1/analytics", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`, 
+            },
+            credentials: "include",
+        });
 
-    if (!response.ok) {
-      console.log("Failed to fetch global analytics");
-    }
+        if (!response.ok) {
+            console.error("Failed to fetch global analytics");
+            return;
+        }
 
-    const data = await response.json();
-    
-    setGlobalAnalystics(data.analytics);
-    console.log(data.analytics);
-    console.log(data); // Harus ada properti analytics
+        const data = await response.json();
+        console.log(data)
+        if (!data || !Array.isArray(data.analytics)) {
+            console.error("Invalid analytics data. Expected an array.");
+            return;
+        }
+        const totalClicks = data.analytics.reduce(
+          (sum: number, item: AnalyticsItem) => sum + item.clicks,
+          0
+        );
+        const totalVisitors = data.analytics.reduce(
+          (sum: number, item: AnalyticsItem) => sum + item.visitors,
+          0
+        );
+        setGlobalAnalystics(data.analytics);
+        setTotalClick(totalClicks);
+        setTotalVisitor(totalVisitors);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setTotalClick(data.analytics.reduce((sum:number, item:any) => sum + item.clicks, 0));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setTotalVisitor(data.analytics.reduce((sum:number, item:any) => sum + item.clicks, 0));
-    } catch (error) {
-      console.error("Error fetching API:", error);
-      notification.error({
-        message: "Error",
-        description: "Failed to Fetch Global Analytics",
-        placement: "top",
-      });
-    }
-  }
+      } catch (error) {
+          console.error("Error fetching API:", error);
+          notification.error({
+              message: "Error",
+              description: "Failed to Fetch Global Analytics",
+              placement: "top",
+          });
+      }
+  };
 
   const fetchSpecificLinkAnalytics = async (id: string) => {
     try {
         if (!id) {
-            console.error("ID is missing.");
+            console.error("Error: ID is missing. Ensure that a valid ID is provided.");
             return;
         }
-
         if (!authToken) {
-            console.error("Authorization token is missing.");
+            console.error("Error: Authorization token is missing. Ensure you are logged in.");
             return;
         }
+        console.log(`Fetching analytics for ID: ${id}`); // Debugging log
 
         const response = await fetch(`http://127.0.0.1:3000/api/v1/analytics/${id}`, {
-            method: "GET", // Ubah ke GET jika tidak memerlukan body
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${authToken}`,
             },
             credentials: "include",
         });
-
+          
+        console.log(response)
+        // Periksa status respons
         if (!response.ok) {
-            console.error(`Failed to fetch specific link analytics. Status: ${response.status}`);
+            console.error(`Error: Failed to fetch specific link analytics. Status: ${response.status}`);
+        if (response.status === 404) {
+            console.error("Error 404: Analytics not found for the specified ID.");
+        }
+        return;
+        }
+
+        // Coba parsing JSON
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            console.error("Error: Failed to parse response as JSON.", jsonError);
             return;
         }
 
-        const data = await response.json();
-
+        // Validasi data respons
         if (!data || typeof data !== "object" || !data.analytics) {
-            console.error("Invalid or missing analytics data in response.");
+            console.error("Error: Invalid or missing analytics data in response.", data);
             return;
         }
 
-        setSpecificLinkAnalytics(data.analytics);
+        console.log("Successfully fetched analytics:", data.analytics);
+        setSpecificLinkAnalytics(data.analytics); // Update state dengan data yang valid
       } catch (error) {
-          console.error("Error fetching API:", error);
+          console.error("Error: An unexpected error occurred while fetching analytics.", error)
           notification.error({
               message: "Error",
-              description: "Failed to Fetch Specific Link Analytics",
+              description: "Failed to Fetch Specific Link Analytics. Please try again later.",
               placement: "top",
           });
       }
   };
-
-
 
   useEffect(() => {
     fetchGlobalAnalystics();

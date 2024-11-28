@@ -49,7 +49,6 @@ const MainPage = () => {
   const [selectedQrCode, setSelectedQrCode] = useState<ShortLink | null>(null);
   const [selectedLink, setSelectedLink] = useState<ShortLink | null>(null);
   const authToken = localStorage.getItem("authToken"); // Replace 'authToken' with your actual key
-  const alala = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [modalText, setModalText] = useState('Are you sure you want to log out? You will need to log in again to access your account.');
@@ -66,7 +65,6 @@ const MainPage = () => {
 
   const handleSave = async () => {
     setLoading(true);
-    // setError("");
     try {
       const response = await axios.put(`http://127.0.0.1:3000/api/v1/urls/${id}`, {
         shortlink: shortLinks,
@@ -247,22 +245,29 @@ const MainPage = () => {
       const response = await fetch(
         "http://127.0.0.1:3000/api/v1/users/logout",
         {
-          method: "POST",
+          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${alala}`,
+            Authorization: `Bearer ${authToken}`,
           },
         }
       );
 
-      if (response.status === 401) {
-        // Handle unauthorized response (e.g., redirect to login or clear session)
-        console.log("Session expired, redirecting to login...");
+      if (response.status === 200 ){
         navigate("/");
         notification.success({
           message: "Logout has Succes",
           description: "Logout successfully.",
           placement: "top",
+        });
+      }else if (response.status === 401) {
+        // Handle unauthorized response (e.g., redirect to login or clear session)
+        console.log("Session expired, redirecting to login...");
+        navigate("/");
+        notification.error({
+          message: "Failed to Logout",
+          description: "Failed to Logout Check Your Conettion.",
+          placement: "top"
         });
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
@@ -618,6 +623,41 @@ const MainPage = () => {
           Shorten now
         </button>
       </div>
+      {/* Edit Popup */}
+      {isEditOpen && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
+            <h2 className="text-xl font-bold mb-4">Edit Shortlink</h2>
+            <label htmlFor="shortlink" className="block text-sm font-medium text-gray-700">
+              New Shortlink
+            </label>
+            <input
+              id="shortlink"
+              type="text"
+              value={newShortlink}
+              onChange={(e) => setNewShortlink(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            {/* {error && <p className="text-red-500 text-sm mt-2">{error}</p>} */}
+            <div className="mt-4 flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                onClick={() => setIsEditOpen(false)}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={handleSave}
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Navigasi */}
       <div className="flex justify-center gap-5 mt-4">
         <button
