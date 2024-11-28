@@ -222,7 +222,6 @@ const MainPage = () => {
   ];
   
 
-
   // Handle Untuk Menggenerate Link Pendek Secara Acak
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
@@ -426,9 +425,11 @@ const MainPage = () => {
       const bodyData = {
         url: originalUrl,
         shortlink: customSlug,
-        title: customTitle,
+        url_title: customTitle,
         expiredTime: expiredTime || null,
       };
+
+      console.log("Request Body:", bodyData);
 
       const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
         method: "POST",
@@ -478,7 +479,7 @@ const MainPage = () => {
       }
 
       if (customTitle) {
-        bodyData.title = customTitle; // Add customTitle if provided
+        bodyData.url_title = customTitle; // Add customTitle if provided
       }
 
       setShortLinks([newLink, ...shortLinks]);

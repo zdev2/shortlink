@@ -11,7 +11,6 @@ import (
 	"shortlink/internal/utils"
 	"shortlink/logger"
 	"shortlink/model"
-	"strconv"
 	"strings"
 	"time"
 
@@ -77,7 +76,7 @@ func GenerateURL(c *fiber.Ctx) error {
 	urlID, err := generator.GetNextIncrementalID(collection, "url_id")
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Failed to create URL ID")
-		return utils.InternalServerError(c, "Failed to create URL ID for short URL")
+		return utils.Conflict(c, "Failed to create URL ID for short URL")
 	}
 
 	// Handle short link creation
@@ -133,7 +132,7 @@ func GenerateURL(c *fiber.Ctx) error {
 	_, err = collection.InsertOne(ctx, url)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Failed to create short URL")
-		return utils.InternalServerError(c, "Failed to create short URL")
+		return utils.Conflict(c, "Failed to create short URL")
 	}
 
 	log.Success("SUCCESS", "Short URL created successfully")
@@ -165,7 +164,7 @@ func EditShortLink(c *fiber.Ctx) error {
 	}
 
 	// Get the URL ID from the URL params and convert to int64
-	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	urlID, err := primitive.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
 		log.Error("BAD_REQUEST", "Invalid URL ID format")
 		return utils.BadRequest(c, "Invalid URL ID format")
@@ -182,7 +181,7 @@ func EditShortLink(c *fiber.Ctx) error {
 	_, err = collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Failed to update shortlink")
-		return utils.InternalServerError(c, "Failed to update shortlink")
+		return utils.Conflict(c, "Failed to update shortlink")
 	}
 
 	log.Success("SUCCESS", "ShortLink updated successfully")
@@ -211,7 +210,7 @@ func RedirectURL(c *fiber.Ctx) error {
 			return utils.NotFound(c, "Short URL not found")
 		}
 		log.Error("INTERNAL_SERVER_ERROR", "Error fetching URL")
-		return utils.InternalServerError(c, "Error fetching URL")
+		return utils.Conflict(c, "Error fetching URL")
 	}
 
 	// Update last accessed and click count
@@ -221,7 +220,7 @@ func RedirectURL(c *fiber.Ctx) error {
 	})
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error updating URL")
-		return utils.InternalServerError(c, "Error updating URL")
+		return utils.Conflict(c, "Error updating URL")
 	}
 
 	// Capture IP address and log analytics
@@ -248,7 +247,7 @@ func RedirectURL(c *fiber.Ctx) error {
 	_, err = analyticsCollection.InsertOne(context.TODO(), analytics)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error logging analytics")
-		return utils.InternalServerError(c, "Error logging analytics")
+		return utils.Conflict(c, "Error logging analytics")
 	}
 
 	// Redirect the user to the original URL
@@ -259,7 +258,7 @@ func DeleteURL(c *fiber.Ctx) error {
 	log := logger.GetLogger()
 
 	// Get the URL ID from the URL params and convert to int64
-	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	urlID, err := primitive.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
 		log.Warning("BAD_REQUEST", "Invalid URL ID format")
 		return utils.BadRequest(c, "Invalid URL ID format")
@@ -267,16 +266,21 @@ func DeleteURL(c *fiber.Ctx) error {
 
 	// Perform the delete operation by marking as deleted (soft delete)
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
-	filter := bson.M{"url_id": urlID}
+	filter := bson.M{"_id": urlID}
 	update := bson.M{"$set": bson.M{
 		"deleted_at": time.Now(),
 	}}
 
 	// Execute the update
-	_, err = collection.UpdateOne(context.TODO(), filter, update)
+	result, err := collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error deleting URL")
-		return utils.InternalServerError(c, "Error deleting URL")
+		return utils.Conflict(c, "Error deleting URL")
+	}
+
+	if result.MatchedCount == 0 {
+		log.Warning("NOT_FOUND", "URL not found")
+		return utils.NotFound(c, "URL not found")
 	}
 
 	log.Success("SUCCESS", "URL deleted successfully")
@@ -313,7 +317,7 @@ func GetURLs(c *fiber.Ctx) error {
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error fetching URLs")
-		return utils.InternalServerError(c, "Error fetching URLs")
+		return utils.Conflict(c, "Error fetching URLs")
 	}
 	defer cursor.Close(context.TODO())
 
@@ -321,7 +325,7 @@ func GetURLs(c *fiber.Ctx) error {
 	var urls []model.Url
 	if err = cursor.All(context.TODO(), &urls); err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error decoding URLs")
-		return utils.InternalServerError(c, "Error decoding URLs")
+		return utils.Conflict(c, "Error decoding URLs")
 	}
 
 	// Return the URLs in the response
@@ -335,7 +339,7 @@ func GetURLs(c *fiber.Ctx) error {
 // GetURLbyID retrieves a specific URL by its ID
 func GetURLbyID(c *fiber.Ctx) error {
 	log := logger.GetLogger()
-	urlID, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	urlID, err := primitive.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
 		log.Warning("BAD_REQUEST", "Invalid URL ID format")
 		return utils.BadRequest(c, "Invalid URL ID format")
@@ -344,7 +348,7 @@ func GetURLbyID(c *fiber.Ctx) error {
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
 	var url model.Url
 	err = collection.FindOne(context.TODO(), bson.M{
-		"url_id": urlID,
+		"_id": urlID,
 		"$or": []bson.M{
 			{"deleted_at": bson.M{"$exists": false}}, // DeletedAt field does not exist
 			{"deleted_at": bson.M{"$eq": nil}},       // DeletedAt field is nil
@@ -356,7 +360,7 @@ func GetURLbyID(c *fiber.Ctx) error {
 			return utils.NotFound(c, "URL not found")
 		}
 		log.Error("INTERNAL_SERVER_ERROR", "Error fetching URL")
-		return utils.InternalServerError(c, "Error fetching URL")
+		return utils.Conflict(c, "Error fetching URL")
 	}
 
 	log.Info("SUCCESS", "URL fetched successfully")
@@ -385,14 +389,14 @@ func GetUserUrlLogs(c *fiber.Ctx) error {
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error fetching URLs")
-		return utils.InternalServerError(c, "Error fetching URLs")
+		return utils.Conflict(c, "Error fetching URLs")
 	}
 	defer cursor.Close(context.TODO())
 	
 	var urls []model.Url
 	if err = cursor.All(context.TODO(), &urls); err != nil {
 		log.Error("INTERNAL_SERVER_ERROR", "Error decoding URLs")
-		return utils.InternalServerError(c, "Error decoding URLs")
+		return utils.Conflict(c, "Error decoding URLs")
 	}
 
 	log.Info("SUCCESS", "User URL Logs fetched successfully")

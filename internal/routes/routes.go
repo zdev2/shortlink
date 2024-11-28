@@ -12,7 +12,7 @@ func RouteSetup(app *fiber.App) {
 
 	// CORS Middleware setup
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:5173", // Replace with your frontend URL
+		AllowOrigins: "https://shortlink-production-dnds.up.railway.app, http://localhost:5173", // Replace with your frontend URL
 		AllowMethods: "GET,POST,PUT,DELETE",   // Allowed HTTP methods
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization, Cookie", // Allowed headers
 		ExposeHeaders: "Authorization, Cookie",
