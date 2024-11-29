@@ -12,6 +12,7 @@ type Analytics struct {
 	URLID 	   primitive.ObjectID `bson:"url_id" json:"url_id"`          //
 	UserAgent  string             `bson:"user_agent" json:"useragent"`   //
 	Referrer   string             `bson:"referrer" json:"referrer"`      //
+	IPAdress   string			  `bson:"ip_adress" json:"ipadress"`
 	Location   string             `bson:"location" json:"location"`      //
 	AccessedAt time.Time          `bson:"accessed_at" json:"accessedat"` //
 }

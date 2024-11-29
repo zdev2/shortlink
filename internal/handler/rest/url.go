@@ -238,6 +238,7 @@ func RedirectURL(c *fiber.Ctx) error {
 		URLID:      url.ID,
 		UserAgent:  userAgent,
 		Referrer:   referrer,
+		IPAdress: 	ip,
 		Location:   location,
 		AccessedAt: time.Now(),
 	}
