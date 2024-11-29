@@ -1,17 +1,17 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AreaChart, Area } from "recharts";
 import { XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { notification } from "antd";
-import { Dropdown, Button, Menu, Space, Modal } from "antd";
-import { DownOutlined } from "@ant-design/icons";
-import { FaUser, FaHandPointer } from "react-icons/fa";
+import { Button, Modal } from "antd";
+// import { DownOutlined } from "@ant-design/icons";
+// import { FaUser, FaHandPointer } from "react-icons/fa";
+import { processData } from "./utils/analitik";
 
-interface AnalyticsItem {
-  clicks: number;
-  visitors: number;
-}
-
+// interface AnalyticsItem {
+//   clicks: number;
+//   visitors: number;
+// }
 
 interface BodyData {
   url: string;
@@ -20,11 +20,11 @@ interface BodyData {
   expiredTime?: number; // Optional property
 }
 
-interface DataItem {
-  name: string;
-  uv: number;
-  pv: number;
-}
+// interface DataItem {
+//   name: string;
+//   uv: number;
+//   pv: number;
+// }
 
 interface AnalysticData {
   name: string;
@@ -52,20 +52,23 @@ const Analisis: React.FC = () => {
   const [expiredTime, setExpiredTime] = useState<number | null>(null);
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [totalUv, setTotalUv] = useState(0);
-  const [totalPv, setTotalPv] = useState(0);
+  // const [totalUv, setTotalUv] = useState(0);
+  // const [totalPv, setTotalPv] = useState(0);
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [modalText, setModalText] = useState("Are you sure you want to log out? You will need to log in again to access your account.");
+  const [modalText, setModalText] = useState(
+    "Are you sure you want to log out? You will need to log in again to access your account."
+  );
   // const {id} = useParams<{id : string}>();
   const [globalAnalystics, setGlobalAnalystics] = useState<AnalysticData[]>([]);
-  const [SpecificLinkAnalytics, setSpecificLinkAnalytics] = useState<AnalysticData | null>(null);
-  const [totalClick, setTotalClick] = useState(0);
-  const [totalVisitor, setTotalVisitor] = useState(0);
+  const [SpecificLinkAnalytics, setSpecificLinkAnalytics] =
+    useState<AnalysticData | null>(null);
+  // const [totalClick, setTotalClick] = useState(0);
+  // const [totalVisitor, setTotalVisitor] = useState(0);
   const authToken = localStorage.getItem("authToken");
 
   const { id = "" } = useParams();
-  console.log(id);
+  // console.log(id);
 
   const showModal = () => {
     setOpen(true);
@@ -240,193 +243,221 @@ const Analisis: React.FC = () => {
 
   const fetchGlobalAnalystics = async () => {
     try {
-        const response = await fetch("http://127.0.0.1:3000/api/v1/analytics", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}`, 
-            },
-            credentials: "include",
-        });
+      const response = await fetch("http://127.0.0.1:3000/api/v1/analytics", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        credentials: "include",
+      });
 
-        if (!response.ok) {
-            console.error("Failed to fetch global analytics");
-            return;
-        }
-
-        const data = await response.json();
-        console.log(data)
-        if (!data || !Array.isArray(data.analytics)) {
-            console.error("Invalid analytics data. Expected an array.");
-            return;
-        }
-        const totalClicks = data.analytics.reduce(
-          (sum: number, item: AnalyticsItem) => sum + item.clicks,
-          0
-        );
-        const totalVisitors = data.analytics.reduce(
-          (sum: number, item: AnalyticsItem) => sum + item.visitors,
-          0
-        );
-        setGlobalAnalystics(data.analytics);
-        setTotalClick(totalClicks);
-        setTotalVisitor(totalVisitors);
-
-      } catch (error) {
-          console.error("Error fetching API:", error);
-          notification.error({
-              message: "Error",
-              description: "Failed to Fetch Global Analytics",
-              placement: "top",
-          });
+      if (!response.ok) {
+        console.error("Failed to fetch global analytics");
+        return;
       }
+
+      console.log("Fetching global analytics...");
+      const data = await response.json();
+      console.log(data, data.data, "yee");
+      const processesdData = processData(data.data.analytics);
+      setGlobalAnalystics(processesdData);
+      console.log({ processesdData });
+      // const totalClicks = data.data.analytics.reduce(
+      //   (sum: number, item: AnalyticsItem) => sum + item.clicks,
+      //   0
+      // );
+      // const totalVisitors = data.data.analytics.reduce(
+      //   (sum: number, item: AnalyticsItem) => sum + item.visitors,
+      //   0
+      // );
+
+      // setTotalClick(totalClicks);
+      // setTotalVisitor(totalVisitors);
+    } catch (error) {
+      console.error("Error fetching API:", error);
+      notification.error({
+        message: "Error",
+        description: "Failed to Fetch Global Analytics",
+        placement: "top",
+      });
+    }
   };
 
   const fetchSpecificLinkAnalytics = async (id: string) => {
     try {
-        // Validasi ID
-        if (!id) {
-            console.error("Error: ID is missing. Ensure that a valid ID is provided.");
-            return;
-        }
-        // Validasi Token Otorisasi
-        if (!authToken) {
-            console.error("Error: Authorization token is missing. Ensure you are logged in.");
-            return;
-        }
-        console.log(`Fetching analytics for ID: ${id}`); // Debugging log
-        // Kirim Permintaan ke API
-        const response = await fetch(`http://127.0.0.1:3000/api/v1/analytics/${id}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}`,
-            },
-            credentials: "include",
-        });
-
-        if (!response.ok){
-          console.error(`Error: Failed to fetch specific link analytics. Status: ${response.status}`);
-        } 
-
-        if (response.status === 200) {
-          notification.success({
-            message: "Success",
-            description: "Analytics fetched successfully.",
-            placement: "top",
-          })
-        }
-        
-        if (response.status === 404) {
-          notification.error ({
-            message: "Error",
-            description: "Analytics not found for the specified ID.",
-            placement: "top",
-          })
-        }
-
-        // Parsing JSON
-        let data;
-        try {
-            data = await response.json();
-            console.log(data)
-        } catch (jsonError) {
-            console.error("Error: Failed to parse response as JSON.", jsonError); 
-        }
-
-        // Set state dengan data yang valid
-        setSpecificLinkAnalytics(data.analytics);
-
-      } catch (error) {
-          console.error("Error: An unexpected error occurred while fetching analytics.", error)
-          // Tampilkan notifikasi kepada pengguna
-          notification.error({
-              message: "Error",
-              description: "Failed to Fetch Specific Link Analytics. Please try again later.",
-              placement: "top",
-          });
+      // Validasi ID
+      if (!id) {
+        console.error(
+          "Error: ID is missing. Ensure that a valid ID is provided."
+        );
+        return;
       }
+      // Validasi Token Otorisasi
+      if (!authToken) {
+        console.error(
+          "Error: Authorization token is missing. Ensure you are logged in."
+        );
+        return;
+      }
+      console.log(`Fetching analytics for ID: ${id}`); // Debugging log
+      // Kirim Permintaan ke API
+      const response = await fetch(
+        `http://127.0.0.1:3000/api/v1/analytics/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        console.error(
+          `Error: Failed to fetch specific link analytics. Status: ${response.status}`
+        );
+      }
+
+      if (response.status === 200) {
+        notification.success({
+          message: "Success",
+          description: "Analytics fetched successfully.",
+          placement: "top",
+        });
+      }
+
+      if (response.status === 404) {
+        notification.error({
+          message: "Analytics not found",
+          description: "Analytics not found for the specified ID.",
+          placement: "top",
+        });
+      }
+
+      // Parsing JSON
+      let data;
+      try {
+        data = await response.json();
+        console.log(data, data.data, "yee");
+        const processedData = processData(data.data.analytics);
+        setSpecificLinkAnalytics(processedData);
+        console.log({ processedData });
+      } catch (jsonError) {
+        console.error("Error: Failed to parse response as JSON.", jsonError);
+      }
+
+      // Set state dengan data yang valid
+      // console.log(data.analytics, 'lohee')
+    } catch (error) {
+      console.error(
+        "Error: An unexpected error occurred while fetching analytics.",
+        error
+      );
+      // Tampilkan notifikasi kepada pengguna
+      notification.error({
+        message: "Error",
+        description:
+          "Failed to Fetch Specific Link Analytics. Please try again later.",
+        placement: "top",
+      });
+    }
   };
 
-
   useEffect(() => {
-    fetchGlobalAnalystics();
-    if (id) {
-      fetchSpecificLinkAnalytics(id);
-    }
-  })
+    const fetchAndSetData = async () => {
+      if (id) {
+        await fetchSpecificLinkAnalytics(id); // Untuk data spesifik jika ada ID
+      } else {
+        await fetchGlobalAnalystics(); // Untuk data global
+      }
 
-  const data3Days = useMemo(
-    () => [
-      { name: "Day 1", uv: 2000, pv: 2500 },
-      { name: "Day 2", uv: 1500, pv: 2000 },
-      { name: "Day 3", uv: 2000, pv: 2500 },
-    ],
-    []
-  );
+      // Misalnya kita ingin mengganti data3Days, data7Days, data1Month
+      // setSelectedData(
+      //   globalAnalystics.map((item) => ({
+      //     name: item.name,
+      //     uv: item.clicks,
+      //     pv: item.visitor,
+      //   }))
+      // );
+    };
 
-  const data7Days = useMemo(
-    () => [
-      { name: "Day 1", uv: 2500, pv: 3000 },
-      { name: "Day 2", uv: 2000, pv: 2500 },
-      { name: "Day 3", uv: 2500, pv: 3000 },
-      { name: "Day 4", uv: 1500, pv: 2000 },
-      { name: "Day 5", uv: 2000, pv: 2500 },
-      { name: "Day 6", uv: 1000, pv: 1500 },
-      { name: "Day 7", uv: 2500, pv: 3000 },
-    ],
-    []
-  );
+    fetchAndSetData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]); // Menjalankan ulang jika ID berubah
 
-  const data1Month = useMemo(
-    () => [
-      { name: "Week 1", uv: 6300, pv: 7800 },
-      { name: "Week 2", uv: 5000, pv: 6000 },
-      { name: "Week 3", uv: 7500, pv: 8500 },
-      { name: "Week 4", uv: 4000, pv: 5000 },
-    ],
-    []
-  );
+  // const data3Days = useMemo(
+  //   () => [
+  //     { name: "Day 1", uv: 2000, pv: 2500 },
+  //     { name: "Day 2", uv: 1500, pv: 2000 },
+  //     { name: "Day 3", uv: 2000, pv: 2500 },
+  //   ],
+  //   []
+  // );
 
-  const [selectedData, setSelectedData] = useState<DataItem[]>(data3Days);
-  type TimeRange = "3days" | "7days" | "1month";
-  const [selectedLabel, setSelectedLabel] = useState("3 Hari");
+  // const data7Days = useMemo(
+  //   () => [
+  //     { name: "Day 1", uv: 2500, pv: 3000 },
+  //     { name: "Day 2", uv: 2000, pv: 2500 },
+  //     { name: "Day 3", uv: 2500, pv: 3000 },
+  //     { name: "Day 4", uv: 1500, pv: 2000 },
+  //     { name: "Day 5", uv: 2000, pv: 2500 },
+  //     { name: "Day 6", uv: 1000, pv: 1500 },
+  //     { name: "Day 7", uv: 2500, pv: 3000 },
+  //   ],
+  //   []
+  // );
 
-  useEffect(() => {
-    const totalUvSum = selectedData.reduce((sum, item) => sum + item.uv, 0);
-    const totalPvSum = selectedData.reduce((sum, item) => sum + item.pv, 0);
-    setTotalUv(totalUvSum);
-    setTotalPv(totalPvSum);
-  }, [selectedData]);
+  // const data1Month = useMemo(
+  //   () => [
+  //     { name: "Week 1", uv: 6300, pv: 7800 },
+  //     { name: "Week 2", uv: 5000, pv: 6000 },
+  //     { name: "Week 3", uv: 7500, pv: 8500 },
+  //     { name: "Week 4", uv: 4000, pv: 5000 },
+  //   ],
+  //   []
+  // );
+
+  // const [selectedData, setSelectedData] = useState<DataItem[]>(data3Days);
+  // type TimeRange = "3days" | "7days" | "1month";
+  // const [selectedLabel, setSelectedLabel] = useState("3 Hari");
+
+  // useEffect(() => {
+  //   const totalUvSum = selectedData.reduce((sum, item) => sum + item.uv, 0);
+  //   const totalPvSum = selectedData.reduce((sum, item) => sum + item.pv, 0);
+  //   // setTotalUv(totalUvSum);
+  //   // setTotalPv(totalPvSum);
+  // }, [selectedData]);
 
   // Fungsi untuk mengubah data berdasarkan pilihan waktu
-  const handleTimeRangeChange = (range: TimeRange) => {
-    switch (range) {
-      case "3days":
-        setSelectedData(data3Days);
-        setSelectedLabel("3 Hari");
-        break;
-      case "7days":
-        setSelectedData(data7Days);
-        setSelectedLabel("7 Hari");
-        break;
-      case "1month":
-        setSelectedData(data1Month);
-        setSelectedLabel("1 Bulan");
-        break;
-      default:
-        setSelectedData(data3Days);
-        setSelectedLabel("Pilih Rentang Waktu");
-    }
-  };
+  // const handleTimeRangeChange = (range: TimeRange) => {
+  //   switch (range) {
+  //     case "3days":
+  //       setSelectedData(data3Days);
+  //       setSelectedLabel("3 Hari");
+  //       break;
+  //     case "7days":
+  //       setSelectedData(data7Days);
+  //       setSelectedLabel("7 Hari");
+  //       break;
+  //     case "1month":
+  //       setSelectedData(data1Month);
+  //       setSelectedLabel("1 Bulan");
+  //       break;
+  //     default:
+  //       setSelectedData(data3Days);
+  //       setSelectedLabel("Pilih Rentang Waktu");
+  //   }
+  // };
 
-  const menu = (
-    <Menu onClick={(e) => handleTimeRangeChange(e.key as TimeRange)}>
-      <Menu.Item key="3days">3 Hari</Menu.Item>
-      <Menu.Item key="7days">7 Hari</Menu.Item>
-      <Menu.Item key="1month">1 Bulan</Menu.Item>
-    </Menu>
-  );
+  // const menu = (
+  //   <Menu onClick={(e) => handleTimeRangeChange(e.key as TimeRange)}>
+  //     <Menu.Item key="3days">3 Hari</Menu.Item>
+  //     <Menu.Item key="7days">7 Hari</Menu.Item>
+  //     <Menu.Item key="1month">1 Bulan</Menu.Item>
+  //   </Menu>
+  // );
 
   return (
     <div className="min-h-screen relative flex flex-col justify-center items-center bg-gray-100 p-4 md:p-6">
@@ -540,146 +571,58 @@ const Analisis: React.FC = () => {
         </div>
       )}
 
-      {/* Dropdown pilihan rentang waktu */}
-      <div
-        className="flex justify-between w-[1000px]"
-        style={{ marginBottom: "20px" }}
-      >
-        <div>
-          <h4>Analystic</h4>
-        </div>
-        <Dropdown overlay={menu}>
-          <Button>
-            <Space>
-              {selectedLabel}
-              <DownOutlined />
-            </Space>
-          </Button>
-        </Dropdown>
-      </div>
-
-      <div
-        className="z-0"
-        style={{
-          width: "100%",
-          height: "400px",
-          maxWidth: "1000px",
-          margin: "auto",
-        }}
-      >
-        <AreaChart
-          width={1000}
-          height={300}
-          data={selectedData}
-          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-        >
-          <defs>
-            <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-            </linearGradient>
-            <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <XAxis strokeOpacity={0} dataKey="name" />
-          <YAxis strokeOpacity={0} />
-          <CartesianGrid strokeDasharray="1 1" />
-          <Tooltip />
-          <Area
-            type="monotone"
-            dataKey="uv"
-            stroke="#8884d8"
-            fillOpacity={1}
-            fill="url(#colorUv)"
-          />
-          <Area
-            type="monotone"
-            dataKey="pv"
-            stroke="#82ca9d"
-            fillOpacity={1}
-            fill="url(#colorPv)"
-          />
-        </AreaChart>
-      </div>
-
-      <div className="flex gap-24">
-        <div className="mb-5 p-5 border rounded-lg flex items-center justify-evenly shadow-md w-64">
-          <div className="bg-purple-100 p-3 rounded-full mb-3">
-            <FaHandPointer style={{ color: "#6A0DAD", fontSize: "24px" }} />
-          </div>
-          <div>
-            <div className="text-center">
-              <span className="text-2xl font-bold text-purple-800">
-                {totalUv}
-              </span>
-              <p className="text-purple-600">Total Click</p>
-            </div>
-            <Dropdown overlay={menu}>
-              <Button>
-                <Space>
-                  {selectedLabel}
-                  <DownOutlined />
-                </Space>
-              </Button>
-            </Dropdown>
-          </div>
-        </div>
-        <div className="mb-5 p-5 border rounded-lg flex items-center justify-evenly shadow-md w-64">
-          <div className="bg-purple-100 p-3 rounded-full mb-3">
-            <FaUser style={{ color: "#6A0DAD", fontSize: "24px" }} />
-          </div>
-          <div>
-            <div className="text-center">
-              <span className="text-2xl font-bold text-purple-800">
-                {totalPv}
-              </span>
-              <p className="text-purple-600">Total Click</p>
-            </div>
-            <Dropdown overlay={menu}>
-              <Button>
-                <Space>
-                  {selectedLabel}
-                  <DownOutlined />
-                </Space>
-              </Button>
-            </Dropdown>
-          </div>
-        </div>
-      </div>
-
       <div>
-        <h1>Analisis Page</h1>
-
         <div>
-          <h2>Global Analystics</h2>
-          <p>Total Clicks: {totalClick}</p>
-          <p>Total Visitor: {totalVisitor}</p>
+            {id ? (
+              <div>
+                <h2 className="font-bold">Analytics for Shortlink: {id}</h2>
+              </div>
+            ) : (
+              <div>
+                <h2 className="font-bold">Analytics by Global</h2>
+              </div>
+            )}
+          </div>
+
+        <div
+          className="z-0"
+          style={{
+            width: "100%",
+            height: "400px",
+            maxWidth: "1000px",
+            margin: "auto",
+          }}
+        >
           <AreaChart
-            width={500}
+            width={1000}
             height={300}
-            data={globalAnalystics}
-            margin={{top : 10, right: 30, left: 0, bottom: 0}}
+            data={id ? SpecificLinkAnalytics : globalAnalystics}
+            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
+            <defs>
+              <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
+          </linearGradient>
+            </defs>
+            <XAxis strokeOpacity={0} dataKey="date" />
+            <YAxis strokeOpacity={0} dataKey="visitors" />
+            <CartesianGrid strokeDasharray="1 1" />
             <Tooltip />
-            <Area type="monotone" dataKey="clicks" stroke="#8884d8" fill="#8884d8" />
-            <Area type="monotone" dataKey="Visitor" stroke="#82ca9d" fill="#82ca9d" />
+            <Area
+              type="monotone"
+              dataKey="visitors"
+              stroke="#82ca9d"
+              fillOpacity={1}
+              fill="url(#colorPv)"
+            />
           </AreaChart>
         </div>
       </div>
-
-      {SpecificLinkAnalytics && (
-        <div>
-          <h2>Analystic for Link ID: {id}</h2>
-          <p>Total Clicks: {SpecificLinkAnalytics.clicks}</p>
-          <p>Total Clicks: {SpecificLinkAnalytics.visitor}</p>
-        </div> 
-      )}
-
 
     </div>
   );
