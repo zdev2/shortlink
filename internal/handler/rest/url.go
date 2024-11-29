@@ -259,6 +259,7 @@ func RedirectURL(c *fiber.Ctx) error {
 	}else {
 		log.Success("SUCCESS", "Visitor found in")
 	}
+	
 	// Prepare analytics data
 	analytics := model.Analytics{
 		ID:         primitive.NewObjectID(),
