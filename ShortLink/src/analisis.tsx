@@ -284,16 +284,18 @@ const Analisis: React.FC = () => {
 
   const fetchSpecificLinkAnalytics = async (id: string) => {
     try {
+        // Validasi ID
         if (!id) {
             console.error("Error: ID is missing. Ensure that a valid ID is provided.");
             return;
         }
+        // Validasi Token Otorisasi
         if (!authToken) {
             console.error("Error: Authorization token is missing. Ensure you are logged in.");
             return;
         }
         console.log(`Fetching analytics for ID: ${id}`); // Debugging log
-
+        // Kirim Permintaan ke API
         const response = await fetch(`http://127.0.0.1:3000/api/v1/analytics/${id}`, {
             method: "GET",
             headers: {
@@ -302,36 +304,42 @@ const Analisis: React.FC = () => {
             },
             credentials: "include",
         });
-          
-        console.log(response)
-        // Periksa status respons
-        if (!response.ok) {
-            console.error(`Error: Failed to fetch specific link analytics. Status: ${response.status}`);
-        if (response.status === 404) {
-            console.error("Error 404: Analytics not found for the specified ID.");
+
+        if (!response.ok){
+          console.error(`Error: Failed to fetch specific link analytics. Status: ${response.status}`);
+        } 
+
+        if (response.status === 200) {
+          notification.success({
+            message: "Success",
+            description: "Analytics fetched successfully.",
+            placement: "top",
+          })
         }
-        return;
+        
+        if (response.status === 404) {
+          notification.error ({
+            message: "Error",
+            description: "Analytics not found for the specified ID.",
+            placement: "top",
+          })
         }
 
-        // Coba parsing JSON
+        // Parsing JSON
         let data;
         try {
             data = await response.json();
+            console.log(data)
         } catch (jsonError) {
-            console.error("Error: Failed to parse response as JSON.", jsonError);
-            return;
+            console.error("Error: Failed to parse response as JSON.", jsonError); 
         }
 
-        // Validasi data respons
-        if (!data || typeof data !== "object" || !data.analytics) {
-            console.error("Error: Invalid or missing analytics data in response.", data);
-            return;
-        }
+        // Set state dengan data yang valid
+        setSpecificLinkAnalytics(data.analytics);
 
-        console.log("Successfully fetched analytics:", data.analytics);
-        setSpecificLinkAnalytics(data.analytics); // Update state dengan data yang valid
       } catch (error) {
           console.error("Error: An unexpected error occurred while fetching analytics.", error)
+          // Tampilkan notifikasi kepada pengguna
           notification.error({
               message: "Error",
               description: "Failed to Fetch Specific Link Analytics. Please try again later.",
@@ -339,6 +347,7 @@ const Analisis: React.FC = () => {
           });
       }
   };
+
 
   useEffect(() => {
     fetchGlobalAnalystics();

@@ -59,31 +59,64 @@ const MainPage = () => {
   const { id = "" } = useParams();
   console.log(id);
 
-  const handleEdit = () => {
-    setIsEditOpen(true);
-  }
+  const handleEdit = (link: ShortLink) => {
+    setCurrentShortlink(link.shortLink); // Atur shortLink yang sedang diedit
+    setNewShortlink(link.shortLink);    // Isi input dengan nilai shortLink saat ini
+    setSelectedLink(link);              // Tetapkan link yang sedang dipilih
+    setIsEditOpen(true);                // Buka modal edit
+  };
 
   const handleSave = async () => {
+    if (!selectedLink || !newShortlink) {
+      notification.error({
+        message: "Error",
+        description: "Please select a link and provide a valid shortlink.",
+        placement: "top",
+      });
+      return;
+    }
+  
     setLoading(true);
     try {
-      const response = await axios.put(`http://127.0.0.1:3000/api/v1/urls/${id}`, {
-        shortlink: shortLinks,
-      });
+      const response = await axios.put(
+        `http://127.0.0.1:3000/api/v1/urls/${selectedLink.id}`,
+        { shortlink: newShortlink }, // Kirim shortlink baru ke API
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
       if (response.status === 200) {
-        alert("Shortlink updated successfully!");
-        setIsPopupOpen(false);
+        notification.success({
+          message: "Shortlink updated successfully!",
+          placement: "top",
+        });
+  
+        // Perbarui state dengan shortlink yang diperbarui
+        setShortLinks((prevLinks) =>
+          prevLinks.map((link) =>
+            link.id === selectedLink.id
+              ? { ...link, shortLink: `${newShortlink}` }
+              : link
+          )
+        );
+        setIsEditOpen(false); // Tutup modal
       }
     } catch (error) {
       console.error(error);
       notification.error({
         message: "Error updating shortlink",
         description: "Failed to update shortlink",
-        placement: "top"
-      })
+        placement: "top",
+      });
     } finally {
       setLoading(false);
     }
   };
+  
 
   const showModal = () => {
     setOpen(true);
@@ -209,7 +242,7 @@ const MainPage = () => {
       key: "edit",
       icon: <EditOutlined />,
       label: "Edit",
-      onClick: handleEdit, // Bungkus dalam fungsi
+      onClick: () => handleEdit(row), // Bungkus dalam fungsi
     },
     {
       key: "delete",
@@ -747,9 +780,6 @@ const MainPage = () => {
           <strong className="text-white">Date</strong>
           <strong className="text-white">Status</strong>
           <strong className="text-white">Click</strong>
-          {/* <strong className="text-white 2xl:hidden sm:hidden">Date</strong>
-          <strong className="text-white 2xl:hidden sm:hidden">Status</strong>
-          <strong className="text-white 2xl:hidden sm:hidden">Click</strong> */}
           <strong className="text-white">QR Code</strong>
           <strong className="text-white">Action</strong>
         </div>
