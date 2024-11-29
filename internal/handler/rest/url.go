@@ -65,7 +65,12 @@ func GenerateURL(c *fiber.Ctx) error {
 	// Check if the provided short link is unique
 	if urlReq.ShortLink != "" {
 		var existingUrl model.Url
-		err := collection.FindOne(context.TODO(), bson.M{"shortlink": urlReq.ShortLink}).Decode(&existingUrl)
+		err := collection.FindOne(context.TODO(), 
+		bson.M{
+			"shortlink": urlReq.ShortLink,
+			"delete_at": "",
+		}).
+			Decode(&existingUrl)
 		if err == nil {
 			log.Warning("BAD_REQUEST", "Short link already exists")
 			return utils.BadRequest(c, "Short link already exists")
@@ -231,6 +236,29 @@ func RedirectURL(c *fiber.Ctx) error {
 	// Get location from IP using ipinfo or similar service
 	location := GetLocationFromIP(ip)
 
+	visitor := model.Visitor{}
+
+	filterVisitor := bson.M{
+		"ip_adress": ip,
+		"user_agent": userAgent,
+	}
+	visitorCollection := database.MongoClient.Database("shortlink").Collection("visitors")
+	err = visitorCollection.FindOne(context.TODO(), filterVisitor).Decode(&visitor)
+	if err == mongo.ErrNoDocuments {
+		newVisitor := model.Visitor{
+			IPAdress: ip,
+			UserAgent: userAgent,
+		}
+		_, err := visitorCollection.InsertOne(context.TODO(), newVisitor)
+		if err != nil {
+			log.Error("INTERNAL_SERVER_ERROR", "Error inserting new visitor")
+			return utils.Conflict(c, "Error inserting new visitor")
+		} 
+	}else if err != nil {
+		log.Error("INTERNAL_SERVER_ERROR", "Failed to query database")
+	}else {
+		log.Success("SUCCESS", "Visitor found in")
+	}
 	// Prepare analytics data
 	analytics := model.Analytics{
 		ID:         primitive.NewObjectID(),
