@@ -244,8 +244,10 @@ func RedirectURL(c *fiber.Ctx) error {
 	}
 	visitorCollection := database.MongoClient.Database("shortlink").Collection("visitors")
 	err = visitorCollection.FindOne(context.TODO(), filterVisitor).Decode(&visitor)
+	visitorID := primitive.NewObjectID()
 	if err == mongo.ErrNoDocuments {
 		newVisitor := model.Visitor{
+			ID: visitorID,
 			IPAdress: ip,
 			UserAgent: userAgent,
 		}
@@ -265,6 +267,7 @@ func RedirectURL(c *fiber.Ctx) error {
 		ID:         primitive.NewObjectID(),
 		UserID:     url.UserID,
 		URLID:      url.ID,
+		VisitorID:  visitorID,
 		UserAgent:  userAgent,
 		Referrer:   referrer,
 		IPAdress: 	ip,
