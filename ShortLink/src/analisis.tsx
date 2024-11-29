@@ -12,7 +12,6 @@ interface AnalyticsItem {
   visitors: number;
 }
 
-
 interface BodyData {
   url: string;
   shortlink: string;
@@ -56,10 +55,13 @@ const Analisis: React.FC = () => {
   const [totalPv, setTotalPv] = useState(0);
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [modalText, setModalText] = useState("Are you sure you want to log out? You will need to log in again to access your account.");
+  const [modalText, setModalText] = useState(
+    "Are you sure you want to log out? You will need to log in again to access your account."
+  );
   // const {id} = useParams<{id : string}>();
   const [globalAnalystics, setGlobalAnalystics] = useState<AnalysticData[]>([]);
-  const [SpecificLinkAnalytics, setSpecificLinkAnalytics] = useState<AnalysticData | null>(null);
+  const [SpecificLinkAnalytics, setSpecificLinkAnalytics] =
+    useState<AnalysticData | null>(null);
   const [totalClick, setTotalClick] = useState(0);
   const [totalVisitor, setTotalVisitor] = useState(0);
   const authToken = localStorage.getItem("authToken");
@@ -240,121 +242,131 @@ const Analisis: React.FC = () => {
 
   const fetchGlobalAnalystics = async () => {
     try {
-        const response = await fetch("http://127.0.0.1:3000/api/v1/analytics", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}`, 
-            },
-            credentials: "include",
-        });
+      const response = await fetch("http://127.0.0.1:3000/api/v1/analytics", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        credentials: "include",
+      });
 
-        if (!response.ok) {
-            console.error("Failed to fetch global analytics");
-            return;
-        }
-
-        const data = await response.json();
-        console.log(data)
-        if (!data || !Array.isArray(data.analytics)) {
-            console.error("Invalid analytics data. Expected an array.");
-            return;
-        }
-        const totalClicks = data.analytics.reduce(
-          (sum: number, item: AnalyticsItem) => sum + item.clicks,
-          0
-        );
-        const totalVisitors = data.analytics.reduce(
-          (sum: number, item: AnalyticsItem) => sum + item.visitors,
-          0
-        );
-        setGlobalAnalystics(data.analytics);
-        setTotalClick(totalClicks);
-        setTotalVisitor(totalVisitors);
-
-      } catch (error) {
-          console.error("Error fetching API:", error);
-          notification.error({
-              message: "Error",
-              description: "Failed to Fetch Global Analytics",
-              placement: "top",
-          });
+      if (!response.ok) {
+        console.error("Failed to fetch global analytics");
+        return;
       }
+
+      const data = await response.json();
+      console.log(data);
+      if (!data || !Array.isArray(data.analytics)) {
+        console.error("Invalid analytics data. Expected an array.");
+        return;
+      }
+      const totalClicks = data.analytics.reduce(
+        (sum: number, item: AnalyticsItem) => sum + item.clicks,
+        0
+      );
+      const totalVisitors = data.analytics.reduce(
+        (sum: number, item: AnalyticsItem) => sum + item.visitors,
+        0
+      );
+      setGlobalAnalystics(data.analytics);
+      setTotalClick(totalClicks);
+      setTotalVisitor(totalVisitors);
+    } catch (error) {
+      console.error("Error fetching API:", error);
+      notification.error({
+        message: "Error",
+        description: "Failed to Fetch Global Analytics",
+        placement: "top",
+      });
+    }
   };
 
   const fetchSpecificLinkAnalytics = async (id: string) => {
     try {
-        // Validasi ID
-        if (!id) {
-            console.error("Error: ID is missing. Ensure that a valid ID is provided.");
-            return;
-        }
-        // Validasi Token Otorisasi
-        if (!authToken) {
-            console.error("Error: Authorization token is missing. Ensure you are logged in.");
-            return;
-        }
-        console.log(`Fetching analytics for ID: ${id}`); // Debugging log
-        // Kirim Permintaan ke API
-        const response = await fetch(`http://127.0.0.1:3000/api/v1/analytics/${id}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}`,
-            },
-            credentials: "include",
-        });
-
-        if (!response.ok){
-          console.error(`Error: Failed to fetch specific link analytics. Status: ${response.status}`);
-        } 
-
-        if (response.status === 200) {
-          notification.success({
-            message: "Success",
-            description: "Analytics fetched successfully.",
-            placement: "top",
-          })
-        }
-        
-        if (response.status === 404) {
-          notification.error ({
-            message: "Error",
-            description: "Analytics not found for the specified ID.",
-            placement: "top",
-          })
-        }
-
-        // Parsing JSON
-        let data;
-        try {
-            data = await response.json();
-            console.log(data)
-        } catch (jsonError) {
-            console.error("Error: Failed to parse response as JSON.", jsonError); 
-        }
-
-        // Set state dengan data yang valid
-        setSpecificLinkAnalytics(data.analytics);
-
-      } catch (error) {
-          console.error("Error: An unexpected error occurred while fetching analytics.", error)
-          // Tampilkan notifikasi kepada pengguna
-          notification.error({
-              message: "Error",
-              description: "Failed to Fetch Specific Link Analytics. Please try again later.",
-              placement: "top",
-          });
+      // Validasi ID
+      if (!id) {
+        console.error(
+          "Error: ID is missing. Ensure that a valid ID is provided."
+        );
+        return;
       }
-  };
+      // Validasi Token Otorisasi
+      if (!authToken) {
+        console.error(
+          "Error: Authorization token is missing. Ensure you are logged in."
+        );
+        return;
+      }
+      console.log(`Fetching analytics for ID: ${id}`); // Debugging log
+      // Kirim Permintaan ke API
+      const response = await fetch(
+        `http://127.0.0.1:3000/api/v1/analytics/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          credentials: "include",
+        }
+      );
 
+      if (!response.ok) {
+        console.error(
+          `Error: Failed to fetch specific link analytics. Status: ${response.status}`
+        );
+      }
+
+      if (response.status === 200) {
+        notification.success({
+          message: "Success",
+          description: "Analytics fetched successfully.",
+          placement: "top",
+        });
+      }
+
+      if (response.status === 404) {
+        notification.error({
+          message: "Error",
+          description: "Analytics not found for the specified ID.",
+          placement: "top",
+        });
+      }
+
+      // Parsing JSON
+      let data;
+      try {
+        data = await response.json();
+        console.log(data);
+      } catch (jsonError) {
+        console.error("Error: Failed to parse response as JSON.", jsonError);
+      }
+
+      // Set state dengan data yang valid
+      setSpecificLinkAnalytics(data.analytics);
+    } catch (error) {
+      console.error(
+        "Error: An unexpected error occurred while fetching analytics.",
+        error
+      );
+      // Tampilkan notifikasi kepada pengguna
+      notification.error({
+        message: "Error",
+        description:
+          "Failed to Fetch Specific Link Analytics. Please try again later.",
+        placement: "top",
+      });
+    }
+  };
 
   useEffect(() => {
     fetchGlobalAnalystics();
     if (id) {
       fetchSpecificLinkAnalytics(id);
     }
-  })
+  }, [id]);
 
   const data3Days = useMemo(
     () => [
@@ -660,14 +672,24 @@ const Analisis: React.FC = () => {
             width={500}
             height={300}
             data={globalAnalystics}
-            margin={{top : 10, right: 30, left: 0, bottom: 0}}
+            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
-            <Area type="monotone" dataKey="clicks" stroke="#8884d8" fill="#8884d8" />
-            <Area type="monotone" dataKey="Visitor" stroke="#82ca9d" fill="#82ca9d" />
+            <Area
+              type="monotone"
+              dataKey="clicks"
+              stroke="#8884d8"
+              fill="#8884d8"
+            />
+            <Area
+              type="monotone"
+              dataKey="Visitor"
+              stroke="#82ca9d"
+              fill="#82ca9d"
+            />
           </AreaChart>
         </div>
       </div>
@@ -677,10 +699,8 @@ const Analisis: React.FC = () => {
           <h2>Analystic for Link ID: {id}</h2>
           <p>Total Clicks: {SpecificLinkAnalytics.clicks}</p>
           <p>Total Clicks: {SpecificLinkAnalytics.visitor}</p>
-        </div> 
+        </div>
       )}
-
-
     </div>
   );
 };
