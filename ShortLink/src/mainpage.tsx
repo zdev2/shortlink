@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "./App.css";
 import { notification } from "antd";
 import {
@@ -13,12 +13,12 @@ import {
 } from "@ant-design/icons";
 import { Dropdown, Space, MenuProps, Button, Modal } from "antd";
 import { jwtDecode } from "jwt-decode";
-// import type { MenuInfo } from "rc-menu/lib/interface";
+import axios from "axios";
+
 
 interface DecodedToken {
   exp: number;
   iat: number;
-  // Add other properties of the decoded token as needed
 }
 
 interface QrCodePopupProps {
@@ -49,21 +49,74 @@ const MainPage = () => {
   const [selectedQrCode, setSelectedQrCode] = useState<ShortLink | null>(null);
   const [selectedLink, setSelectedLink] = useState<ShortLink | null>(null);
   const authToken = localStorage.getItem("authToken"); // Replace 'authToken' with your actual key
-  const alala = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  // const [confirmDelete, setConfirmDelete] = useState(false);
-  const [modalText, setModalText] = useState(
-    "Are you sure you want to log out? You will need to log in again to access your account."
-  );
-  // const [modalTexts, setModalTexts] = useState('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
-  // const [confirmDelete, setConfirmDelete] = useState(false);
-  // const [modalText, setModalText] = useState(
-  //   "Are you sure you want to log out? You will need to log in again to access your account."
-  // );
-  // const [modalTexts, setModalTexts] = useState(
-  //   "Are you sure you want to delete this item? Once deleted, it cannot be recovered."
-  // );
+  const [modalText, setModalText] = useState('Are you sure you want to log out? You will need to log in again to access your account.');
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [currentShortlink, setCurrentShortlink] = useState("example-shortlink");
+  const [newShortlink, setNewShortlink] = useState(currentShortlink);
+  const [loading, setLoading] = useState(false);
+  const { id = "" } = useParams();
+  console.log(id);
+
+  const handleEdit = (link: ShortLink) => {
+    setCurrentShortlink(link.shortLink); // Atur shortLink yang sedang diedit
+    setNewShortlink(link.shortLink);    // Isi input dengan nilai shortLink saat ini
+    setSelectedLink(link);              // Tetapkan link yang sedang dipilih
+    setIsEditOpen(true);                // Buka modal edit
+  };
+
+  const handleSave = async () => {
+    if (!selectedLink || !newShortlink) {
+      notification.error({
+        message: "Error",
+        description: "Please select a link and provide a valid shortlink.",
+        placement: "top",
+      });
+      return;
+    }
+  
+    setLoading(true);
+    try {
+      const response = await axios.put(
+        `http://127.0.0.1:3000/api/v1/urls/${selectedLink.id}`,
+        { shortlink: newShortlink }, // Kirim shortlink baru ke API
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (response.status === 200) {
+        notification.success({
+          message: "Shortlink updated successfully!",
+          placement: "top",
+        });
+  
+        // Perbarui state dengan shortlink yang diperbarui
+        setShortLinks((prevLinks) =>
+          prevLinks.map((link) =>
+            link.id === selectedLink.id
+              ? { ...link, shortLink: `${newShortlink}` }
+              : link
+          )
+        );
+        setIsEditOpen(false); // Tutup modal
+      }
+    } catch (error) {
+      console.error(error);
+      notification.error({
+        message: "Error updating shortlink",
+        description: "Failed to update shortlink",
+        placement: "top",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   const showModal = () => {
     setOpen(true);
@@ -78,48 +131,13 @@ const MainPage = () => {
       handleLogout();
       setOpen(false);
       setConfirmLoading(false);
-    }, 5000);
+    }, 3000);
   };
 
   const handleCancel = () => {
     console.log("Clicked cancel button");
     setOpen(false);
   };
-
-  // const showModals = () => {
-  //   setOpen(true);
-  // };
-
-  // const handleOks = () => {
-  //   setModalTexts('Are you sure you want to delete this item? Once deleted, it cannot be recovered.');
-  //   setConfirmDelete(true);
-  //   setTimeout(() => {
-  //     deleteShortlink('')
-  //     setOpen(false);
-  //     setConfirmDelete(false);
-  //   }, 5000);
-  // };
-
-  // const handleCancels = () => {
-  //   console.log('Clicked cancel button');
-  //   setOpen(false);
-  // };
-  // const handleOks = () => {
-  //   setModalTexts(
-  //     "Are you sure you want to delete this item? Once deleted, it cannot be recovered."
-  //   );
-  //   setConfirmDelete(true);
-  //   setTimeout(() => {
-  //     deleteShortlink("");
-  //     setOpen(false);
-  //     setConfirmDelete(false);
-  //   }, 5000);
-  // };
-
-  // const handleCancels = () => {
-  //   console.log("Clicked cancel button");
-  //   setOpen(false);
-  // };
 
   // Handle Untuk Copy Link Pendek
   const handleCopy = () => {
@@ -176,16 +194,17 @@ const MainPage = () => {
   async function deleteShortlink(id: string) {
     try {
       // console.log(authToken);
-      const response = await fetch(
-        `https://shortlink-production-dnd.up.railway.app/api/v1/urls/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`http://127.0.0.1:3000/api/v1/urls/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      console.log(data)
+
       if (response.ok) {
         notification.success({
           message: "Link succes has delete!",
@@ -223,27 +242,16 @@ const MainPage = () => {
       key: "edit",
       icon: <EditOutlined />,
       label: "Edit",
-      // onClick: handleShare,
+      onClick: () => handleEdit(row), // Bungkus dalam fungsi
     },
     {
       key: "delete",
       icon: <DeleteOutlined />,
       label: "Delete",
       onClick: () => deleteShortlink(row.id as string),
-      // onClick: showModals,
-      // render: (
-      //   <Modal
-      //     title="Logout Confirmation"
-      //     open={open}
-      //     onOk={handleOks}
-      //     confirmDelete={confirmDelete}
-      //     onCancel={handleCancels}
-      //   >
-      //     <p>{modalTexts}</p>
-      //   </Modal>
-      // ),
     },
   ];
+  
 
   // Handle Untuk Menggenerate Link Pendek Secara Acak
   const generateRandomSlug = (length: number = 6): string => {
@@ -268,24 +276,31 @@ const MainPage = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "https://shortlink-production-dnd.up.railway.app/api/v1/users/logout",
+        "http://127.0.0.1:3000/api/v1/users/logout",
         {
-          method: "POST",
+          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${alala}`,
+            Authorization: `Bearer ${authToken}`,
           },
         }
       );
 
-      if (response.status === 401) {
-        // Handle unauthorized response (e.g., redirect to login or clear session)
-        console.log("Session expired, redirecting to login...");
+      if (response.status === 200 ){
         navigate("/");
         notification.success({
           message: "Logout has Succes",
           description: "Logout successfully.",
           placement: "top",
+        });
+      }else if (response.status === 401) {
+        // Handle unauthorized response (e.g., redirect to login or clear session)
+        console.log("Session expired, redirecting to login...");
+        navigate("/");
+        notification.error({
+          message: "Failed to Logout",
+          description: "Failed to Logout Check Your Conettion.",
+          placement: "top"
         });
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
@@ -322,7 +337,12 @@ const MainPage = () => {
   // Funcation Untuk Mengvalidasi Link Original
   const handleShorten = async () => {
     if (!originalUrl || !validateUrl(originalUrl)) {
-      alert("Please enter a valid URL.");
+      // alert("Please enter a valid URL.");
+      notification.info({
+        message: "Invalid URL",
+        description: "Please enter a valid URL.",
+        placement: "top",
+      })
       return;
     }
     // Generate a random slug and set it as customSlug
@@ -351,16 +371,13 @@ const MainPage = () => {
           console.error("No token found in localStorage");
         }
 
-        const response = await fetch(
-          "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!response.ok) {
           if (response.status === 401) {
@@ -382,15 +399,32 @@ const MainPage = () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const links: ShortLink[] = data.data.urls.map((item: any) => ({
           id: item.id,
-          shortLink: `https://shortlink-production-dnd.up.railway.app/${item.shortlink}`,
+          shortLink: `https://dnd.id/${item.shortlink}`,
           originalUrl: item.url || "",
           title: item.url_title || "Untitled",
           clicks: item.clickcount || 0,
           status: item.status || "inactive",
-          createdAt: item.createdat || "N/A",
-          lastAccessedAt: item.lastaccesedat || null,
+          createdAt: formatDate(item.createdat) || "N/A",
+          lastAccessedAt: formatDate(item.lastaccesedat) || null,
           qrCodeUrl: item.qr_code || "",
         }));
+        
+        // Fungsi untuk memformat tanggal
+        function formatDate(dateString: string): string {
+          if (!dateString) return ""; // Jika tidak ada tanggal
+          const date = new Date(dateString);
+          if (isNaN(date.getTime())) return ""; // Pastikan validitas tanggal
+        
+          // Ambil bulan dalam format angka (1 - 12) dan tahun, hari
+          const month = date.getMonth() + 1; // Menambahkan 1 agar bulan dimulai dari 1
+          const day = date.getDate();
+          const year = date.getFullYear();
+        
+          // Formatkan tanggal dengan bulan berupa angka
+          return `${day}-${month < 10 ? '0' + month : month}-${year}`;
+        }
+        
+        
 
         setShortLinks(links);
         console.log(links); // Log the final links array
@@ -400,7 +434,7 @@ const MainPage = () => {
     };
 
     showAllURLs();
-  }, [navigate]);
+  }, [id, navigate]);
 
   // Format Penanggalan
   const formatDate = (isoString: string): string => {
@@ -433,18 +467,17 @@ const MainPage = () => {
         expiredTime: expiredTime || null,
       };
 
-      const response = await fetch(
-        "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
-          },
-          credentials: "include",
-          body: JSON.stringify(bodyData),
-        }
-      );
+      console.log("Request Body:", bodyData);
+
+      const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        credentials: "include",
+        body: JSON.stringify(bodyData),
+      });
 
       if (!response.ok) {
         const errorText = await response.json();
@@ -461,9 +494,9 @@ const MainPage = () => {
       const data = await response.json();
       const newLink = {
         id: data.data.url_details.id,
-        shortLink: `https://shortlink-production-dnd.up.railway.app/${data.data.shortlink}`,
+        shortLink: `https://dnd.id/${data.data.shortlink}`,
         originalUrl: originalUrl,
-        title: customTitle,
+        title: data.data.url_details.url_title,
         clicks: data.data.url_details.clickcount,
         status: "active", // Default status as active
         createdAt: formatDate(data.data.url_details.createdat), // Format tanggal
@@ -572,6 +605,41 @@ const MainPage = () => {
           <p>{modalText}</p>
         </Modal>
       </div>
+      {/* Input Edit Shortlink */}
+      {isEditOpen && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
+            <h2 className="text-xl font-bold mb-4">Edit Shortlink</h2>
+            <label htmlFor="shortlink" className="block text-sm font-medium text-gray-700">
+              New Shortlink
+            </label>
+            <input
+              id="shortlink"
+              type="text"
+              value={newShortlink}
+              onChange={(e) => setNewShortlink(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            {/* {error && <p className="text-red-500 text-sm mt-2">{error}</p>} */}
+            <div className="mt-4 flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                onClick={() => setIsEditOpen(false)}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={handleSave}
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Input Original Link */}
       <div className="jawir flex md:flex-row justify-center sm:w-[768px] md:w-[1075px] w-[1075px] py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
@@ -588,6 +656,41 @@ const MainPage = () => {
           Shorten now
         </button>
       </div>
+      {/* Edit Popup */}
+      {isEditOpen && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
+            <h2 className="text-xl font-bold mb-4">Edit Shortlink</h2>
+            <label htmlFor="shortlink" className="block text-sm font-medium text-gray-700">
+              New Shortlink
+            </label>
+            <input
+              id="shortlink"
+              type="text"
+              value={newShortlink}
+              onChange={(e) => setNewShortlink(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            {/* {error && <p className="text-red-500 text-sm mt-2">{error}</p>} */}
+            <div className="mt-4 flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                onClick={() => setIsEditOpen(false)}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={handleSave}
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Navigasi */}
       <div className="flex justify-center gap-5 mt-4">
         <button
@@ -614,8 +717,8 @@ const MainPage = () => {
               <p>
                 <strong>Shortlink:</strong>{" "}
                 {customSlug
-                  ? `https://shortlink-production-dnd.up.railway.app/${customSlug}`
-                  : "https://shortlink-production-dnd.up.railway.app/"}
+                  ? `https://dnd.id/${customSlug}`
+                  : "https://dnd.id/"}
               </p>
             </div>
             <input
@@ -677,9 +780,6 @@ const MainPage = () => {
           <strong className="text-white">Date</strong>
           <strong className="text-white">Status</strong>
           <strong className="text-white">Click</strong>
-          {/* <strong className="text-white 2xl:hidden sm:hidden">Date</strong>
-          <strong className="text-white 2xl:hidden sm:hidden">Status</strong>
-          <strong className="text-white 2xl:hidden sm:hidden">Click</strong> */}
           <strong className="text-white">QR Code</strong>
           <strong className="text-white">Action</strong>
         </div>
