@@ -80,7 +80,7 @@ const MainPage = () => {
     setLoading(true);
     try {
       const response = await axios.put(
-        `https://shortlink-production-dnds.up.railway.app/api/v1/urls/${selectedLink.id}`,
+        `https://shortlink-production-dnd.up.railway.app/api/v1/urls/${selectedLink.id}`,
         { shortlink: newShortlink }, // Kirim shortlink baru ke API
         {
           headers: {
@@ -195,7 +195,7 @@ const MainPage = () => {
     try {
       // console.log(authToken);
       const response = await fetch(
-        `https://shortlink-production-dnds.up.railway.app/api/v1/urls/${id}`,
+        `https://shortlink-production-dnd.up.railway.app/api/v1/urls/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -278,7 +278,7 @@ const MainPage = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "https://shortlink-production-dnds.up.railway.app/api/v1/users/logout",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/users/logout",
         {
           method: "DELETE",
           headers: {
@@ -374,7 +374,7 @@ const MainPage = () => {
         }
 
         const response = await fetch(
-          "https://shortlink-production-dnds.up.railway.app/api/v1/urls",
+          "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
           {
             method: "GET",
             headers: {
@@ -473,7 +473,7 @@ const MainPage = () => {
       console.log("Request Body:", bodyData);
 
       const response = await fetch(
-        "https://shortlink-production-dnds.up.railway.app/api/v1/urls",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
         {
           method: "POST",
           headers: {

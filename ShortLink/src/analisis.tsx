@@ -98,7 +98,7 @@ const Analisis: React.FC = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "https://shortlink-production-dnds.up.railway.app/api/v1/users/logout",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/users/logout",
         {
           method: "POST",
           headers: {
@@ -183,7 +183,7 @@ const Analisis: React.FC = () => {
       }
 
       const response = await fetch(
-        "https://shortlink-production-dnds.up.railway.app/api/v1/urls",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
         {
           method: "POST",
           headers: {
@@ -236,7 +236,7 @@ const Analisis: React.FC = () => {
   const fetchGlobalAnalystics = async () => {
     try {
       const response = await fetch(
-        "https://shortlink-production-dnds.up.railway.app/api/v1/analytics",
+        "https://shortlink-production-dnd.up.railway.app/api/v1/analytics",
         {
           method: "GET",
           headers: {
@@ -288,7 +288,7 @@ const Analisis: React.FC = () => {
       console.log(`Fetching analytics for ID: ${id}`); // Debugging log
       // Kirim Permintaan ke API
       const response = await fetch(
-        `https://shortlink-production-dnds.up.railway.app/api/v1/analytics/${id}`,
+        `https://shortlink-production-dnd.up.railway.app/api/v1/analytics/${id}`,
         {
           method: "GET",
           headers: {
