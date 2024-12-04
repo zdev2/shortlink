@@ -9,6 +9,7 @@ COPY ShortLink/package-lock.json ./
 # Install dependencies excluding development dependencies
 RUN npm run install:prod
 RUN npm install typescript --save-dev
+RUN npm install axios
 
 # Copy all project files into the container
 COPY ./ShortLink/ ./
