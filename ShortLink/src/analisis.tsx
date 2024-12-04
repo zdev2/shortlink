@@ -4,33 +4,20 @@ import { AreaChart, Area } from "recharts";
 import { XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { notification } from "antd";
 import { Button, Modal } from "antd";
-// import { DownOutlined } from "@ant-design/icons";
-// import { FaUser, FaHandPointer } from "react-icons/fa";
-import { processData } from "./utils/analitik";
-
-// interface AnalyticsItem {
-//   clicks: number;
-//   visitors: number;
-// }
+import { ChartData, processData } from "./utils/analitik";
 
 interface BodyData {
   url: string;
   shortlink: string;
   title: string;
-  expiredTime?: number; // Optional property
+  expiredTime?: number;
 }
 
-// interface DataItem {
+// interface AnalysticData {
 //   name: string;
-//   uv: number;
-//   pv: number;
+//   clicks: number;
+//   visitor: number;
 // }
-
-interface AnalysticData {
-  name: string;
-  clicks: number;
-  visitor: number;
-}
 
 interface ShortLink {
   id: string;
@@ -52,28 +39,22 @@ const Analisis: React.FC = () => {
   const [expiredTime, setExpiredTime] = useState<number | null>(null);
   const [shortLinks, setShortLinks] = useState<ShortLink[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  // const [totalUv, setTotalUv] = useState(0);
-  // const [totalPv, setTotalPv] = useState(0);
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [modalText, setModalText] = useState(
     "Are you sure you want to log out? You will need to log in again to access your account."
   );
-  // const {id} = useParams<{id : string}>();
-  const [globalAnalystics, setGlobalAnalystics] = useState<AnalysticData[]>([]);
-  const [SpecificLinkAnalytics, setSpecificLinkAnalytics] =
-    useState<AnalysticData | null>(null);
-  // const [totalClick, setTotalClick] = useState(0);
-  // const [totalVisitor, setTotalVisitor] = useState(0);
+  const [globalAnalystics, setGlobalAnalystics] = useState<ChartData[]>([]);
+  const [SpecificLinkAnalytics, setSpecificLinkAnalytics] =useState<ChartData[]>([]);
   const authToken = localStorage.getItem("authToken");
-
   const { id = "" } = useParams();
-  // console.log(id);
 
+  // Handle Show Modal
   const showModal = () => {
     setOpen(true);
   };
 
+  // Handle Oke
   const handleOk = () => {
     setModalText(
       "Are you sure you want to log out? You will need to log in again to access your account."
@@ -86,11 +67,13 @@ const Analisis: React.FC = () => {
     }, 5000);
   };
 
+  // Handle Cancel
   const handleCancel = () => {
     console.log("Clicked cancel button");
     setOpen(false);
   };
 
+  // Generate Random Shortlink
   const generateRandomSlug = (length: number = 6): string => {
     const chars =
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -101,6 +84,7 @@ const Analisis: React.FC = () => {
     return slug;
   };
 
+  // Reset Inputs
   const resetInputs = () => {
     setOriginalUrl("");
     setCustomSlug("");
@@ -108,12 +92,11 @@ const Analisis: React.FC = () => {
     setExpiredTime(null);
   };
 
-  // const authToken = localStorage.getItem("Authorization"); // Replace 'authToken' with your actual key
-
+  // Handle Logout 
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "https://shortlink-production-dnd.up.railway.app/api/v1/users/logout",
+        "http://127.0.0.1:3000/api/v1/users/logout",
         {
           method: "POST",
           headers: {
@@ -144,6 +127,7 @@ const Analisis: React.FC = () => {
     }
   };
 
+  // Handle Validasi Url
   const validateUrl = (url: string) => {
     const urlPattern = new RegExp(
       "^(https?:\\/\\/)?" +
@@ -157,6 +141,7 @@ const Analisis: React.FC = () => {
     return !!urlPattern.test(url);
   };
 
+  // Handle Shorten Link
   const handleShorten = async () => {
     if (!originalUrl || !validateUrl(originalUrl)) {
       notification.error({
@@ -172,6 +157,7 @@ const Analisis: React.FC = () => {
     setIsPopupOpen(true);
   };
 
+  // Handle Submit
   const handlePopupSubmit = async () => {
     if (!customSlug || !customTitle) {
       notification.error({
@@ -194,17 +180,14 @@ const Analisis: React.FC = () => {
         bodyData.expiredTime = expiredTime;
       }
 
-      const response = await fetch(
-        "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(bodyData),
-        }
-      );
+      const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(bodyData),
+      });
 
       if (!response.ok) {
         const errorText = await response.json();
@@ -244,19 +227,17 @@ const Analisis: React.FC = () => {
     }
   };
 
+  // Fetching Global Analytics
   const fetchGlobalAnalystics = async () => {
     try {
-      const response = await fetch(
-        "https://shortlink-production-dnd.up.railway.app/api/v1/analytics",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
-          },
-          credentials: "include",
-        }
-      );
+      const response = await fetch("http://127.0.0.1:3000/api/v1/analytics", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        credentials: "include",
+      });
 
       if (!response.ok) {
         console.error("Failed to fetch global analytics");
@@ -269,17 +250,6 @@ const Analisis: React.FC = () => {
       const processesdData = processData(data.data.analytics);
       setGlobalAnalystics(processesdData);
       console.log({ processesdData });
-      // const totalClicks = data.data.analytics.reduce(
-      //   (sum: number, item: AnalyticsItem) => sum + item.clicks,
-      //   0
-      // );
-      // const totalVisitors = data.data.analytics.reduce(
-      //   (sum: number, item: AnalyticsItem) => sum + item.visitors,
-      //   0
-      // );
-
-      // setTotalClick(totalClicks);
-      // setTotalVisitor(totalVisitors);
     } catch (error) {
       console.error("Error fetching API:", error);
       notification.error({
@@ -290,6 +260,7 @@ const Analisis: React.FC = () => {
     }
   };
 
+  // Fetching Spesifik Analytics
   const fetchSpecificLinkAnalytics = async (id: string) => {
     try {
       // Validasi ID
@@ -309,7 +280,7 @@ const Analisis: React.FC = () => {
       console.log(`Fetching analytics for ID: ${id}`); // Debugging log
       // Kirim Permintaan ke API
       const response = await fetch(
-        `https://shortlink-production-dnd.up.railway.app/api/v1/analytics/${id}`,
+        `http://127.0.0.1:3000/api/v1/analytics/${id}`,
         {
           method: "GET",
           headers: {
@@ -353,9 +324,6 @@ const Analisis: React.FC = () => {
       } catch (jsonError) {
         console.error("Error: Failed to parse response as JSON.", jsonError);
       }
-
-      // Set state dengan data yang valid
-      // console.log(data.analytics, 'lohee')
     } catch (error) {
       console.error(
         "Error: An unexpected error occurred while fetching analytics.",
@@ -371,6 +339,7 @@ const Analisis: React.FC = () => {
     }
   };
 
+  // Memindai Output by ID dan Global
   useEffect(() => {
     const fetchAndSetData = async () => {
       if (id) {
@@ -378,92 +347,11 @@ const Analisis: React.FC = () => {
       } else {
         await fetchGlobalAnalystics(); // Untuk data global
       }
-
-      // Misalnya kita ingin mengganti data3Days, data7Days, data1Month
-      // setSelectedData(
-      //   globalAnalystics.map((item) => ({
-      //     name: item.name,
-      //     uv: item.clicks,
-      //     pv: item.visitor,
-      //   }))
-      // );
     };
 
     fetchAndSetData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]); // Menjalankan ulang jika ID berubah
-
-  // const data3Days = useMemo(
-  //   () => [
-  //     { name: "Day 1", uv: 2000, pv: 2500 },
-  //     { name: "Day 2", uv: 1500, pv: 2000 },
-  //     { name: "Day 3", uv: 2000, pv: 2500 },
-  //   ],
-  //   []
-  // );
-
-  // const data7Days = useMemo(
-  //   () => [
-  //     { name: "Day 1", uv: 2500, pv: 3000 },
-  //     { name: "Day 2", uv: 2000, pv: 2500 },
-  //     { name: "Day 3", uv: 2500, pv: 3000 },
-  //     { name: "Day 4", uv: 1500, pv: 2000 },
-  //     { name: "Day 5", uv: 2000, pv: 2500 },
-  //     { name: "Day 6", uv: 1000, pv: 1500 },
-  //     { name: "Day 7", uv: 2500, pv: 3000 },
-  //   ],
-  //   []
-  // );
-
-  // const data1Month = useMemo(
-  //   () => [
-  //     { name: "Week 1", uv: 6300, pv: 7800 },
-  //     { name: "Week 2", uv: 5000, pv: 6000 },
-  //     { name: "Week 3", uv: 7500, pv: 8500 },
-  //     { name: "Week 4", uv: 4000, pv: 5000 },
-  //   ],
-  //   []
-  // );
-
-  // const [selectedData, setSelectedData] = useState<DataItem[]>(data3Days);
-  // type TimeRange = "3days" | "7days" | "1month";
-  // const [selectedLabel, setSelectedLabel] = useState("3 Hari");
-
-  // useEffect(() => {
-  //   const totalUvSum = selectedData.reduce((sum, item) => sum + item.uv, 0);
-  //   const totalPvSum = selectedData.reduce((sum, item) => sum + item.pv, 0);
-  //   // setTotalUv(totalUvSum);
-  //   // setTotalPv(totalPvSum);
-  // }, [selectedData]);
-
-  // Fungsi untuk mengubah data berdasarkan pilihan waktu
-  // const handleTimeRangeChange = (range: TimeRange) => {
-  //   switch (range) {
-  //     case "3days":
-  //       setSelectedData(data3Days);
-  //       setSelectedLabel("3 Hari");
-  //       break;
-  //     case "7days":
-  //       setSelectedData(data7Days);
-  //       setSelectedLabel("7 Hari");
-  //       break;
-  //     case "1month":
-  //       setSelectedData(data1Month);
-  //       setSelectedLabel("1 Bulan");
-  //       break;
-  //     default:
-  //       setSelectedData(data3Days);
-  //       setSelectedLabel("Pilih Rentang Waktu");
-  //   }
-  // };
-
-  // const menu = (
-  //   <Menu onClick={(e) => handleTimeRangeChange(e.key as TimeRange)}>
-  //     <Menu.Item key="3days">3 Hari</Menu.Item>
-  //     <Menu.Item key="7days">7 Hari</Menu.Item>
-  //     <Menu.Item key="1month">1 Bulan</Menu.Item>
-  //   </Menu>
-  // );
 
   return (
     <div className="min-h-screen relative flex flex-col justify-center items-center bg-gray-100 p-4 md:p-6">
@@ -485,6 +373,7 @@ const Analisis: React.FC = () => {
           <p>{modalText}</p>
         </Modal>
       </div>
+
       {/* Input Original Link */}
       <div className="flex md:flex-row justify-center w-[1075px] py-1 px-2 bg-white rounded-full border-4 border-blue-600 ">
         <input
@@ -577,18 +466,19 @@ const Analisis: React.FC = () => {
         </div>
       )}
 
+      {/* Analisis Page */}
       <div>
         <div>
-          {id ? (
-            <div>
-              <h2 className="font-bold">Analytics for Shortlink: {id}</h2>
-            </div>
-          ) : (
-            <div>
-              <h2 className="font-bold">Analytics by Global</h2>
-            </div>
-          )}
-        </div>
+            {id ? (
+              <div>
+                <h2 className="font-bold">Analytics for Shortlink: {id}</h2>
+              </div>
+            ) : (
+              <div>
+                <h2 className="font-bold">Analytics by Global</h2>
+              </div>
+            )}
+          </div>
 
         <div
           className="z-0"
@@ -611,9 +501,9 @@ const Analisis: React.FC = () => {
                 <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
-              </linearGradient>
+            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
+            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
+          </linearGradient>
             </defs>
             <XAxis strokeOpacity={0} dataKey="date" />
             <YAxis strokeOpacity={0} dataKey="visitors" />
@@ -629,6 +519,7 @@ const Analisis: React.FC = () => {
           </AreaChart>
         </div>
       </div>
+
     </div>
   );
 };

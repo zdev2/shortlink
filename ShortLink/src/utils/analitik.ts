@@ -10,7 +10,7 @@ interface VisitorData {
 }
 
 // Define types for processed chart data
-interface ChartData {
+export interface ChartData {
   date: string;
   visitors: number;
 }
