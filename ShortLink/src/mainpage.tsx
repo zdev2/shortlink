@@ -58,8 +58,7 @@ const MainPage = () => {
   const [newShortlink, setNewShortlink] = useState(currentShortlink);
   const [loading, setLoading] = useState(false);
   const { id = "" } = useParams();
-  console.log(id);
-
+  
   const handleEdit = (link: ShortLink) => {
     setCurrentShortlink(link.shortLink); // Atur shortLink yang sedang diedit
     setNewShortlink(link.shortLink); // Isi input dengan nilai shortLink saat ini
@@ -135,7 +134,6 @@ const MainPage = () => {
   };
 
   const handleCancel = () => {
-    console.log("Clicked cancel button");
     setOpen(false);
   };
 
@@ -193,7 +191,6 @@ const MainPage = () => {
   // Handle Untuk Menghapus Link Pendek
   async function deleteShortlink(id: string) {
     try {
-      // console.log(authToken);
       const response = await fetch(
         `https://shortlink-production-dnd.up.railway.app/api/v1/urls/${id}`,
         {
@@ -206,8 +203,6 @@ const MainPage = () => {
       );
 
       const data = await response.json();
-      console.log(data);
-
       if (response.ok) {
         notification.success({
           message: "Link succes has delete!",
@@ -297,7 +292,6 @@ const MainPage = () => {
         });
       } else if (response.status === 401) {
         // Handle unauthorized response (e.g., redirect to login or clear session)
-        console.log("Session expired, redirecting to login...");
         navigate("/");
         notification.error({
           message: "Failed to Logout",
@@ -307,8 +301,6 @@ const MainPage = () => {
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
       }
-
-      console.log("Logout successful");
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -361,7 +353,6 @@ const MainPage = () => {
         if (token) {
           try {
             const decoded: DecodedToken = jwtDecode(token);
-            console.log(decoded);
             if (decoded.exp < Date.now() / 1000) {
               console.error("Token has expired");
               // Handle token expiry (e.g., log out user or refresh token)
@@ -428,9 +419,7 @@ const MainPage = () => {
           // Formatkan tanggal dengan bulan berupa angka
           return `${day}-${month < 10 ? "0" + month : month}-${year}`;
         }
-
         setShortLinks(links);
-        console.log(links); // Log the final links array
       } catch (error) {
         console.error("Error fetching URLs:", error);
       }
@@ -469,9 +458,6 @@ const MainPage = () => {
         url_title: customTitle,
         expiredTime: expiredTime || null,
       };
-
-      console.log("Request Body:", bodyData);
-
       const response = await fetch(
         "https://shortlink-production-dnd.up.railway.app/api/v1/urls",
         {
