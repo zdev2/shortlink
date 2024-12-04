@@ -71,7 +71,6 @@ const Analisis: React.FC = () => {
 
   // Handle Cancel
   const handleCancel = () => {
-    console.log("Clicked cancel button");
     setOpen(false);
   };
 
@@ -110,7 +109,6 @@ const Analisis: React.FC = () => {
 
       if (response.status === 401) {
         // Handle unauthorized response (e.g., redirect to login or clear session)
-        console.log("Session expired, redirecting to login...");
         navigate("/");
         notification.success({
           message: "Logout has Succes",
@@ -122,8 +120,6 @@ const Analisis: React.FC = () => {
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
       }
-
-      console.log("Logout successful");
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -251,13 +247,9 @@ const Analisis: React.FC = () => {
         console.error("Failed to fetch global analytics");
         return;
       }
-
-      console.log("Fetching global analytics...");
       const data = await response.json();
-      console.log(data, data.data, "yee");
       const processesdData = processData(data.data.analytics);
       setGlobalAnalystics(processesdData);
-      console.log({ processesdData });
     } catch (error) {
       console.error("Error fetching API:", error);
       notification.error({
@@ -285,7 +277,6 @@ const Analisis: React.FC = () => {
         );
         return;
       }
-      console.log(`Fetching analytics for ID: ${id}`); // Debugging log
       // Kirim Permintaan ke API
       const response = await fetch(
         `https://shortlink-production-dnd.up.railway.app/api/v1/analytics/${id}`,
@@ -325,10 +316,8 @@ const Analisis: React.FC = () => {
       let data;
       try {
         data = await response.json();
-        console.log(data, data.data, "yee");
         const processedData = processData(data.data.analytics);
         setSpecificLinkAnalytics(processedData);
-        console.log({ processedData });
       } catch (jsonError) {
         console.error("Error: Failed to parse response as JSON.", jsonError);
       }
