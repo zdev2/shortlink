@@ -15,7 +15,6 @@ import { Dropdown, Space, MenuProps, Button, Modal } from "antd";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
-
 interface DecodedToken {
   exp: number;
   iat: number;
@@ -51,7 +50,9 @@ const MainPage = () => {
   const authToken = localStorage.getItem("authToken"); // Replace 'authToken' with your actual key
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [modalText, setModalText] = useState('Are you sure you want to log out? You will need to log in again to access your account.');
+  const [modalText, setModalText] = useState(
+    "Are you sure you want to log out? You will need to log in again to access your account."
+  );
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [currentShortlink, setCurrentShortlink] = useState("example-shortlink");
   const [newShortlink, setNewShortlink] = useState(currentShortlink);
@@ -61,9 +62,9 @@ const MainPage = () => {
 
   const handleEdit = (link: ShortLink) => {
     setCurrentShortlink(link.shortLink); // Atur shortLink yang sedang diedit
-    setNewShortlink(link.shortLink);    // Isi input dengan nilai shortLink saat ini
-    setSelectedLink(link);              // Tetapkan link yang sedang dipilih
-    setIsEditOpen(true);                // Buka modal edit
+    setNewShortlink(link.shortLink); // Isi input dengan nilai shortLink saat ini
+    setSelectedLink(link); // Tetapkan link yang sedang dipilih
+    setIsEditOpen(true); // Buka modal edit
   };
 
   const handleSave = async () => {
@@ -75,11 +76,11 @@ const MainPage = () => {
       });
       return;
     }
-  
+
     setLoading(true);
     try {
       const response = await axios.put(
-        `http://127.0.0.1:3000/api/v1/urls/${selectedLink.id}`,
+        `https://shortlink-production-dnds.up.railway.app/api/v1/urls/${selectedLink.id}`,
         { shortlink: newShortlink }, // Kirim shortlink baru ke API
         {
           headers: {
@@ -88,13 +89,13 @@ const MainPage = () => {
           },
         }
       );
-  
+
       if (response.status === 200) {
         notification.success({
           message: "Shortlink updated successfully!",
           placement: "top",
         });
-  
+
         // Perbarui state dengan shortlink yang diperbarui
         setShortLinks((prevLinks) =>
           prevLinks.map((link) =>
@@ -116,7 +117,6 @@ const MainPage = () => {
       setLoading(false);
     }
   };
-  
 
   const showModal = () => {
     setOpen(true);
@@ -194,16 +194,19 @@ const MainPage = () => {
   async function deleteShortlink(id: string) {
     try {
       // console.log(authToken);
-      const response = await fetch(`http://127.0.0.1:3000/api/v1/urls/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `https://shortlink-production-dnds.up.railway.app/api/v1/urls/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const data = await response.json();
-      console.log(data)
+      console.log(data);
 
       if (response.ok) {
         notification.success({
@@ -275,7 +278,7 @@ const MainPage = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:3000/api/v1/users/logout",
+        "https://shortlink-production-dnds.up.railway.app/api/v1/users/logout",
         {
           method: "DELETE",
           headers: {
@@ -285,21 +288,21 @@ const MainPage = () => {
         }
       );
 
-      if (response.status === 200 ){
+      if (response.status === 200) {
         navigate("/");
         notification.success({
           message: "Logout has Succes",
           description: "Logout successfully.",
           placement: "top",
         });
-      }else if (response.status === 401) {
+      } else if (response.status === 401) {
         // Handle unauthorized response (e.g., redirect to login or clear session)
         console.log("Session expired, redirecting to login...");
         navigate("/");
         notification.error({
           message: "Failed to Logout",
           description: "Failed to Logout Check Your Conettion.",
-          placement: "top"
+          placement: "top",
         });
       } else if (!response.ok) {
         throw new Error(`Logout failed: ${response.statusText}`);
@@ -341,7 +344,7 @@ const MainPage = () => {
         message: "Invalid URL",
         description: "Please enter a valid URL.",
         placement: "top",
-      })
+      });
       return;
     }
     // Generate a random slug and set it as customSlug
@@ -370,13 +373,16 @@ const MainPage = () => {
           console.error("No token found in localStorage");
         }
 
-        const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "https://shortlink-production-dnds.up.railway.app/api/v1/urls",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           if (response.status === 401) {
@@ -407,23 +413,21 @@ const MainPage = () => {
           lastAccessedAt: formatDate(item.lastaccesedat) || null,
           qrCodeUrl: item.qr_code || "",
         }));
-        
+
         // Fungsi untuk memformat tanggal
         function formatDate(dateString: string): string {
           if (!dateString) return ""; // Jika tidak ada tanggal
           const date = new Date(dateString);
           if (isNaN(date.getTime())) return ""; // Pastikan validitas tanggal
-        
+
           // Ambil bulan dalam format angka (1 - 12) dan tahun, hari
           const month = date.getMonth() + 1; // Menambahkan 1 agar bulan dimulai dari 1
           const day = date.getDate();
           const year = date.getFullYear();
-        
+
           // Formatkan tanggal dengan bulan berupa angka
-          return `${day}-${month < 10 ? '0' + month : month}-${year}`;
+          return `${day}-${month < 10 ? "0" + month : month}-${year}`;
         }
-        
-        
 
         setShortLinks(links);
         console.log(links); // Log the final links array
@@ -468,15 +472,18 @@ const MainPage = () => {
 
       console.log("Request Body:", bodyData);
 
-      const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        credentials: "include",
-        body: JSON.stringify(bodyData),
-      });
+      const response = await fetch(
+        "https://shortlink-production-dnds.up.railway.app/api/v1/urls",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          credentials: "include",
+          body: JSON.stringify(bodyData),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.json();
@@ -609,7 +616,10 @@ const MainPage = () => {
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
             <h2 className="text-xl font-bold mb-4">Edit Shortlink</h2>
-            <label htmlFor="shortlink" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="shortlink"
+              className="block text-sm font-medium text-gray-700"
+            >
               New Shortlink
             </label>
             <input
@@ -660,7 +670,10 @@ const MainPage = () => {
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
             <h2 className="text-xl font-bold mb-4">Edit Shortlink</h2>
-            <label htmlFor="shortlink" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="shortlink"
+              className="block text-sm font-medium text-gray-700"
+            >
               New Shortlink
             </label>
             <input

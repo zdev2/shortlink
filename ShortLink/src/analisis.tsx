@@ -45,7 +45,9 @@ const Analisis: React.FC = () => {
     "Are you sure you want to log out? You will need to log in again to access your account."
   );
   const [globalAnalystics, setGlobalAnalystics] = useState<ChartData[]>([]);
-  const [SpecificLinkAnalytics, setSpecificLinkAnalytics] =useState<ChartData[]>([]);
+  const [SpecificLinkAnalytics, setSpecificLinkAnalytics] = useState<
+    ChartData[]
+  >([]);
   const authToken = localStorage.getItem("authToken");
   const { id = "" } = useParams();
 
@@ -92,11 +94,11 @@ const Analisis: React.FC = () => {
     setExpiredTime(null);
   };
 
-  // Handle Logout 
+  // Handle Logout
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:3000/api/v1/users/logout",
+        "https://shortlink-production-dnds.up.railway.app/api/v1/users/logout",
         {
           method: "POST",
           headers: {
@@ -180,14 +182,17 @@ const Analisis: React.FC = () => {
         bodyData.expiredTime = expiredTime;
       }
 
-      const response = await fetch("http://127.0.0.1:3000/api/v1/urls", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(bodyData),
-      });
+      const response = await fetch(
+        "https://shortlink-production-dnds.up.railway.app/api/v1/urls",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(bodyData),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.json();
@@ -230,14 +235,17 @@ const Analisis: React.FC = () => {
   // Fetching Global Analytics
   const fetchGlobalAnalystics = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:3000/api/v1/analytics", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        credentials: "include",
-      });
+      const response = await fetch(
+        "https://shortlink-production-dnds.up.railway.app/api/v1/analytics",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
         console.error("Failed to fetch global analytics");
@@ -280,7 +288,7 @@ const Analisis: React.FC = () => {
       console.log(`Fetching analytics for ID: ${id}`); // Debugging log
       // Kirim Permintaan ke API
       const response = await fetch(
-        `http://127.0.0.1:3000/api/v1/analytics/${id}`,
+        `https://shortlink-production-dnds.up.railway.app/api/v1/analytics/${id}`,
         {
           method: "GET",
           headers: {
@@ -469,16 +477,16 @@ const Analisis: React.FC = () => {
       {/* Analisis Page */}
       <div>
         <div>
-            {id ? (
-              <div>
-                <h2 className="font-bold">Analytics for Shortlink: {id}</h2>
-              </div>
-            ) : (
-              <div>
-                <h2 className="font-bold">Analytics by Global</h2>
-              </div>
-            )}
-          </div>
+          {id ? (
+            <div>
+              <h2 className="font-bold">Analytics for Shortlink: {id}</h2>
+            </div>
+          ) : (
+            <div>
+              <h2 className="font-bold">Analytics by Global</h2>
+            </div>
+          )}
+        </div>
 
         <div
           className="z-0"
@@ -501,9 +509,9 @@ const Analisis: React.FC = () => {
                 <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
-          </linearGradient>
+                <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#82ca9d" stopOpacity={0} />
+              </linearGradient>
             </defs>
             <XAxis strokeOpacity={0} dataKey="date" />
             <YAxis strokeOpacity={0} dataKey="visitors" />
@@ -519,7 +527,6 @@ const Analisis: React.FC = () => {
           </AreaChart>
         </div>
       </div>
-
     </div>
   );
 };
