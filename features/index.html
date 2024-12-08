@@ -4,6 +4,243 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DND Shortlink - Features</title>
+    <link rel="stylesheet" href="../src/styles.css" />
   </head>
-  <body></body>
+  <body>
+    <header>
+      <section id="navbar">
+        <a href="/">
+          <section id="good">
+            <h1 class="title">DND Shortener</h1>
+            <p>URL Shortener, made with Go, React+Vite, MongoDB</p>
+          </section></a
+        >
+        <ul id="nav-links">
+          <li><a href="/features/index.html">Features</a></li>
+          <li>|</li>
+          <li>
+            <a
+              href="http://github.com/zdev2/shortlink"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Github Repo</a
+            >
+          </li>
+        </ul>
+      </section>
+    </header>
+    <section class="okay">
+      <h2>Features</h2>
+      <ol>
+        <li>
+          <h3>Shorten URLs</h3>
+          <p>
+            Generate short links with either custom aliases or randomly
+            generated short codes.
+          </p>
+        </li>
+        <li>
+          <h3>Expiration Dates</h3>
+          <p>
+            Set an optional expiration date for each URL. Links without
+            expiration remain active indefinitely.
+          </p>
+        </li>
+        <li>
+          <h3>Analytics</h3>
+          <p>
+            Track the total number of clicks on each short URL and view detailed
+            stats.
+          </p>
+        </li>
+        <li>
+          <h3>User Authentication</h3>
+          <p>
+            Secure registration and login using JWT-based authentication for
+            managing user-specific URLs.
+          </p>
+        </li>
+        <li>
+          <h3>Cookie-Based Sessions</h3>
+          <p>
+            Manage secure sessions with encrypted cookies for better security
+            and persistence.
+          </p>
+        </li>
+        <li>
+          <h3>MongoDB Integration</h3>
+          <p>
+            All link data, user details, and analytics are stored securely in
+            MongoDB.
+          </p>
+        </li>
+      </ol>
+    </section>
+
+    <hr />
+
+    <section class="okay">
+      <h2>Tech Stack</h2>
+      <ul>
+        <li><strong>Backend:</strong> Go (Golang)</li>
+        <li><strong>Web Framework:</strong> Fiber</li>
+        <li><strong>Database:</strong> MongoDB</li>
+        <li><strong>Authentication:</strong> JWT</li>
+        <li><strong>Session Management:</strong> Secure Cookies</li>
+      </ul>
+    </section>
+
+    <hr />
+
+    <section class="okay">
+      <h1>API Endpoints Documentation</h1>
+      <p>List of available endpoints for the URL Shortener Application.</p>
+    </section>
+
+    <section class="okay">
+      <h2>User Routes</h2>
+      <table border="1" cellspacing="0" cellpadding="5" class="box">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GET</td>
+            <td>/api/v1/users</td>
+            <td>Fetch all users (requires token)</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/api/v1/users/:id</td>
+            <td>Fetch a specific user by ID (requires token)</td>
+          </tr>
+          <tr>
+            <td>POST</td>
+            <td>/api/v1/users/login</td>
+            <td>Login user</td>
+          </tr>
+          <tr>
+            <td>POST</td>
+            <td>/api/v1/users/logout</td>
+            <td>Logout user (requires token)</td>
+          </tr>
+          <tr>
+            <td>POST</td>
+            <td>/api/v1/users/register</td>
+            <td>Register a new user</td>
+          </tr>
+          <tr>
+            <td>PUT</td>
+            <td>/api/v1/users/:id</td>
+            <td>Update user info (requires token)</td>
+          </tr>
+          <tr>
+            <td>DELETE</td>
+            <td>/api/v1/users/:id</td>
+            <td>Delete a user (requires token)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="okay">
+      <h2>URL Routes</h2>
+      <table border="1" cellspacing="0" cellpadding="5" class="box">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GET</td>
+            <td>/api/v1/urls</td>
+            <td>Fetch all URLs for the logged-in user (requires token)</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/api/v1/urls/:id</td>
+            <td>Fetch short URL by ID (requires token)</td>
+          </tr>
+          <tr>
+            <td>POST</td>
+            <td>/api/v1/urls</td>
+            <td>Generate a new short URL (requires token)</td>
+          </tr>
+          <tr>
+            <td>PUT</td>
+            <td>/api/v1/urls/:id</td>
+            <td>Update an existing short URL (requires token)</td>
+          </tr>
+          <tr>
+            <td>DELETE</td>
+            <td>/api/v1/urls/:id</td>
+            <td>Delete a short URL (requires token)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="okay">
+      <h2>Analytics Routes</h2>
+      <table border="1" cellspacing="0" cellpadding="5" class="box">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GET</td>
+            <td>/api/v1/analytics</td>
+            <td>Fetch global analytics (requires token)</td>
+          </tr>
+          <tr>
+            <td>GET</td>
+            <td>/api/v1/analytics/:id</td>
+            <td>Fetch analytics for a specific URL (requires token)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr />
+
+    <section class="okay">
+      <h2>Installation and Setup</h2>
+      <ol>
+        <li>
+          Clone the repository:
+          <code>git clone https://github.com/your-repo/url-shortener.git</code>
+        </li>
+        <li>Navigate to the directory: <code>cd url-shortener</code></li>
+        <li>Install dependencies: <code>go mod tidy</code></li>
+        <li>
+          Create a <code>.env</code> file with the necessary environment
+          variables.
+        </li>
+        <li>Run the application: <code>go run main.go</code></li>
+        <li>Access the application at <code>http://localhost:3000</code></li>
+      </ol>
+    </section>
+
+    <hr />
+
+    <section class="okay">
+      <h2>Conclusion</h2>
+      <p>
+        The URL Shortener application provides all the tools necessary to
+        shorten, manage, and analyze URLs effectively. It is fast, secure, and
+        scalable, making it ideal for modern web applications.
+      </p>
+    </section>
+  </body>
 </html>

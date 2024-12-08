@@ -4,45 +4,67 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DND Shortener</title>
+    <link rel="stylesheet" href="src/styles.css" />
   </head>
   <body>
     <header>
-      <h1>DND Shortener</h1>
-      <h6>URL Shortener, made with Go, React+Vite, MongoDB</h6>
+      <section id="navbar">
+        <a href="/">
+          <section id="good">
+            <h1 class="title">DND Shortener</h1>
+            <p>URL Shortener, made with Go, React+Vite, MongoDB</p>
+          </section></a
+        >
+        <ul id="nav-links">
+          <li><a href="/features/index.html">Features</a></li>
+          <li>|</li>
+          <li>
+            <a
+              href="http://github.com/zdev2/shortlink"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Github Repo</a
+            >
+          </li>
+        </ul>
+      </section>
     </header>
     <main>
       <section id="about">
-        <h3>What is DND Shortener?</h3>
-        <p>
-          This project provides a robust URL shortening service that allows
-          users to generate custom or random short URLs, manage expiration
-          dates, track click analytics, and utilize user authentication for
-          secure access. The system integrates MongoDB as the database for
-          efficient data storage and retrieval and uses JWT-based authentication
-          and secure cookie-based sessions for managing user access.
-        </p>
+        <h3 class="subtitle">What is DND Shortener?</h3>
+        <section class="what">
+          <p class="box about-box">
+            This project provides a robust URL shortening service that allows
+            users to generate custom or random short URLs, manage expiration
+            dates, track click analytics, and utilize user authentication for
+            secure access. The system integrates MongoDB as the database for
+            efficient data storage and retrieval and uses JWT-based
+            authentication and secure cookie-based sessions for managing user
+            access.
+          </p>
+          <img src="/src/dnd-shortlink.png" alt="dnd-shortlink" class="img" />
+        </section>
       </section>
       <section id="team">
-        <h3>Teams</h3>
-        <section id="team-members">
-          <p>Bagus Perwira</p>
-          <p>Backend Developer</p>
+        <h3 class="subtitle">Teams</h3>
+        <section class="team-container">
+          <section id="team-members" class="box">
+            <h2>Bagus Perwira</h2>
+            <p>Backend Developer</p>
+          </section>
+          <section id="team-members" class="box">
+            <h2>Dendra De Tama</h2>
+            <p>Frontend Developer</p>
+          </section>
+          <section id="team-members" class="box">
+            <h2>I Dewa Gede Darmawan Putra</h2>
+            <p>Frontend Developer</p>
+          </section>
+          <section id="team-members" class="box">
+            <h2>I Putu Andhica Dinata</h2>
+            <p>Backend Developer</p>
+          </section>
         </section>
-        <section id="team-members">
-          <p>Dendra De Tama</p>
-          <p>Frontend Developer</p>
-        </section>
-        <section id="team-members">
-          <p>I Dewa Gede Darmawan Putra</p>
-          <p>Frontend Developer</p>
-        </section>
-        <section id="team-members">
-          <p>I Putu Andhica Dinata</p>
-          <p>Backend Developer</p>
-        </section>
-      </section>
-      <section id="documetation-photos">
-        <section id="documentation-container" class="grid-container"></section>
       </section>
     </main>
   </body>

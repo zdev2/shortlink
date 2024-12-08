@@ -1,0 +1,103 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "JetBrains Mono";
+}
+
+#team-members {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 10rem;
+}
+
+.box {
+  border: 1px solid #9c9c9c;
+  background-color: rgb(216, 216, 216);
+  box-shadow: 10px 10px 0px 0px rgba(0, 0, 0, 0.83);
+  -webkit-box-shadow: 10px 10px 0px 0px rgba(0, 0, 0, 0.83);
+  -moz-box-shadow: 10px 10px 0px 0px rgba(0, 0, 0, 0.83);
+}
+
+.about-box {
+  padding: 2rem;
+  width: 30rem;
+}
+
+.img {
+  width: 50rem;
+  border: 1px solid #9c9c9c;
+}
+
+.what {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.team-container {
+  margin: 2rem;
+  display: grid;
+  gap: 5rem;
+  grid-template-columns: repeat(2, 1fr);
+  align-content: space-evenly;
+}
+
+.title {
+  font-size: 5rem;
+}
+
+#navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 30vh;
+}
+
+#good {
+  text-align: center;
+}
+
+#good > p {
+  margin-top: -1rem;
+}
+
+.subtitle {
+  font-size: 3rem;
+  text-align: center;
+}
+
+#about,
+#team {
+  height: 100vh;
+}
+
+#nav-links {
+  display: flex;
+  gap: 10px;
+}
+#nav-links > li {
+  list-style: none;
+}
+a {
+  text-decoration: none;
+}
+
+.okay {
+  margin: 2rem;
+}
+
+.okay > ol,
+ul > li {
+  margin-left: 2rem;
+}
+
+th,
+td {
+  padding: 10px;
+}
