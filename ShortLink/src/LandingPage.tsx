@@ -1,21 +1,21 @@
-import './App.css';
-import { FaArrowRight } from 'react-icons/fa';
-import Icon from './assets/www-bro.svg';
-import iconv2 from './assets/www.gif';
-import Logo from './assets/Group 105.svg';
-import { useState } from 'react';
-import foto from './assets/Group 86.svg';
-import feat from './assets/feat-links 1.svg';
-import facebook from './assets/Icon_11_.png';
-import twiter from './assets/Twitter.png'
-import linkedin from './assets/Linkedin.png'
-import close from './assets/close.svg'
-import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
-import { notification } from 'antd';
-import type { NotificationArgsProps } from 'antd';
+import "./App.css";
+import { FaArrowRight } from "react-icons/fa";
+import Icon from "./assets/www-bro.svg";
+import iconv2 from "./assets/www.gif";
+import Logo from "./assets/Group 105.svg";
+import { useState } from "react";
+import foto from "./assets/Group 86.svg";
+import feat from "./assets/feat-links 1.svg";
+import facebook from "./assets/Icon_11_.png";
+import twiter from "./assets/Twitter.png";
+import linkedin from "./assets/Linkedin.png";
+import close from "./assets/close.svg";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import { notification } from "antd";
+import type { NotificationArgsProps } from "antd";
 
-type NotificationPlacement = NotificationArgsProps['placement'];
+type NotificationPlacement = NotificationArgsProps["placement"];
 
 const LandingPage = () => {
   const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false); // State untuk popup Login
@@ -29,9 +29,8 @@ const LandingPage = () => {
 
   const openNotification = (placement: NotificationPlacement) => {
     notification.success({
-      message: 'Succes Registrase',
-      description:
-        'Registrasi Berhasil silahkan kembali Login',
+      message: "Succes Registrase",
+      description: "Registrasi Berhasil silahkan kembali Login",
       placement,
     });
   };
@@ -83,31 +82,33 @@ const LandingPage = () => {
   // Fungsi untuk menangani login
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:3000/api/v1/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body : JSON.stringify ({username, password}),
-        credentials: "include",
-      }); 
+      const response = await fetch(
+        "https://shortlink-production-dnd.up.railway.app/api/v1/users/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+          credentials: "include",
+        }
+      );
       const data = await response.json();
-      console.log(data)
+      console.log(data);
 
       const token = data.data.token; // pastikan sesuai dengan respons server
-      localStorage.setItem('authToken', token);
+      localStorage.setItem("authToken", token);
 
       if (response.ok) {
         notification.success({
-          message: 'Login Berhasil',
-          description:
-            'Login Berhasil Selamat Datang di DnD Shortlink',
-          placement: 'top',
+          message: "Login Berhasil",
+          description: "Login Berhasil Selamat Datang di DnD Shortlink",
+          placement: "top",
         });
         const token = data.token; // Make sure this matches the server's response
-        Cookies.set('authToken', token, { expires: 7 }); // Save token as a cookie, expires in 7 days
-        setErrorMessage('');
-        navigate('/main-menu');
+        Cookies.set("authToken", token, { expires: 7 }); // Save token as a cookie, expires in 7 days
+        setErrorMessage("");
+        navigate("/main-menu");
       } else {
         setErrorMessage("Username atau Password Salah");
       }
@@ -119,31 +120,35 @@ const LandingPage = () => {
   // Fungsi untuk menangani Register
   const handleRegister = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:3000/api/v1/users/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, username, password }),
-      });
-  
+      const response = await fetch(
+        "https://shortlink-production-dnd.up.railway.app/api/v1/users/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, username, password }),
+        }
+      );
+
       if (response.ok) {
         openNotification("top"); // Notifikasi sukses
-        closeRegisterPopup();     // Menutup popup registrasi
-        openLoginPopup();         // Membuka popup login
+        closeRegisterPopup(); // Menutup popup registrasi
+        openLoginPopup(); // Membuka popup login
       } else {
         notification.error({
-          message: 'Registration Failed',
-          description: 'Registrasi gagal. Silakan coba lagi.',
-          placement: 'top',
+          message: "Registration Failed",
+          description: "Registrasi gagal. Silakan coba lagi.",
+          placement: "top",
         });
       }
     } catch (error) {
       console.error("Error Fetching API", error);
       notification.error({
-        message: 'Error',
-        description: 'Terjadi kesalahan saat menghubungi server. Silakan coba lagi nanti.',
-        placement: 'top',
+        message: "Error",
+        description:
+          "Terjadi kesalahan saat menghubungi server. Silakan coba lagi nanti.",
+        placement: "top",
       });
     }
   };
@@ -164,10 +169,10 @@ const LandingPage = () => {
               </div>
             </div>
             <button
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg md:w-[100px] xl:text-3xl xl:w-44 xl:p-3"
+              className="bg-indigo-600 text-white px-4 py-2 font-semibold rounded-lg md:w-[100px] xl:text-2xl xl:w-[120px] xl:p-2"
               onClick={handleVisitNowClick}
             >
-              Login
+              Sign Up
             </button>
           </div>
 

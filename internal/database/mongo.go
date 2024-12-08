@@ -44,7 +44,7 @@ func CreateCollectionsAndIndexes(client *mongo.Client) error {
 	db := client.Database(os.Getenv("DB_NAME"))
 
 	// Creating collections (if they don't exist)
-	collections := []string{"user", "urls", "audit_log", "analytics"}
+	collections := []string{"user", "urls", "audit_log", "analytics", "visitors"}
 	for _, collection := range collections {
 		if err := db.CreateCollection(ctx, collection); err != nil {
 			log.Printf("Collection %s already exists or an error occurred: %v", collection, err)
