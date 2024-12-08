@@ -58,7 +58,7 @@ const MainPage = () => {
   const [newShortlink, setNewShortlink] = useState(currentShortlink);
   const [loading, setLoading] = useState(false);
   const { id = "" } = useParams();
-  
+
   const handleEdit = (link: ShortLink) => {
     setCurrentShortlink(link.shortLink); // Atur shortLink yang sedang diedit
     setNewShortlink(link.shortLink); // Isi input dengan nilai shortLink saat ini
@@ -202,7 +202,7 @@ const MainPage = () => {
         }
       );
 
-      const data = await response.json();
+      await response.json();
       if (response.ok) {
         notification.success({
           message: "Link succes has delete!",
