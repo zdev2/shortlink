@@ -177,7 +177,7 @@ func EditShortLink(c *fiber.Ctx) error {
 
 	// Create MongoDB filter and update using url_id as int64
 	collection := database.MongoClient.Database("shortlink").Collection("urls")
-	filter := bson.M{"url_id": urlID}
+	filter := bson.M{"_id": urlID}
 	update := bson.M{"$set": bson.M{
 		"shortlink": editReq.ShortLink,
 	}}
